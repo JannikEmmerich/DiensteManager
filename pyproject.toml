@@ -1,0 +1,42 @@
+[project]
+name = "dienstemanager"
+version = "0.1.0"
+description = "Staff planning with external units, based on duties from HiOrg-Server"
+requires-python = ">=3.12"
+dependencies = [
+    "Django>=6.1,<6.2",
+    "django-allauth[mfa,socialaccount]>=65.20,<66",
+    "django-environ>=0.14",
+    "django-htmx>=1.29",
+    "gunicorn>=26",
+    "psycopg[binary]>=3.3",
+    "whitenoise>=6.12",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "pytest-django>=4.14",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# A Django project, not a library: `pip install .` only installs the dependencies.
+py-modules = []
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+testpaths = ["tests"]
+addopts = "--strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM"]

@@ -1,0 +1,754 @@
+# German translations of DiensteManager.
+msgid ""
+msgstr ""
+"Project-Id-Version: DiensteManager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-25 01:07+0200\n"
+"PO-Revision-Date: 2026-10-25 01:10+0200\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: accounts/adapters.py:99
+msgid "The invitation is no longer valid."
+msgstr "Die Einladung ist nicht mehr gültig."
+
+#: accounts/admin.py:33
+msgid "Personal info"
+msgstr "Persönliche Angaben"
+
+#: accounts/admin.py:34
+msgid "Assignment"
+msgstr "Zuordnung"
+
+#: accounts/admin.py:36
+msgid "Permissions"
+msgstr "Berechtigungen"
+
+#: accounts/admin.py:39
+msgid "Important dates"
+msgstr "Wichtige Daten"
+
+#: accounts/admin.py:75
+msgid "status"
+msgstr "Status"
+
+#: accounts/apps.py:7
+msgid "Users and units"
+msgstr "Benutzer und Bereitschaften"
+
+#: accounts/forms.py:14
+msgid "Language of the invitation"
+msgstr "Sprache der Einladung"
+
+#: accounts/forms.py:16
+msgid "Used for the email and as the initial language of the new account."
+msgstr "Gilt für die E-Mail und als anfängliche Sprache des neuen Kontos."
+
+#: accounts/forms.py:26
+msgid "– none (internal account) –"
+msgstr "– keine (internes Konto) –"
+
+#: accounts/forms.py:38
+msgid "An account with this email address already exists."
+msgstr "Für diese E-Mail-Adresse gibt es bereits ein Konto."
+
+#: accounts/forms.py:41
+msgid "There is already a pending invitation for this email address."
+msgstr "Für diese E-Mail-Adresse gibt es bereits eine offene Einladung."
+
+#: accounts/forms.py:50
+msgid "Internal accounts do not belong to a unit."
+msgstr "Interne Konten gehören zu keiner Bereitschaft."
+
+#: accounts/forms.py:52
+msgid "Please select a unit."
+msgstr "Bitte eine Bereitschaft auswählen."
+
+#: accounts/forms.py:59
+msgid "First name"
+msgstr "Vorname"
+
+#: accounts/forms.py:60
+msgid "Last name"
+msgstr "Nachname"
+
+#: accounts/forms.py:91
+msgid "Automatic (browser setting)"
+msgstr "Automatisch (Browsereinstellung)"
+
+#: accounts/models.py:23
+msgid "Dispatcher (internal)"
+msgstr "Disposition (intern)"
+
+#: accounts/models.py:24
+msgid "Unit lead"
+msgstr "Bereitschaftsleitung"
+
+#: accounts/models.py:25
+msgid "Unit member"
+msgstr "Mitglied einer Bereitschaft"
+
+#: accounts/models.py:37
+msgid "name"
+msgstr "Name"
+
+#: accounts/models.py:38 accounts/models.py:147
+msgid "created at"
+msgstr "erstellt am"
+
+#: accounts/models.py:41 accounts/models.py:58 accounts/models.py:126
+msgid "unit"
+msgstr "Bereitschaft"
+
+#: accounts/models.py:42
+msgid "units"
+msgstr "Bereitschaften"
+
+#: accounts/models.py:54 accounts/models.py:122
+msgid "email address"
+msgstr "E-Mail-Adresse"
+
+#: accounts/models.py:55 accounts/models.py:123
+msgid "role"
+msgstr "Rolle"
+
+#: accounts/models.py:65 accounts/models.py:133
+msgid "language"
+msgstr "Sprache"
+
+#: accounts/models.py:69
+msgid "Leave empty to follow the browser setting."
+msgstr "Leer lassen, um der Browsereinstellung zu folgen."
+
+#: accounts/models.py:79
+msgid "user"
+msgstr "Benutzer"
+
+#: accounts/models.py:80
+msgid "users"
+msgstr "Benutzer"
+
+#: accounts/models.py:117
+msgid "Pending"
+msgstr "Offen"
+
+#: accounts/models.py:118
+msgid "Accepted"
+msgstr "Angenommen"
+
+#: accounts/models.py:119
+msgid "Expired"
+msgstr "Abgelaufen"
+
+#: accounts/models.py:120
+msgid "Revoked"
+msgstr "Widerrufen"
+
+#: accounts/models.py:137
+msgid "Language of the invitation email and of the new account."
+msgstr "Sprache der Einladungs-E-Mail und des neuen Kontos."
+
+#: accounts/models.py:141
+msgid "invited by"
+msgstr "eingeladen von"
+
+#: accounts/models.py:148
+msgid "expires at"
+msgstr "gültig bis"
+
+#: accounts/models.py:149
+msgid "accepted at"
+msgstr "angenommen am"
+
+#: accounts/models.py:152
+msgid "created account"
+msgstr "angelegtes Konto"
+
+#: accounts/models.py:158
+msgid "revoked at"
+msgstr "widerrufen am"
+
+#: accounts/models.py:163
+msgid "invitation"
+msgstr "Einladung"
+
+#: accounts/models.py:164
+msgid "invitations"
+msgstr "Einladungen"
+
+#: accounts/views.py:46
+#, python-format
+msgid ""
+"The invitation for %(email)s has been saved, but the email could not be sent."
+" Please use “Resend” later."
+msgstr ""
+"Die Einladung an %(email)s ist gespeichert, aber die E-Mail konnte nicht "
+"verschickt werden. Bitte später „Erneut senden“ verwenden."
+
+#: accounts/views.py:52
+#, python-format
+msgid "Invitation sent to %(email)s."
+msgstr "Einladung an %(email)s verschickt."
+
+#: accounts/views.py:97
+msgid "Welcome! Your account is ready."
+msgstr "Willkommen! Dein Konto ist eingerichtet."
+
+#: accounts/views.py:161
+msgid "This invitation can no longer be resent."
+msgstr "Diese Einladung kann nicht mehr erneut gesendet werden."
+
+#: accounts/views.py:172
+#, python-format
+msgid "Invitation for %(email)s revoked."
+msgstr "Einladung an %(email)s widerrufen."
+
+#: accounts/views.py:175
+msgid "This invitation can no longer be revoked."
+msgstr "Diese Einladung kann nicht mehr widerrufen werden."
+
+#: accounts/views.py:195
+#, python-format
+msgid "Unit “%(name)s” created."
+msgstr "Bereitschaft „%(name)s“ angelegt."
+
+#: accounts/views.py:207 accounts/views.py:260
+msgid "Saved."
+msgstr "Gespeichert."
+
+#: accounts/views.py:246
+#, python-format
+msgid "Access for %(account)s unblocked."
+msgstr "Zugang für %(account)s freigegeben."
+
+#: accounts/views.py:248
+#, python-format
+msgid "Access for %(account)s blocked."
+msgstr "Zugang für %(account)s gesperrt."
+
+#: config/settings.py:227
+msgid "German"
+msgstr "Deutsch"
+
+#: config/settings.py:228
+msgid "English"
+msgstr "Englisch"
+
+#: config/urls.py:11 config/urls.py:13 templates/core/_navbar.html:33
+msgid "Administration"
+msgstr "Verwaltung"
+
+#: core/apps.py:7
+msgid "Core"
+msgstr "Grundfunktionen"
+
+#: templates/403.html:3 templates/403.html:5
+msgid "Access denied"
+msgstr "Kein Zugriff"
+
+#: templates/403.html:6
+msgid "You do not have permission to view this page."
+msgstr "Für diese Seite fehlen dir die nötigen Rechte."
+
+#: templates/403.html:7 templates/404.html:7
+msgid "Back to the overview"
+msgstr "Zur Übersicht"
+
+#: templates/404.html:3 templates/404.html:5
+msgid "Page not found"
+msgstr "Seite nicht gefunden"
+
+#: templates/404.html:6
+msgid "The page you requested does not exist (anymore)."
+msgstr "Die aufgerufene Seite gibt es nicht (mehr)."
+
+#: templates/500.html:6
+msgid "Error"
+msgstr "Fehler"
+
+#: templates/500.html:9
+msgid "Something went wrong"
+msgstr "Da ist etwas schiefgelaufen"
+
+#: templates/500.html:10
+msgid "Please try again in a few minutes."
+msgstr "Bitte versuche es in ein paar Minuten noch einmal."
+
+#: templates/account/login.html:6 templates/account/login.html:9
+#: templates/account/login.html:22
+msgid "Sign in"
+msgstr "Anmelden"
+
+#: templates/account/login.html:11
+msgid "Access is by invitation only."
+msgstr "Zugänge werden nur per Einladung vergeben."
+
+#: templates/account/signup_closed.html:3
+#: templates/account/signup_closed.html:6
+msgid "No account found"
+msgstr "Kein Konto gefunden"
+
+#: templates/account/signup_closed.html:8
+msgid "There is no account for this sign-in yet. Access is by invitation only."
+msgstr ""
+"Zu dieser Anmeldung gibt es noch kein Konto. Zugänge werden nur per Einladung"
+" vergeben."
+
+#: templates/account/signup_closed.html:11
+msgid "Already have an account with a password?"
+msgstr "Du hast schon ein Konto mit Passwort?"
+
+#: templates/account/signup_closed.html:12
+msgid "Sign in with it and link your HiOrg account under “My account”."
+msgstr "Melde dich damit an und verknüpfe dein HiOrg-Konto unter „Mein Konto“."
+
+#: templates/account/signup_closed.html:15
+msgid "Received an invitation?"
+msgstr "Du hast eine Einladung bekommen?"
+
+#: templates/account/signup_closed.html:16
+msgid ""
+"Open the link from the invitation email and choose “Sign in with HiOrg-"
+"Server” there."
+msgstr ""
+"Öffne den Link aus der Einladungs-E-Mail und wähle dort „Mit HiOrg-Server "
+"anmelden“."
+
+#: templates/account/signup_closed.html:19
+#: templates/accounts/invitation_invalid.html:12
+msgid "Go to sign-in"
+msgstr "Zur Anmeldung"
+
+#: templates/accounts/_invitation_row.html:12
+#, python-format
+msgid "until %(date)s"
+msgstr "bis %(date)s"
+
+#: templates/accounts/_invitation_row.html:20
+#, python-format
+msgid "Revoke the invitation for %(email)s?"
+msgstr "Einladung an %(email)s widerrufen?"
+
+#: templates/accounts/_invitation_row.html:26
+msgid "Resend"
+msgstr "Erneut senden"
+
+#: templates/accounts/_invitation_row.html:33
+msgid "Revoke"
+msgstr "Widerrufen"
+
+#: templates/accounts/_profile_nav.html:4 templates/accounts/profile.html:3
+#: templates/accounts/profile.html:5 templates/core/_navbar.html:44
+#: templates/core/home.html:41
+msgid "My account"
+msgstr "Mein Konto"
+
+#: templates/accounts/_profile_nav.html:5
+#: templates/accounts/invitation_list.html:14
+#: templates/accounts/profile.html:10 templates/accounts/unit_detail.html:24
+#: templates/accounts/unit_detail.html:73
+msgid "Email address"
+msgstr "E-Mail-Adresse"
+
+#: templates/accounts/_profile_nav.html:6 templates/accounts/profile.html:33
+msgid "Password"
+msgstr "Passwort"
+
+#: templates/accounts/_profile_nav.html:8
+msgid "HiOrg link"
+msgstr "HiOrg-Verknüpfung"
+
+#: templates/accounts/_profile_nav.html:10 templates/accounts/profile.html:66
+msgid "Two-factor authentication"
+msgstr "Zwei-Faktor-Anmeldung"
+
+#: templates/accounts/accept_invitation.html:3
+#: templates/accounts/invitation_signed_in.html:3
+msgid "Accept invitation"
+msgstr "Einladung annehmen"
+
+#: templates/accounts/accept_invitation.html:5
+#, python-format
+msgid "Welcome to %(site)s"
+msgstr "Willkommen bei %(site)s"
+
+#: templates/accounts/accept_invitation.html:8
+#, python-format
+msgid ""
+"You have been invited as <strong>%(role)s</strong> of the unit "
+"<strong>%(unit)s</strong>."
+msgstr ""
+"Du wurdest als <strong>%(role)s</strong> der Bereitschaft "
+"<strong>%(unit)s</strong> eingeladen."
+
+#: templates/accounts/accept_invitation.html:12
+#, python-format
+msgid "You have been invited as <strong>%(role)s</strong>."
+msgstr "Du wurdest als <strong>%(role)s</strong> eingeladen."
+
+#: templates/accounts/accept_invitation.html:16
+#, python-format
+msgid "Your account will be created for <strong>%(email)s</strong>."
+msgstr "Dein Konto wird für <strong>%(email)s</strong> angelegt."
+
+#: templates/accounts/accept_invitation.html:25
+msgid "Sign in with HiOrg-Server"
+msgstr "Mit HiOrg-Server anmelden"
+
+#: templates/accounts/accept_invitation.html:28
+msgid ""
+"Your HiOrg account will be linked right away. You can additionally set a "
+"password later under “My account”."
+msgstr ""
+"Dein HiOrg-Konto wird dabei direkt verknüpft. Ein Passwort kannst du später "
+"zusätzlich unter „Mein Konto“ festlegen."
+
+#: templates/accounts/accept_invitation.html:33
+msgid "or with your own password"
+msgstr "oder mit eigenem Passwort"
+
+#: templates/accounts/accept_invitation.html:39
+msgid "Create account"
+msgstr "Konto anlegen"
+
+#: templates/accounts/email/invitation_message.txt:1
+msgid "Hello,"
+msgstr "Hallo,"
+
+#: templates/accounts/email/invitation_message.txt:3
+#, python-format
+msgid "%(inviter)s has invited you to %(site)s."
+msgstr "%(inviter)s hat dich zu %(site)s eingeladen."
+
+#: templates/accounts/email/invitation_message.txt:3
+#, python-format
+msgid "You have been invited to %(site)s."
+msgstr "Du wurdest zu %(site)s eingeladen."
+
+#: templates/accounts/email/invitation_message.txt:4
+#, python-format
+msgid "Your role: %(role)s of the unit %(unit)s"
+msgstr "Deine Rolle: %(role)s der Bereitschaft %(unit)s"
+
+#: templates/accounts/email/invitation_message.txt:4
+#, python-format
+msgid "Your role: %(role)s"
+msgstr "Deine Rolle: %(role)s"
+
+#: templates/accounts/email/invitation_message.txt:6
+msgid ""
+"Use this link to create your account, either with your own password or with "
+"your HiOrg account:"
+msgstr ""
+"Über diesen Link legst du dein Konto an, wahlweise mit eigenem Passwort oder "
+"mit deinem HiOrg-Konto:"
+
+#: templates/accounts/email/invitation_message.txt:10
+#, python-format
+msgid "The link is valid until %(date)s and can only be used once."
+msgstr "Der Link ist bis %(date)s gültig und funktioniert nur einmal."
+
+#: templates/accounts/email/invitation_message.txt:12
+msgid "If you were not expecting this invitation, simply ignore this email."
+msgstr ""
+"Falls du mit dieser Einladung nichts anfangen kannst, ignoriere diese E-Mail "
+"einfach."
+
+#: templates/accounts/email/invitation_subject.txt:1
+#, python-format
+msgid "Invitation to %(site)s"
+msgstr "Einladung zu %(site)s"
+
+#: templates/accounts/invitation_form.html:3
+#: templates/accounts/invitation_form.html:7
+#: templates/accounts/invitation_list.html:7
+#: templates/accounts/unit_detail.html:12 templates/core/home.html:34
+msgid "Invite a person"
+msgstr "Person einladen"
+
+#: templates/accounts/invitation_form.html:9
+#, python-format
+msgid ""
+"The person receives a link by email and uses it to create their account – "
+"with their own password or via their HiOrg account. The link is valid for "
+"%(days)s day."
+msgid_plural ""
+"The person receives a link by email and uses it to create their account – "
+"with their own password or via their HiOrg account. The link is valid for "
+"%(days)s days."
+msgstr[0] ""
+"Die Person bekommt einen Link per E-Mail und legt damit ihr Konto an – mit "
+"eigenem Passwort oder über ihr HiOrg-Konto. Der Link ist %(days)s Tag gültig."
+msgstr[1] ""
+"Die Person bekommt einen Link per E-Mail und legt damit ihr Konto an – mit "
+"eigenem Passwort oder über ihr HiOrg-Konto. Der Link ist %(days)s Tage "
+"gültig."
+
+#: templates/accounts/invitation_form.html:21
+msgid "Send invitation"
+msgstr "Einladung verschicken"
+
+#: templates/accounts/invitation_form.html:22
+#: templates/accounts/unit_form.html:12
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: templates/accounts/invitation_invalid.html:3
+msgid "Invitation invalid"
+msgstr "Einladung ungültig"
+
+#: templates/accounts/invitation_invalid.html:5
+msgid "This invitation is no longer valid"
+msgstr "Diese Einladung ist nicht mehr gültig"
+
+#: templates/accounts/invitation_invalid.html:7
+msgid ""
+"This invitation link has expired, was revoked, replaced by a newer link or "
+"has already been used. Please contact the person who invited you."
+msgstr ""
+"Dieser Einladungslink ist abgelaufen, wurde widerrufen, durch einen neueren "
+"Link ersetzt oder schon verwendet. Bitte frag bei der Person nach, die dich "
+"eingeladen hat."
+
+#: templates/accounts/invitation_list.html:3
+#: templates/accounts/invitation_list.html:6 templates/core/_navbar.html:28
+msgid "Invitations"
+msgstr "Einladungen"
+
+#: templates/accounts/invitation_list.html:15
+#: templates/accounts/profile.html:12 templates/accounts/unit_detail.html:25
+#: templates/accounts/unit_detail.html:74
+msgid "Role"
+msgstr "Rolle"
+
+#: templates/accounts/invitation_list.html:16
+#: templates/accounts/unit_detail.html:75
+msgid "Status"
+msgstr "Status"
+
+#: templates/accounts/invitation_list.html:17
+#: templates/accounts/unit_detail.html:76
+msgid "Invited by"
+msgstr "Eingeladen von"
+
+#: templates/accounts/invitation_list.html:29
+msgid "No invitations sent yet."
+msgstr "Noch keine Einladungen verschickt."
+
+#: templates/accounts/invitation_signed_in.html:5
+msgid "You are already signed in"
+msgstr "Du bist bereits angemeldet"
+
+#: templates/accounts/invitation_signed_in.html:7
+#, python-format
+msgid ""
+"You are currently signed in as <strong>%(current)s</strong>. The invitation "
+"is for <strong>%(invited)s</strong>. Sign out and open the link again to "
+"accept it."
+msgstr ""
+"Du bist gerade als <strong>%(current)s</strong> angemeldet. Die Einladung "
+"gilt für <strong>%(invited)s</strong>. Melde dich ab und öffne den Link "
+"erneut, um sie anzunehmen."
+
+#: templates/accounts/invitation_signed_in.html:15
+msgid "Sign out and accept the invitation"
+msgstr "Abmelden und Einladung annehmen"
+
+#: templates/accounts/profile.html:13
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/accounts/profile.html:15
+msgid "Unit"
+msgstr "Bereitschaft"
+
+#: templates/accounts/profile.html:22
+msgid "Personal settings"
+msgstr "Persönliche Einstellungen"
+
+#: templates/accounts/profile.html:26 templates/accounts/unit_form.html:11
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/accounts/profile.html:29
+msgid "Sign-in"
+msgstr "Anmeldung"
+
+#: templates/accounts/profile.html:36
+msgid "Signing in with email address and password is possible."
+msgstr "Die Anmeldung mit E-Mail-Adresse und Passwort ist möglich."
+
+#: templates/accounts/profile.html:38
+msgid "No password set yet – so far you sign in via HiOrg only."
+msgstr ""
+"Noch kein Passwort festgelegt – du meldest dich bisher nur über HiOrg an."
+
+#: templates/accounts/profile.html:43
+msgid "Change"
+msgstr "Ändern"
+
+#: templates/accounts/profile.html:45
+msgid "Set"
+msgstr "Festlegen"
+
+#: templates/accounts/profile.html:54
+msgid "Linked with:"
+msgstr "Verknüpft mit:"
+
+#: templates/accounts/profile.html:57
+msgid "Not linked. Once linked, you can also sign in with your HiOrg account."
+msgstr ""
+"Nicht verknüpft. Nach dem Verknüpfen kannst du dich auch mit deinem HiOrg-"
+"Konto anmelden."
+
+#: templates/accounts/profile.html:61 templates/accounts/profile.html:71
+msgid "Manage"
+msgstr "Verwalten"
+
+#: templates/accounts/profile.html:61
+msgid "Link"
+msgstr "Verknüpfen"
+
+#: templates/accounts/profile.html:68
+msgid "Active (authenticator app)."
+msgstr "Aktiv (Authenticator-App)."
+
+#: templates/accounts/profile.html:68
+msgid "Not set up."
+msgstr "Nicht eingerichtet."
+
+#: templates/accounts/profile.html:71
+msgid "Set up"
+msgstr "Einrichten"
+
+#: templates/accounts/unit_detail.html:9
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/accounts/unit_detail.html:17
+msgid "Accounts"
+msgstr "Konten"
+
+#: templates/accounts/unit_detail.html:23
+msgid "Name"
+msgstr "Name"
+
+#: templates/accounts/unit_detail.html:26
+msgid "Access"
+msgstr "Zugang"
+
+#: templates/accounts/unit_detail.html:38
+msgid "Active"
+msgstr "Aktiv"
+
+#: templates/accounts/unit_detail.html:40
+msgid "Blocked"
+msgstr "Gesperrt"
+
+#: templates/accounts/unit_detail.html:50
+msgid "Block"
+msgstr "Sperren"
+
+#: templates/accounts/unit_detail.html:53
+msgid "Unblock"
+msgstr "Freigeben"
+
+#: templates/accounts/unit_detail.html:64
+msgid "No accounts yet."
+msgstr "Noch keine Konten."
+
+#: templates/accounts/unit_detail.html:67
+msgid "Open invitations"
+msgstr "Offene Einladungen"
+
+#: templates/accounts/unit_detail.html:88
+msgid "No open invitations."
+msgstr "Keine offenen Einladungen."
+
+#: templates/accounts/unit_form.html:3 templates/accounts/unit_form.html:7
+msgid "Edit unit"
+msgstr "Bereitschaft bearbeiten"
+
+#: templates/accounts/unit_form.html:3 templates/accounts/unit_form.html:7
+#: templates/accounts/unit_list.html:7
+msgid "Add unit"
+msgstr "Bereitschaft anlegen"
+
+#: templates/accounts/unit_list.html:3 templates/accounts/unit_list.html:6
+#: templates/core/_navbar.html:19
+msgid "Units"
+msgstr "Bereitschaften"
+
+#: templates/accounts/unit_list.html:16
+#, python-format
+msgid "%(counter)s account"
+msgid_plural "%(counter)s accounts"
+msgstr[0] "%(counter)s Konto"
+msgstr[1] "%(counter)s Konten"
+
+#: templates/accounts/unit_list.html:26
+msgid "No units yet."
+msgstr "Noch keine Bereitschaften angelegt."
+
+#: templates/core/_language_switcher.html:7
+msgid "Language"
+msgstr "Sprache"
+
+#: templates/core/_messages.html:6
+msgid "Close"
+msgstr "Schließen"
+
+#: templates/core/_navbar.html:8
+msgid "Toggle navigation"
+msgstr "Navigation umschalten"
+
+#: templates/core/_navbar.html:15 templates/core/home.html:3
+msgid "Overview"
+msgstr "Übersicht"
+
+#: templates/core/_navbar.html:23 templates/core/home.html:39
+msgid "My unit"
+msgstr "Meine Bereitschaft"
+
+#: templates/core/_navbar.html:49
+msgid "Sign out"
+msgstr "Abmelden"
+
+#: templates/core/home.html:5
+#, python-format
+msgid "Hello %(name)s!"
+msgstr "Hallo %(name)s!"
+
+#: templates/core/home.html:8
+#, python-format
+msgid ""
+"Signed in as <strong>%(role)s</strong> of the unit <strong>%(unit)s</strong>."
+msgstr ""
+"Angemeldet als <strong>%(role)s</strong> der Bereitschaft "
+"<strong>%(unit)s</strong>."
+
+#: templates/core/home.html:12
+#, python-format
+msgid "Signed in as <strong>%(role)s</strong>."
+msgstr "Angemeldet als <strong>%(role)s</strong>."
+
+#: templates/core/home.html:21
+msgid "Duties with open staffing needs"
+msgstr "Dienste mit offenem Personalbedarf"
+
+#: templates/core/home.html:23
+msgid ""
+"Duties from HiOrg-Server that still need staff will appear here soon. Units "
+"will then be able to report people for them."
+msgstr ""
+"Hier erscheinen demnächst die Dienste aus dem HiOrg-Server, für die noch "
+"Personal gesucht wird. Bereitschaften können dort dann Personen melden."
+
+#: templates/core/home.html:37
+msgid "Manage units"
+msgstr "Bereitschaften verwalten"

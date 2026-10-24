@@ -1,0 +1,21 @@
+{% load static i18n %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block head_title %}{% endblock head_title %} · {{ SITE_NAME }}</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-5.3.8/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock extra_head %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% include "core/_navbar.html" %}
+    <main class="container py-4">
+        {% include "core/_messages.html" %}
+        {% block main %}{% block content %}{% endblock content %}{% endblock main %}
+    </main>
+    <script src="{% static 'vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/htmx-2.0.11/htmx.min.js' %}"></script>
+    {% block extra_body %}{% endblock extra_body %}
+</body>
+</html>

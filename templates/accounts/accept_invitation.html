@@ -1,0 +1,41 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Accept invitation" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h4 mb-3">{% blocktranslate trimmed with site=SITE_NAME %}Welcome to {{ site }}{% endblocktranslate %}</h1>
+    <p>
+        {% if invitation.unit %}
+            {% blocktranslate trimmed with role=invitation.get_role_display unit=invitation.unit %}
+                You have been invited as <strong>{{ role }}</strong> of the unit <strong>{{ unit }}</strong>.
+            {% endblocktranslate %}
+        {% else %}
+            {% blocktranslate trimmed with role=invitation.get_role_display %}
+                You have been invited as <strong>{{ role }}</strong>.
+            {% endblocktranslate %}
+        {% endif %}
+        {% blocktranslate trimmed with email=invitation.email %}
+            Your account will be created for <strong>{{ email }}</strong>.
+        {% endblocktranslate %}
+    </p>
+
+    {% if HIORG_ENABLED %}
+        <form method="post" action="{% url 'openid_connect_login' 'hiorg' %}" class="mb-2">
+            {% csrf_token %}
+            <input type="hidden" name="process" value="login">
+            <button class="btn btn-outline-primary w-100" type="submit">{% translate "Sign in with HiOrg-Server" %}</button>
+        </form>
+        <p class="form-text">
+            {% blocktranslate trimmed %}
+                Your HiOrg account will be linked right away. You can additionally set a
+                password later under “My account”.
+            {% endblocktranslate %}
+        </p>
+        <div class="text-center text-body-secondary small my-3">{% translate "or with your own password" %}</div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {% include "core/_form_fields.html" %}
+        <button class="btn btn-primary w-100" type="submit">{% translate "Create account" %}</button>
+    </form>
+{% endblock content %}

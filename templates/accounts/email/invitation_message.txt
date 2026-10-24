@@ -1,0 +1,13 @@
+{% load i18n %}{% autoescape off %}{% translate "Hello," %}
+
+{% if invitation.invited_by %}{% blocktranslate trimmed with inviter=invitation.invited_by site=SITE_NAME %}{{ inviter }} has invited you to {{ site }}.{% endblocktranslate %}{% else %}{% blocktranslate trimmed with site=SITE_NAME %}You have been invited to {{ site }}.{% endblocktranslate %}{% endif %}
+{% if invitation.unit %}{% blocktranslate trimmed with role=invitation.get_role_display unit=invitation.unit %}Your role: {{ role }} of the unit {{ unit }}{% endblocktranslate %}{% else %}{% blocktranslate trimmed with role=invitation.get_role_display %}Your role: {{ role }}{% endblocktranslate %}{% endif %}
+
+{% translate "Use this link to create your account, either with your own password or with your HiOrg account:" %}
+
+{{ link }}
+
+{% blocktranslate trimmed with date=invitation.expires_at|date:"SHORT_DATETIME_FORMAT" %}The link is valid until {{ date }} and can only be used once.{% endblocktranslate %}
+
+{% translate "If you were not expecting this invitation, simply ignore this email." %}
+{% endautoescape %}

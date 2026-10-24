@@ -1,0 +1,10 @@
+/* Additions to Bootstrap. */
+
+body {
+    min-height: 100vh;
+}
+
+/* Give the recovery codes on allauth pages enough room. */
+.card-body textarea.font-monospace {
+    min-height: 12rem;
+}

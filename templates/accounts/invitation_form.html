@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Invite a person" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-7">
+            <h1 class="h3 mb-3">{% translate "Invite a person" %}</h1>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed count days=validity_days %}
+                    The person receives a link by email and uses it to create their account – with
+                    their own password or via their HiOrg account. The link is valid for {{ days }} day.
+                {% plural %}
+                    The person receives a link by email and uses it to create their account – with
+                    their own password or via their HiOrg account. The link is valid for {{ days }} days.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% include "core/_form_fields.html" %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+                <button class="btn btn-primary" type="submit">{% translate "Send invitation" %}</button>
+                <a class="btn btn-link" href="{% url 'invitation_list' %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

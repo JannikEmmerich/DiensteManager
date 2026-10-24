@@ -1,0 +1,22 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as LANGUAGES %}
+{% get_language_info_list for LANGUAGES as languages %}
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+       title="{% translate 'Language' %}">{{ LANGUAGE_CODE|upper }}</a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        {% for language in languages %}
+            <li>
+                <form method="post" action="{% url 'set_language' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    <button class="dropdown-item{% if language.code == LANGUAGE_CODE %} active{% endif %}"
+                            type="submit" name="language" value="{{ language.code }}" lang="{{ language.code }}">
+                        {{ language.name_local }}
+                    </button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</li>

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Overview" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-1">{% blocktranslate trimmed with name=user.first_name|default:user.email %}Hello {{ name }}!{% endblocktranslate %}</h1>
+    <p class="text-body-secondary">
+        {% if user.unit %}
+            {% blocktranslate trimmed with role=user.get_role_display unit=user.unit %}
+                Signed in as <strong>{{ role }}</strong> of the unit <strong>{{ unit }}</strong>.
+            {% endblocktranslate %}
+        {% else %}
+            {% blocktranslate trimmed with role=user.get_role_display %}
+                Signed in as <strong>{{ role }}</strong>.
+            {% endblocktranslate %}
+        {% endif %}
+    </p>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h5">{% translate "Duties with open staffing needs" %}</h2>
+                    <p class="text-body-secondary mb-0">
+                        {% blocktranslate trimmed %}
+                            Duties from HiOrg-Server that still need staff will appear here soon.
+                            Units will then be able to report people for them.
+                        {% endblocktranslate %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="list-group">
+                {% if can.invite %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'invitation_create' %}">{% translate "Invite a person" %}</a>
+                {% endif %}
+                {% if can.manage_units %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'unit_list' %}">{% translate "Manage units" %}</a>
+                {% elif can.view_own_unit %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'unit_detail' user.unit_id %}">{% translate "My unit" %}</a>
+                {% endif %}
+                <a class="list-group-item list-group-item-action" href="{% url 'profile' %}">{% translate "My account" %}</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

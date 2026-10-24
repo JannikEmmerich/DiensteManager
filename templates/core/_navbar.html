@@ -1,0 +1,59 @@
+{% load i18n %}
+{% with page=request.resolver_match.url_name %}
+<nav class="navbar navbar-expand-md bg-body-tertiary border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="{% url 'home' %}">{{ SITE_NAME }}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#main-navigation" aria-controls="main-navigation"
+                aria-expanded="false" aria-label="{% translate 'Toggle navigation' %}">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="main-navigation">
+            <ul class="navbar-nav me-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if page == 'home' %} active{% endif %}" href="{% url 'home' %}">{% translate "Overview" %}</a>
+                    </li>
+                    {% if can.manage_units %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page == 'unit_list' %} active{% endif %}" href="{% url 'unit_list' %}">{% translate "Units" %}</a>
+                        </li>
+                    {% elif can.view_own_unit %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page == 'unit_detail' %} active{% endif %}" href="{% url 'unit_detail' user.unit_id %}">{% translate "My unit" %}</a>
+                        </li>
+                    {% endif %}
+                    {% if can.invite %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page == 'invitation_list' %} active{% endif %}" href="{% url 'invitation_list' %}">{% translate "Invitations" %}</a>
+                        </li>
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}">{% translate "Administration" %}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                {% include "core/_language_switcher.html" %}
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user }}</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">{% translate "My account" %}</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'account_logout' %}">
+                                    {% csrf_token %}
+                                    <button class="dropdown-item" type="submit">{% translate "Sign out" %}</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endwith %}

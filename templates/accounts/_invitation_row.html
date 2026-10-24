@@ -1,0 +1,39 @@
+{% load i18n %}
+<tr>
+    <td>
+        {{ invitation.email }}
+        {% if invitation.unit %}<div class="small text-body-secondary">{{ invitation.unit }}</div>{% endif %}
+    </td>
+    <td>{{ invitation.get_role_display }}</td>
+    <td>
+        {% with status=invitation.status %}
+            <span class="badge {% if status == 'pending' %}text-bg-primary{% elif status == 'accepted' %}text-bg-success{% elif status == 'expired' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">{{ status.label }}</span>
+            {% if status == 'pending' %}
+                <div class="small text-body-secondary">{% blocktranslate trimmed with date=invitation.expires_at|date:"SHORT_DATE_FORMAT" %}until {{ date }}{% endblocktranslate %}</div>
+            {% endif %}
+        {% endwith %}
+    </td>
+    <td class="small">{{ invitation.invited_by|default:"–" }}</td>
+    <td class="text-end">
+        {% if invitation.can_be_resent %}
+            {% with back=request.htmx.current_url_abs_path|default:request.get_full_path %}
+            {% blocktranslate trimmed with email=invitation.email asvar confirm_text %}Revoke the invitation for {{ email }}?{% endblocktranslate %}
+            <div class="d-inline-flex gap-1">
+                <form method="post" action="{% url 'invitation_resend' invitation.pk %}"
+                      hx-post="{% url 'invitation_resend' invitation.pk %}" hx-target="closest tr" hx-swap="outerHTML">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ back }}">
+                    <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Resend" %}</button>
+                </form>
+                <form method="post" action="{% url 'invitation_revoke' invitation.pk %}"
+                      hx-post="{% url 'invitation_revoke' invitation.pk %}" hx-target="closest tr" hx-swap="outerHTML"
+                      hx-confirm="{{ confirm_text }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ back }}">
+                    <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Revoke" %}</button>
+                </form>
+            </div>
+            {% endwith %}
+        {% endif %}
+    </td>
+</tr>

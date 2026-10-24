@@ -1,0 +1,11 @@
+{% extends "allauth/layouts/base.html" %}
+{% block main %}
+    <div class="row g-4">
+        <div class="col-md-4 col-lg-3">
+            {% include "accounts/_profile_nav.html" %}
+        </div>
+        <div class="col-md-8 col-lg-9">
+            {% block content %}{% endblock content %}
+        </div>
+    </div>
+{% endblock main %}

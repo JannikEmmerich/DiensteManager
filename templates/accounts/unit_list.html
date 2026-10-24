@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Units" %}{% endblock head_title %}
+{% block content %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">{% translate "Units" %}</h1>
+        <a class="btn btn-primary" href="{% url 'unit_create' %}">{% translate "Add unit" %}</a>
+    </div>
+    {% if units %}
+        <div class="list-group">
+            {% for unit in units %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                   href="{{ unit.get_absolute_url }}">
+                    {{ unit.name }}
+                    <span class="badge text-bg-secondary">
+                        {% blocktranslate trimmed count counter=unit.account_count %}
+                            {{ counter }} account
+                        {% plural %}
+                            {{ counter }} accounts
+                        {% endblocktranslate %}
+                    </span>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-body-secondary">{% translate "No units yet." %}</p>
+    {% endif %}
+{% endblock content %}

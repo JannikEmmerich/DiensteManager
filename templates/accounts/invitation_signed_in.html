@@ -1,0 +1,17 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Accept invitation" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h4 mb-3">{% translate "You are already signed in" %}</h1>
+    <p>
+        {% blocktranslate trimmed with current=user.email invited=invitation.email %}
+            You are currently signed in as <strong>{{ current }}</strong>. The invitation is for
+            <strong>{{ invited }}</strong>. Sign out and open the link again to accept it.
+        {% endblocktranslate %}
+    </p>
+    <form method="post" action="{% url 'account_logout' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="btn btn-primary" type="submit">{% translate "Sign out and accept the invitation" %}</button>
+    </form>
+{% endblock content %}

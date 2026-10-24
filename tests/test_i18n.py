@@ -1,0 +1,142 @@
+"""German and English UI, language preference per account.
+
+Expected German texts are looked up from the translation catalogue (never hard-coded),
+and every check also asserts that a real translation exists.
+"""
+
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+from django.conf import settings
+from django.core import mail
+from django.urls import reverse
+from django.utils import translation
+from django.utils.translation import gettext
+
+from accounts.models import Role
+
+PO_FILE = Path(settings.BASE_DIR) / "locale" / "de" / "LC_MESSAGES" / "django.po"
+MO_FILE = PO_FILE.with_suffix(".mo")
+COOKIE = settings.LANGUAGE_COOKIE_NAME
+
+
+def german(text):
+    """The German translation of ``text``; fails if there is none."""
+    with translation.override("de"):
+        translated = gettext(text)
+    assert translated != text, f"No German translation for {text!r}"
+    return translated
+
+
+def test_german_catalogue_is_complete():
+    msgfmt = shutil.which("msgfmt")
+    if msgfmt is None:
+        pytest.skip("msgfmt (GNU gettext) is not installed")
+    result = subprocess.run(
+        [msgfmt, "--check", "--statistics", "--output-file=/dev/null", str(PO_FILE)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "untranslated" not in result.stderr, result.stderr
+    assert "fuzzy" not in result.stderr, result.stderr
+
+
+def test_compiled_catalogue_is_up_to_date():
+    hint = "Run: python manage.py compilemessages --ignore=.venv"
+    assert MO_FILE.exists(), hint
+    assert MO_FILE.stat().st_mtime >= PO_FILE.stat().st_mtime, hint
+
+
+def test_browser_language_decides_for_visitors(client, db):
+    text = "Access is by invitation only."
+    page = client.get(reverse("account_login"), HTTP_ACCEPT_LANGUAGE="de")
+    assert german(text) in page.text
+    assert '<html lang="de">' in page.text
+    page = client.get(reverse("account_login"), HTTP_ACCEPT_LANGUAGE="en")
+    assert text in page.text
+
+
+def test_visitors_can_switch_language(client, db):
+    response = client.post(
+        reverse("set_language"),
+        {"language": "en", "next": reverse("account_login")},
+        HTTP_ACCEPT_LANGUAGE="de",
+    )
+    assert response.status_code == 302
+    assert response["Location"] == reverse("account_login")
+    assert response.cookies[COOKIE].value == "en"
+    page = client.get(reverse("account_login"), HTTP_ACCEPT_LANGUAGE="de")
+    assert "Access is by invitation only." in page.text
+
+
+def test_language_switch_requires_post(client, db):
+    assert client.get(reverse("set_language")).status_code == 405
+
+
+def test_language_switch_is_stored_on_the_account(client, member):
+    client.force_login(member)
+    client.post(reverse("set_language"), {"language": "de", "next": "/"})
+    member.refresh_from_db()
+    assert member.language == "de"
+
+
+def test_unknown_language_is_ignored(client, member):
+    client.force_login(member)
+    client.post(reverse("set_language"), {"language": "xx", "next": "/"})
+    member.refresh_from_db()
+    assert member.language == ""
+
+
+def test_account_language_wins_over_browser_and_syncs_cookie(client, member):
+    member.language = "de"
+    member.save()
+    client.force_login(member)
+    response = client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en")
+    assert german("Overview") in response.text
+    assert response.cookies[COOKIE].value == "de"
+
+    member.language = "en"
+    member.save()
+    response = client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="de")
+    assert "Overview" in response.text
+
+
+def test_choosing_automatic_language_follows_browser_again(client, member):
+    member.language = "de"
+    member.save()
+    client.force_login(member)
+    response = client.post(
+        reverse("profile"), {"first_name": "Mia", "last_name": "Member", "language": ""}
+    )
+    member.refresh_from_db()
+    assert member.language == ""
+    assert response.cookies[COOKIE].value == ""  # cookie deleted
+    assert "Overview" in client.get(reverse("home"), HTTP_ACCEPT_LANGUAGE="en").text
+
+
+def test_invitation_email_uses_invitation_language(client, dispatcher, unit):
+    client.force_login(dispatcher)
+    for email, language in [("a@example.org", "de"), ("b@example.org", "en")]:
+        client.post(
+            reverse("invitation_create"),
+            {"email": email, "role": Role.MEMBER, "unit": unit.pk, "language": language},
+        )
+    german_mail, english_mail = mail.outbox
+    assert german("Hello,") in german_mail.body
+    assert german_mail.subject == german("Invitation to %(site)s") % {"site": settings.SITE_NAME}
+    assert "Hello," in english_mail.body
+    assert english_mail.subject == f"Invitation to {settings.SITE_NAME}"
+
+
+def test_password_reset_email_uses_account_language(client, member):
+    member.language = "de"
+    member.save()
+    client.post(
+        reverse("account_reset_password"), {"email": member.email}, HTTP_ACCEPT_LANGUAGE="en"
+    )
+    assert len(mail.outbox) == 1
+    assert german("Password Reset Email") in mail.outbox[0].subject

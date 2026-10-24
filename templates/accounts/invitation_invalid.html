@@ -1,0 +1,13 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Invitation invalid" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h4 mb-3">{% translate "This invitation is no longer valid" %}</h1>
+    <p>
+        {% blocktranslate trimmed %}
+            This invitation link has expired, was revoked, replaced by a newer link or has
+            already been used. Please contact the person who invited you.
+        {% endblocktranslate %}
+    </p>
+    <a class="btn btn-primary" href="{% url 'account_login' %}">{% translate "Go to sign-in" %}</a>
+{% endblock content %}

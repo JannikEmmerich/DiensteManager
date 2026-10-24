@@ -1,0 +1,6 @@
+{% comment %}
+    HTMX response to "Resend"/"Revoke": the updated table row plus the messages,
+    which end up at the top of the page via hx-swap-oob.
+{% endcomment %}
+{% include "accounts/_invitation_row.html" %}
+{% include "core/_messages.html" with oob=True %}

@@ -1,0 +1,74 @@
+{% extends "allauth/layouts/manage.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "My account" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-3">{% translate "My account" %}</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">{% translate "Email address" %}</dt>
+                <dd class="col-sm-8">{{ user.email }}</dd>
+                <dt class="col-sm-4">{% translate "Role" %}</dt>
+                <dd class="col-sm-8">{{ user.get_role_display }}{% if user.is_superuser %} · {% translate "Admin" %}{% endif %}</dd>
+                {% if user.unit %}
+                    <dt class="col-sm-4">{% translate "Unit" %}</dt>
+                    <dd class="col-sm-8">{{ user.unit }}</dd>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <h2 class="h5">{% translate "Personal settings" %}</h2>
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        {% include "core/_form_fields.html" %}
+        <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+    </form>
+
+    <h2 class="h5">{% translate "Sign-in" %}</h2>
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+            <div>
+                <div class="fw-semibold">{% translate "Password" %}</div>
+                <div class="small text-body-secondary">
+                    {% if user.has_usable_password %}
+                        {% translate "Signing in with email address and password is possible." %}
+                    {% else %}
+                        {% translate "No password set yet – so far you sign in via HiOrg only." %}
+                    {% endif %}
+                </div>
+            </div>
+            {% if user.has_usable_password %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'account_change_password' %}">{% translate "Change" %}</a>
+            {% else %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'account_set_password' %}">{% translate "Set" %}</a>
+            {% endif %}
+        </li>
+        {% if HIORG_ENABLED %}
+            <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                <div>
+                    <div class="fw-semibold">HiOrg-Server</div>
+                    <div class="small text-body-secondary">
+                        {% if hiorg_accounts %}
+                            {% translate "Linked with:" %}
+                            {% for hiorg_account in hiorg_accounts %}{{ hiorg_account }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                        {% else %}
+                            {% translate "Not linked. Once linked, you can also sign in with your HiOrg account." %}
+                        {% endif %}
+                    </div>
+                </div>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'socialaccount_connections' %}">{% if hiorg_accounts %}{% translate "Manage" %}{% else %}{% translate "Link" %}{% endif %}</a>
+            </li>
+        {% endif %}
+        <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+            <div>
+                <div class="fw-semibold">{% translate "Two-factor authentication" %}</div>
+                <div class="small text-body-secondary">
+                    {% if mfa_enabled %}{% translate "Active (authenticator app)." %}{% else %}{% translate "Not set up." %}{% endif %}
+                </div>
+            </div>
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'mfa_index' %}">{% if mfa_enabled %}{% translate "Manage" %}{% else %}{% translate "Set up" %}{% endif %}</a>
+        </li>
+    </ul>
+{% endblock content %}

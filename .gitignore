@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
+# Compiled translations (built with `manage.py compilemessages`, also in the Docker build)
+*.mo
+
+# Local configuration (contains secrets)
+.env

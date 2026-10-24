@@ -1,0 +1,20 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n allauth %}
+{% block head_title %}{% translate "No account found" %}{% endblock head_title %}
+{% block content %}
+    {% element h1 %}
+        {% translate "No account found" %}
+    {% endelement %}
+    <p>{% translate "There is no account for this sign-in yet. Access is by invitation only." %}</p>
+    <ul>
+        <li class="mb-2">
+            <strong>{% translate "Already have an account with a password?" %}</strong>
+            {% translate "Sign in with it and link your HiOrg account under “My account”." %}
+        </li>
+        <li>
+            <strong>{% translate "Received an invitation?" %}</strong>
+            {% translate "Open the link from the invitation email and choose “Sign in with HiOrg-Server” there." %}
+        </li>
+    </ul>
+    <a class="btn btn-primary" href="{% url 'account_login' %}">{% translate "Go to sign-in" %}</a>
+{% endblock content %}

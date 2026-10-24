@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% if unit %}{% translate "Edit unit" %}{% else %}{% translate "Add unit" %}{% endif %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="h3 mb-3">{% if unit %}{% translate "Edit unit" %}{% else %}{% translate "Add unit" %}{% endif %}</h1>
+            <form method="post">
+                {% csrf_token %}
+                {% include "core/_form_fields.html" %}
+                <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+                <a class="btn btn-link" href="{% if unit %}{{ unit.get_absolute_url }}{% else %}{% url 'unit_list' %}{% endif %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

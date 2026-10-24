@@ -1,0 +1,12 @@
+{% extends "allauth/layouts/base.html" %}
+{% block main %}
+    <div class="row justify-content-center">
+        <div class="col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    {% block content %}{% endblock content %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock main %}
