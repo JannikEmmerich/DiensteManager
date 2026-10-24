@@ -105,6 +105,17 @@ def test_account_language_wins_over_browser_and_syncs_cookie(client, member):
     assert "Overview" in response.text
 
 
+def test_profile_confirms_in_the_newly_chosen_language(client, member):
+    client.force_login(member)
+    response = client.post(
+        reverse("profile"),
+        {"first_name": "Mia", "last_name": "Member", "language": "de"},
+        HTTP_ACCEPT_LANGUAGE="en",
+        follow=True,
+    )
+    assert german("Saved.") in response.text
+
+
 def test_choosing_automatic_language_follows_browser_again(client, member):
     member.language = "de"
     member.save()
