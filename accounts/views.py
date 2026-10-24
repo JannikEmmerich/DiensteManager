@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
@@ -257,6 +257,9 @@ def profile(request):
     form = ProfileForm(request.POST or None, instance=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
+        if request.user.language:
+            # Confirm in the language just chosen, not in the one this request started with.
+            translation.activate(request.user.language)
         messages.success(request, _("Saved."))
         response = redirect("profile")
         if previous_language and not request.user.language:
