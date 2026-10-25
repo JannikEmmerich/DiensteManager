@@ -365,9 +365,10 @@ packages, the GitHub Actions and the base image weekly.
 
 ### Making a release
 
-1. Pull request "Release 1.2.3": set `version = "1.2.3"` in `pyproject.toml` and rename
-   `## [Unreleased]` in `CHANGELOG.md` to `## [1.2.3] – <date>` (start a new empty
-   `## [Unreleased]` above it). Merge it.
+1. Pull request "Release 1.2.3": set `version = "1.2.3"` in `pyproject.toml`, run
+   `uv lock` (`uv.lock` contains the version too) and rename `## [Unreleased]` in
+   `CHANGELOG.md` to `## [1.2.3] – <date>` (start a new empty `## [Unreleased]` above
+   it). Merge it.
 2. Tag the merge commit and push the tag:
    `git tag -a v1.2.3 -m "1.2.3" && git push origin v1.2.3`
    (or create the release with the new tag `v1.2.3` on GitHub).
