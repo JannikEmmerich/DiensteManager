@@ -97,6 +97,16 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   dispatcher under "Add helpers" on the duty: unit plus names, confirmed right away; the
   unit leads are notified.
 - Released duties are **cancelled** instead of deleted; only drafts can be deleted.
+- **Calendar subscription** (*My account → Calendar subscription*): every account can
+  create a personal calendar address (iCal) to subscribe to in a calendar app (phone,
+  Outlook, Google). Units get the released duties offered to them, optionally only those
+  with active reports of their unit; dispatchers get all duties, drafts optionally. It
+  covers duties that ended up to 180 days ago and everything after. Each event has
+  title, time, place and the link to the duty – no helpers. Cancelled duties stay with
+  `STATUS:CANCELLED` (and "Cancelled:" in the title) so calendar apps remove or strike
+  them out. Calendar apps cannot sign in, so the random token in the address is the key:
+  it works without signing in, stops working when the account is blocked, and "Create a
+  new address" replaces it (the old one stops working at once).
 
 ## Email notifications
 

@@ -1,0 +1,65 @@
+{% extends "allauth/layouts/manage.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Calendar subscription" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-3">{% translate "Calendar subscription" %}</h1>
+    <p>
+        {% blocktranslate trimmed %}
+            With your personal calendar address, the duties appear in your calendar app (phone,
+            Outlook, Google and others) and stay up to date. It shows title, time and place of
+            the duties and the link to them, but no helpers.
+        {% endblocktranslate %}
+    </p>
+    {% if feed %}
+        <div class="mb-3">
+            <label class="form-label" for="calendar-url">{% translate "Your calendar address" %}</label>
+            <div class="input-group">
+                <input class="form-control" id="calendar-url" type="text" value="{{ url }}" readonly>
+                <button class="btn btn-outline-secondary" type="button" data-copy="#calendar-url" data-copied="{% translate 'Copied' %}">{% translate "Copy" %}</button>
+            </div>
+            <div class="form-text">
+                {% blocktranslate trimmed %}
+                    Add it in your calendar app as a subscription ("subscribe to calendar", "from
+                    URL"). Calendar apps update subscriptions on their own, often only every few
+                    hours. Whoever knows the address sees these duties – do not pass it on.
+                {% endblocktranslate %}
+            </div>
+        </div>
+        <p><a class="btn btn-primary" href="{{ webcal_url }}">{% translate "Open in calendar app" %}</a></p>
+
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save">
+            {% include "core/_form_fields.html" %}
+            <button class="btn btn-outline-primary" type="submit">{% translate "Save" %}</button>
+        </form>
+
+        <h2 class="h5">{% translate "New address" %}</h2>
+        <p class="text-body-secondary">
+            {% blocktranslate trimmed %}
+                If the address got into the wrong hands: a new address replaces it, the old one
+                stops working at once. You then have to subscribe again.
+            {% endblocktranslate %}
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="renew">
+                {% translate "Create a new address? The old one stops working." as renew_text %}
+                <button class="btn btn-outline-secondary" type="submit" data-confirm="{{ renew_text }}">{% translate "Create a new address" %}</button>
+            </form>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                {% translate "End the calendar subscription? The address stops working." as delete_text %}
+                <button class="btn btn-outline-danger" type="submit" data-confirm="{{ delete_text }}">{% translate "End subscription" %}</button>
+            </form>
+        </div>
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            <button class="btn btn-primary" type="submit">{% translate "Create calendar address" %}</button>
+        </form>
+    {% endif %}
+{% endblock content %}

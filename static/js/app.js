@@ -86,3 +86,19 @@ document.addEventListener("click", (event) => {
 for (const button of document.querySelectorAll("[data-formset-add]")) {
     button.hidden = false;
 }
+
+// Copies the field named by data-copy="#id" to the clipboard, e.g. the calendar address.
+document.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-copy]");
+    if (!button) {
+        return;
+    }
+    const field = document.querySelector(button.dataset.copy);
+    field.select();
+    try {
+        await navigator.clipboard.writeText(field.value);
+        button.textContent = button.dataset.copied || button.textContent;
+    } catch {
+        // Without clipboard access the address stays selected for copying by hand.
+    }
+});

@@ -9,6 +9,11 @@ All notable changes are listed here. The format follows
 
 ### Added
 
+- Calendar subscription (iCal): under *My account → Calendar subscription* every account
+  creates a personal calendar address for its calendar app. Units get the duties offered
+  to them (optionally only those with their reports), dispatchers all duties (drafts
+  optionally); cancelled duties are marked as cancelled. No helpers in the feed; the
+  address can be renewed and stops working when the account is blocked.
 - Roles can be changed: unit leads switch the accounts of their unit between unit lead
   and member, dispatchers those of all units (on the unit's page). Admins edit all data
   of other accounts in the portal – name, email address, role (also dispatcher), unit,
