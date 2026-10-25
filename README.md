@@ -134,8 +134,10 @@ and when, with the old and the new value of each changed field (`lifecycle` app)
   see it.
 - **Bank accounts:** created and changed, on the duty pay overview. IBANs appear masked
   (`DE89 **** **** **** **30 00`) in the history. A change of account holder, IBAN or
-  BIC is emailed to the unit leads, and creating a statement warns if the bank details
-  changed within the last 30 days – a changed IBAN does not go unnoticed.
+  BIC is emailed to the unit leads and the dispatchers (switch "Billings" or "Changed
+  bank details" under *My account*), and creating a statement warns if the bank details
+  changed within the last 30 days – a changed IBAN does not go unnoticed, even if the
+  only unit lead changed it.
 
 ### Retention periods
 

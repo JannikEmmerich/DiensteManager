@@ -362,11 +362,14 @@ def test_pdf_with_names_beyond_latin_1(dispatcher, unit):
     assert b"DejaVuSans" in content
 
 
-def test_profile_offers_billing_emails_to_unit_leads_only(client, unit_lead, member):
-    client.force_login(unit_lead)
-    assert "notify_billing" in client.get(reverse("profile")).context["form"].fields
-    client.force_login(member)
-    assert "notify_billing" not in client.get(reverse("profile")).context["form"].fields
+def test_profile_offers_billing_emails(client, unit_lead, dispatcher, member):
+    def fields(user):
+        client.force_login(user)
+        return client.get(reverse("profile")).context["form"].fields
+
+    assert fields(unit_lead)["notify_billing"].label == "Billings"
+    assert fields(dispatcher)["notify_billing"].label == "Changed bank details"
+    assert "notify_billing" not in fields(member)
 
 
 def test_blocked_unit_leads_get_no_billing_emails(dispatcher, unit, rf, mailoutbox):

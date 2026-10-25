@@ -150,10 +150,15 @@ class ProfileForm(forms.ModelForm):
         if permissions.is_unit_lead(user):
             self.fields["notify_billing"].help_text = _(
                 "When a statement of the duty pay of my unit is created (with the PDF), "
-                "paid or cancelled."
+                "paid or cancelled, and when its bank details change."
+            )
+        elif permissions.is_dispatcher(user):
+            self.fields["notify_billing"].label = _("Changed bank details")
+            self.fields["notify_billing"].help_text = _(
+                "When a unit changes the account to which its duty pay is transferred."
             )
         else:
-            # Only unit leads receive billings.
+            # Members receive neither billings nor bank details.
             del self.fields["notify_billing"]
         if settings.EMAIL_QUEUE:
             self.fields["email_delivery"].help_text = _(
