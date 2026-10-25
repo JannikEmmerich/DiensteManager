@@ -107,3 +107,9 @@ class MFAAdapter(DefaultMFAAdapter):
     def can_delete_authenticator(self, authenticator):
         # Accounts that must use two-factor authentication cannot switch it off.
         return not permissions.must_use_mfa(authenticator.user)
+
+    def is_mfa_enabled(self, user, types=None):
+        # In demo mode, only admins sign in with a second factor.
+        if permissions.demo_restricted(user):
+            return False
+        return super().is_mfa_enabled(user, types=types)

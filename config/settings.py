@@ -42,6 +42,10 @@ DISPATCH_NAME = env("DISPATCH_NAME", default="Disposition")
 with (BASE_DIR / "pyproject.toml").open("rb") as pyproject:
     VERSION = tomllib.load(pyproject)["project"]["version"]
 REVISION = env("APP_REVISION", default="")
+# Demo mode, e.g. for a public trial: emails are not sent but shown under "Inbox"
+# (everyone sees their own, admins all); only admins (superusers) change email addresses
+# and passwords, use two-factor authentication and create accounts (invitations).
+DEMO_MODE = env.bool("DEMO_MODE", default=False)
 ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/")
 
 
@@ -68,6 +72,7 @@ INSTALLED_APPS = [
     "billing",
     "lifecycle",
     "outbox",
+    "demo",
 ]
 
 MIDDLEWARE = [
@@ -92,6 +97,8 @@ MIDDLEWARE = [
     # Needs the signed-in user and messages: sends accounts that must use two-factor
     # authentication (MFA_REQUIRED_ROLES) to its setup first.
     "accounts.middleware.MfaRequiredMiddleware",
+    # In demo mode (DEMO_MODE), only admins change email addresses and passwords.
+    "accounts.middleware.DemoModeMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -155,6 +162,7 @@ LOGIN_REDIRECT_URL = "home"
 
 # django-allauth: accounts are only created through invitations; sign-in by email address.
 ACCOUNT_ADAPTER = "accounts.adapters.AccountAdapter"
+ACCOUNT_FORMS = {"login": "accounts.forms.LoginForm"}
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
@@ -258,6 +266,9 @@ if _smtp_host:
     }
 else:
     MAILERS = {"default": {"BACKEND": "django.core.mail.backends.console.EmailBackend"}}
+if DEMO_MODE:
+    # Stored for the inbox instead of sent (demo/backends.py).
+    MAILERS = {"default": {"BACKEND": "demo.backends.DemoEmailBackend"}}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=f"{SITE_NAME} <noreply@localhost>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # Notifications (duties/notifications.py) use the same subject prefix as allauth.

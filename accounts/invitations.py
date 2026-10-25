@@ -7,6 +7,7 @@ session when the invitation page is opened.
 """
 
 from allauth.account.models import EmailAddress
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -41,8 +42,16 @@ def send_invitation(request, invitation):
     )
 
 
+def _pending():
+    invitations = Invitation.objects.pending()
+    if settings.DEMO_MODE:
+        # In demo mode, only admins create accounts.
+        invitations = invitations.filter(invited_by__is_superuser=True)
+    return invitations
+
+
 def pending_invitation(token):
-    return Invitation.objects.pending().with_token(token).select_related("unit").first()
+    return _pending().with_token(token).select_related("unit").first()
 
 
 def remember_in_session(request, invitation):
@@ -57,7 +66,7 @@ def pending_invitation_from_session(request):
     token_hash = request.session.get(SESSION_KEY)
     if not token_hash:
         return None
-    return Invitation.objects.pending().filter(token_hash=token_hash).first()
+    return _pending().filter(token_hash=token_hash).first()
 
 
 def lock_and_validate(invitation_pk):
@@ -69,6 +78,8 @@ def lock_and_validate(invitation_pk):
     # of an outer join (the unit is empty for internal invitations).
     invitation = Invitation.objects.select_for_update().get(pk=invitation_pk)
     if not invitation.is_pending or User.objects.filter(email__iexact=invitation.email).exists():
+        raise InvitationInvalid
+    if settings.DEMO_MODE and not _pending().filter(pk=invitation.pk).exists():
         raise InvitationInvalid
     return invitation
 

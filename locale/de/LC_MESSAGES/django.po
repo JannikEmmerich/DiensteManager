@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 15:40+0100\n"
+"POT-Creation-Date: 2026-10-25 16:02+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -42,76 +42,76 @@ msgstr "Status"
 msgid "Users and units"
 msgstr "Benutzer und Bereitschaften"
 
-#: accounts/forms.py:24 templates/duties/duty_detail.html:95
+#: accounts/forms.py:25 templates/duties/duty_detail.html:95
 #: templates/mailings/_audience.html:1
 msgid "All units"
 msgstr "Alle Bereitschaften"
 
-#: accounts/forms.py:24
+#: accounts/forms.py:25
 msgid "Only the selected units"
 msgstr "Nur die ausgewählten Bereitschaften"
 
-#: accounts/forms.py:31
+#: accounts/forms.py:32
 msgid "Selected units"
 msgstr "Ausgewählte Bereitschaften"
 
-#: accounts/forms.py:46
+#: accounts/forms.py:47
 msgid "Please select at least one unit."
 msgstr "Bitte wähle mindestens eine Bereitschaft aus."
 
-#: accounts/forms.py:55
+#: accounts/forms.py:64
 msgid "Language of the invitation"
 msgstr "Sprache der Einladung"
 
-#: accounts/forms.py:57
+#: accounts/forms.py:66
 msgid "Used for the email and as the initial language of the new account."
 msgstr "Gilt für die E-Mail und als anfängliche Sprache des neuen Kontos."
 
-#: accounts/forms.py:67 accounts/forms.py:240
+#: accounts/forms.py:76 accounts/forms.py:249
 msgid "– none (internal account) –"
 msgstr "– keine (internes Konto) –"
 
-#: accounts/forms.py:79 accounts/forms.py:252
+#: accounts/forms.py:88 accounts/forms.py:261
 msgid "An account with this email address already exists."
 msgstr "Für diese E-Mail-Adresse gibt es bereits ein Konto."
 
-#: accounts/forms.py:82 accounts/forms.py:255
+#: accounts/forms.py:91 accounts/forms.py:264
 msgid "There is already a pending invitation for this email address."
 msgstr "Für diese E-Mail-Adresse gibt es bereits eine offene Einladung."
 
-#: accounts/forms.py:91 accounts/forms.py:241
+#: accounts/forms.py:100 accounts/forms.py:250
 msgid "Internal accounts do not belong to a unit."
 msgstr "Interne Konten gehören zu keiner Bereitschaft."
 
-#: accounts/forms.py:93 accounts/forms.py:265
+#: accounts/forms.py:102 accounts/forms.py:274
 msgid "Please select a unit."
 msgstr "Bitte eine Bereitschaft auswählen."
 
-#: accounts/forms.py:100
+#: accounts/forms.py:109
 msgid "First name"
 msgstr "Vorname"
 
-#: accounts/forms.py:101
+#: accounts/forms.py:110
 msgid "Last name"
 msgstr "Nachname"
 
-#: accounts/forms.py:142
+#: accounts/forms.py:151
 msgid "New duties for my unit"
 msgstr "Neue Dienste für meine Bereitschaft"
 
-#: accounts/forms.py:143 accounts/forms.py:232
+#: accounts/forms.py:152 accounts/forms.py:241
 msgid "Reports"
 msgstr "Meldungen"
 
-#: accounts/forms.py:144
+#: accounts/forms.py:153
 msgid "Billings"
 msgstr "Abrechnungen"
 
-#: accounts/forms.py:152 accounts/forms.py:243
+#: accounts/forms.py:161 accounts/forms.py:252
 msgid "Automatic (browser setting)"
 msgstr "Automatisch (Browsereinstellung)"
 
-#: accounts/forms.py:158
+#: accounts/forms.py:167
 msgid ""
 "When a statement of the duty pay of my unit is created (with the PDF) or "
 "cancelled, and when its bank details change."
@@ -119,17 +119,17 @@ msgstr ""
 "Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit PDF) "
 "oder storniert wird und wenn sich ihre Bankverbindung ändert."
 
-#: accounts/forms.py:162
+#: accounts/forms.py:171
 msgid "Changed bank details"
 msgstr "Geänderte Bankverbindungen"
 
-#: accounts/forms.py:164
+#: accounts/forms.py:173
 msgid "When a unit changes the account to which its duty pay is transferred."
 msgstr ""
 "Wenn eine Bereitschaft das Konto ändert, auf das ihre Dienstgelder "
 "überwiesen werden."
 
-#: accounts/forms.py:172
+#: accounts/forms.py:181
 #, python-format
 msgid ""
 "The summary comes every day at %(hour)d:00. Changed and cancelled duties, "
@@ -140,11 +140,11 @@ msgstr ""
 "abgesagte Dienste, Abrechnungen, geänderte Bankverbindungen und E-Mails der "
 "%(DISPATCH_NAME)s kommen immer sofort."
 
-#: accounts/forms.py:184
+#: accounts/forms.py:193
 msgid "When units report or withdraw helpers."
 msgstr "Wenn Bereitschaften Helfer melden oder Meldungen zurückziehen."
 
-#: accounts/forms.py:187
+#: accounts/forms.py:196
 msgid ""
 "When reports of my unit are confirmed or declined, and when a duty with "
 "reports of my unit changes or is cancelled."
@@ -152,7 +152,7 @@ msgstr ""
 "Wenn Meldungen meiner Bereitschaft bestätigt oder abgelehnt werden und wenn "
 "sich ein Dienst mit Meldungen meiner Bereitschaft ändert oder abgesagt wird."
 
-#: accounts/forms.py:192
+#: accounts/forms.py:201
 msgid ""
 "When helpers I reported are confirmed or declined, and when their duty "
 "changes or is cancelled."
@@ -160,22 +160,26 @@ msgstr ""
 "Wenn von mir gemeldete Helfer bestätigt oder abgelehnt werden und wenn sich "
 "ihr Dienst ändert oder abgesagt wird."
 
-#: accounts/forms.py:207 templates/accounts/_account_table.html:9
+#: accounts/forms.py:216 templates/accounts/_account_table.html:9
 #: templates/accounts/invitation_list.html:15
 #: templates/accounts/profile.html:12 templates/accounts/unit_detail.html:37
 #: templates/mailings/mailing_detail.html:35
 msgid "Role"
 msgstr "Rolle"
 
-#: accounts/forms.py:231
+#: accounts/forms.py:240
 msgid "New duties for the unit"
 msgstr "Neue Dienste für die Bereitschaft"
 
-#: accounts/forms.py:233
+#: accounts/forms.py:242
 msgid "Billings and changed bank details"
 msgstr "Abrechnungen und geänderte Bankverbindungen"
 
-#: accounts/middleware.py:94
+#: accounts/middleware.py:103
+msgid "In demo mode, only an admin can do this."
+msgstr "Im Demo-Modus kann das nur ein Admin."
+
+#: accounts/middleware.py:130
 msgid ""
 "Your account must be protected with two-factor authentication. Please set it "
 "up now."
@@ -755,21 +759,93 @@ msgstr ""
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
-#: config/settings.py:285
+#: config/settings.py:296
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:286
+#: config/settings.py:297
 msgid "English"
 msgstr "Englisch"
 
-#: config/urls.py:11 config/urls.py:13 templates/core/_navbar.html:52
+#: config/urls.py:11 config/urls.py:13 templates/core/_navbar.html:57
 msgid "Administration"
 msgstr "Verwaltung"
 
 #: core/apps.py:7
 msgid "Core"
 msgstr "Grundfunktionen"
+
+#: demo/admin.py:28 demo/models.py:13 outbox/admin.py:33 outbox/models.py:28
+msgid "to"
+msgstr "an"
+
+#: demo/apps.py:7
+msgid "Demo mode"
+msgstr "Demo-Modus"
+
+#: demo/models.py:12 outbox/models.py:29
+msgid "from"
+msgstr "von"
+
+#: demo/models.py:14
+msgid "cc"
+msgstr "Kopie an"
+
+#: demo/models.py:15
+msgid "bcc"
+msgstr "Blindkopie an"
+
+#: demo/models.py:16 outbox/models.py:30
+msgid "reply to"
+msgstr "Antwort an"
+
+#: demo/models.py:19 mailings/models.py:25 mailings/models.py:50
+msgid "recipients"
+msgstr "Empfänger"
+
+#: demo/models.py:20 mailings/models.py:22 outbox/models.py:31
+msgid "subject"
+msgstr "Betreff"
+
+#: demo/models.py:21 mailings/models.py:23 outbox/models.py:32
+msgid "message"
+msgstr "Nachricht"
+
+#: demo/models.py:22 mailings/models.py:47 outbox/models.py:49
+msgid "sent at"
+msgstr "gesendet am"
+
+#: demo/models.py:25
+msgid "demo email"
+msgstr "Demo-E-Mail"
+
+#: demo/models.py:26
+msgid "demo emails"
+msgstr "Demo-E-Mails"
+
+#: demo/models.py:35 mailings/models.py:56 outbox/models.py:64
+msgid "email"
+msgstr "E-Mail"
+
+#: demo/models.py:37 outbox/models.py:68
+msgid "file name"
+msgstr "Dateiname"
+
+#: demo/models.py:38 outbox/models.py:69
+msgid "content"
+msgstr "Inhalt"
+
+#: demo/models.py:39 lifecycle/models.py:33 outbox/models.py:70
+msgid "type"
+msgstr "Typ"
+
+#: demo/models.py:42 outbox/models.py:73
+msgid "attachment"
+msgstr "Anhang"
+
+#: demo/models.py:43 outbox/models.py:74
+msgid "attachments"
+msgstr "Anhänge"
 
 #: duties/apps.py:7
 msgid "Duties and reports"
@@ -1341,10 +1417,6 @@ msgstr "storniert"
 msgid "scope"
 msgstr "Bereich"
 
-#: lifecycle/models.py:33 outbox/models.py:70
-msgid "type"
-msgstr "Typ"
-
 #: lifecycle/models.py:35
 msgid "object ID"
 msgstr "Objekt-ID"
@@ -1417,18 +1489,6 @@ msgstr "Bereitschaftsleitungen"
 msgid "All accounts of the units (unit leads and members)"
 msgstr "Alle Konten der Bereitschaften (Leitungen und Mitglieder)"
 
-#: mailings/models.py:22 outbox/models.py:31
-msgid "subject"
-msgstr "Betreff"
-
-#: mailings/models.py:23 outbox/models.py:32
-msgid "message"
-msgstr "Nachricht"
-
-#: mailings/models.py:25 mailings/models.py:50
-msgid "recipients"
-msgstr "Empfänger"
-
 #: mailings/models.py:27
 msgid "to all units"
 msgstr "an alle Bereitschaften"
@@ -1440,14 +1500,6 @@ msgstr "Die E-Mail verlinkt auf diesen Dienst."
 #: mailings/models.py:42
 msgid "sent by"
 msgstr "gesendet von"
-
-#: mailings/models.py:47 outbox/models.py:49
-msgid "sent at"
-msgstr "gesendet am"
-
-#: mailings/models.py:56 outbox/models.py:64
-msgid "email"
-msgstr "E-Mail"
 
 #: mailings/models.py:57
 msgid "emails"
@@ -1471,10 +1523,6 @@ msgid "Email sent to %(count)d person."
 msgid_plural "Email sent to %(count)d people."
 msgstr[0] "E-Mail an %(count)d Person gesendet."
 msgstr[1] "E-Mail an %(count)d Personen gesendet."
-
-#: outbox/admin.py:33 outbox/models.py:28
-msgid "to"
-msgstr "an"
 
 #: outbox/admin.py:40
 msgid "Send again"
@@ -1512,14 +1560,6 @@ msgstr "Fehlgeschlagen"
 msgid "recipient"
 msgstr "Empfänger"
 
-#: outbox/models.py:29
-msgid "from"
-msgstr "von"
-
-#: outbox/models.py:30
-msgid "reply to"
-msgstr "Antwort an"
-
 #: outbox/models.py:33
 msgid "for the daily summary"
 msgstr "für die tägliche Zusammenfassung"
@@ -1547,22 +1587,6 @@ msgstr "ausgehende E-Mail"
 #: outbox/models.py:53
 msgid "outgoing emails"
 msgstr "ausgehende E-Mails"
-
-#: outbox/models.py:68
-msgid "file name"
-msgstr "Dateiname"
-
-#: outbox/models.py:69
-msgid "content"
-msgstr "Inhalt"
-
-#: outbox/models.py:73
-msgid "attachment"
-msgstr "Anhang"
-
-#: outbox/models.py:74
-msgid "attachments"
-msgstr "Anhänge"
 
 #: outbox/worker.py:130
 #, python-format
@@ -1655,7 +1679,7 @@ msgid "Name"
 msgstr "Name"
 
 #: templates/accounts/_account_table.html:8
-#: templates/accounts/_profile_nav.html:5
+#: templates/accounts/_profile_nav.html:6
 #: templates/accounts/invitation_list.html:14
 #: templates/accounts/profile.html:10 templates/accounts/unit_detail.html:36
 #: templates/mailings/mailing_detail.html:33
@@ -1671,7 +1695,7 @@ msgstr "Zugang"
 msgid "Role of %(account)s"
 msgstr "Rolle von %(account)s"
 
-#: templates/accounts/_account_table.html:31 templates/accounts/profile.html:49
+#: templates/accounts/_account_table.html:31 templates/accounts/profile.html:52
 #: templates/billing/unit_pay.html:106 templates/duties/duty_detail.html:187
 msgid "Change"
 msgstr "Ändern"
@@ -1721,24 +1745,24 @@ msgid "Revoke"
 msgstr "Widerrufen"
 
 #: templates/accounts/_profile_nav.html:4 templates/accounts/profile.html:3
-#: templates/accounts/profile.html:5 templates/core/_navbar.html:63
+#: templates/accounts/profile.html:5 templates/core/_navbar.html:68
 #: templates/core/home.html:91
 msgid "My account"
 msgstr "Mein Konto"
 
-#: templates/accounts/_profile_nav.html:6 templates/accounts/profile.html:39
+#: templates/accounts/_profile_nav.html:7 templates/accounts/profile.html:42
 msgid "Password"
 msgstr "Passwort"
 
-#: templates/accounts/_profile_nav.html:8
+#: templates/accounts/_profile_nav.html:9
 msgid "HiOrg link"
 msgstr "HiOrg-Verknüpfung"
 
-#: templates/accounts/_profile_nav.html:10 templates/accounts/profile.html:72
+#: templates/accounts/_profile_nav.html:11 templates/accounts/profile.html:75
 msgid "Two-factor authentication"
 msgstr "Zwei-Faktor-Anmeldung"
 
-#: templates/accounts/_profile_nav.html:12
+#: templates/accounts/_profile_nav.html:14
 #: templates/duties/calendar_settings.html:3
 #: templates/duties/calendar_settings.html:5
 msgid "Calendar subscription"
@@ -1973,46 +1997,54 @@ msgstr "Persönliche Einstellungen"
 msgid "Sign-in"
 msgstr "Anmeldung"
 
-#: templates/accounts/profile.html:42
+#: templates/accounts/profile.html:37
+msgid ""
+"This is a demo: only an admin can change email addresses and passwords, and "
+"two-factor authentication is switched off."
+msgstr ""
+"Dies ist eine Demo: E-Mail-Adressen und Passwörter kann nur ein Admin ändern,"
+" und die Zwei-Faktor-Authentifizierung ist ausgeschaltet."
+
+#: templates/accounts/profile.html:45
 msgid "Signing in with email address and password is possible."
 msgstr "Die Anmeldung mit E-Mail-Adresse und Passwort ist möglich."
 
-#: templates/accounts/profile.html:44
+#: templates/accounts/profile.html:47
 msgid "No password set yet – so far you sign in via HiOrg only."
 msgstr ""
 "Noch kein Passwort festgelegt – du meldest dich bisher nur über HiOrg an."
 
-#: templates/accounts/profile.html:51
+#: templates/accounts/profile.html:54
 msgid "Set"
 msgstr "Festlegen"
 
-#: templates/accounts/profile.html:60
+#: templates/accounts/profile.html:63
 msgid "Linked with:"
 msgstr "Verknüpft mit:"
 
-#: templates/accounts/profile.html:63
+#: templates/accounts/profile.html:66
 msgid "Not linked. Once linked, you can also sign in with your HiOrg account."
 msgstr ""
 "Nicht verknüpft. Nach dem Verknüpfen kannst du dich auch mit deinem HiOrg-"
 "Konto anmelden."
 
-#: templates/accounts/profile.html:67 templates/accounts/profile.html:77
+#: templates/accounts/profile.html:70 templates/accounts/profile.html:80
 msgid "Manage"
 msgstr "Verwalten"
 
-#: templates/accounts/profile.html:67
+#: templates/accounts/profile.html:70
 msgid "Link"
 msgstr "Verknüpfen"
 
-#: templates/accounts/profile.html:74
+#: templates/accounts/profile.html:77
 msgid "Active (authenticator app)."
 msgstr "Aktiv (Authenticator-App)."
 
-#: templates/accounts/profile.html:74
+#: templates/accounts/profile.html:77
 msgid "Not set up."
 msgstr "Nicht eingerichtet."
 
-#: templates/accounts/profile.html:77
+#: templates/accounts/profile.html:80
 msgid "Set up"
 msgstr "Einrichten"
 
@@ -2073,6 +2105,10 @@ msgstr "Interne Konten"
 #, python-format
 msgid "%(DISPATCH_NAME)s and admins; they belong to no unit."
 msgstr "%(DISPATCH_NAME)s und Admins; sie gehören zu keiner Bereitschaft."
+
+#: templates/base.html:18
+msgid "Demo: emails are not sent; you find them under “Inbox”."
+msgstr "Demo: E-Mails werden nicht verschickt, du findest sie im „Postfach“."
 
 #: templates/billing/bank_account_form.html:9
 #, python-format
@@ -2426,7 +2462,12 @@ msgstr "Übersicht"
 msgid "My unit"
 msgstr "Meine Bereitschaft"
 
-#: templates/core/_navbar.html:68
+#: templates/core/_navbar.html:52 templates/demo/inbox.html:3
+#: templates/demo/inbox.html:6
+msgid "Inbox"
+msgstr "Postfach"
+
+#: templates/core/_navbar.html:73
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -2494,6 +2535,88 @@ msgstr "Dienst anlegen"
 #: templates/core/home.html:86
 msgid "Manage units"
 msgstr "Bereitschaften verwalten"
+
+#: templates/demo/inbox.html:9
+msgid "Mine"
+msgstr "Meine"
+
+#: templates/demo/inbox.html:10
+msgid "All"
+msgstr "Alle"
+
+#: templates/demo/inbox.html:16
+msgid "All emails the portal would have sent."
+msgstr "Alle E-Mails, die das Portal verschickt hätte."
+
+#: templates/demo/inbox.html:18
+#, python-format
+msgid ""
+"The emails you would have received at %(email)s. In this demo they are not "
+"sent."
+msgstr ""
+"Die E-Mails, die du an %(email)s bekommen hättest. In dieser Demo werden sie "
+"nicht verschickt."
+
+#: templates/demo/inbox.html:28 templates/demo/inbox_email.html:9
+msgid "Received"
+msgstr "Empfangen"
+
+#: templates/demo/inbox.html:29 templates/mailings/mailing_list.html:15
+msgid "Subject"
+msgstr "Betreff"
+
+#: templates/demo/inbox.html:30 templates/demo/inbox_email.html:13
+msgid "To"
+msgstr "An"
+
+#: templates/demo/inbox.html:48 templates/duties/duty_list.html:25
+#: templates/mailings/mailing_list.html:39
+msgid "Pages"
+msgstr "Seiten"
+
+#: templates/demo/inbox.html:51 templates/duties/duty_list.html:28
+#: templates/mailings/mailing_list.html:42
+msgid "Previous"
+msgstr "Zurück"
+
+#: templates/demo/inbox.html:53 templates/duties/duty_list.html:30
+#: templates/mailings/mailing_list.html:44
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Seite %(number)s von %(total)s"
+
+#: templates/demo/inbox.html:55 templates/duties/duty_list.html:32
+#: templates/mailings/mailing_list.html:46
+msgid "Next"
+msgstr "Weiter"
+
+#: templates/demo/inbox.html:61
+msgid "No emails yet."
+msgstr "Noch keine E-Mails."
+
+#: templates/demo/inbox_email.html:11
+msgid "From"
+msgstr "Von"
+
+#: templates/demo/inbox_email.html:16
+msgid "Cc"
+msgstr "Kopie an"
+
+#: templates/demo/inbox_email.html:20
+msgid "Bcc"
+msgstr "Blindkopie an"
+
+#: templates/demo/inbox_email.html:24
+msgid "Reply to"
+msgstr "Antwort an"
+
+#: templates/demo/inbox_email.html:28
+msgid "Attachments"
+msgstr "Anhänge"
+
+#: templates/demo/inbox_email.html:40
+msgid "Back to the inbox"
+msgstr "Zurück zum Postfach"
 
 #: templates/duties/_duty_table.html:6 templates/duties/duty_detail.html:74
 msgid "When"
@@ -2915,23 +3038,6 @@ msgstr "Qualifikationen"
 msgid "Past"
 msgstr "Vergangen"
 
-#: templates/duties/duty_list.html:25 templates/mailings/mailing_list.html:39
-msgid "Pages"
-msgstr "Seiten"
-
-#: templates/duties/duty_list.html:28 templates/mailings/mailing_list.html:42
-msgid "Previous"
-msgstr "Zurück"
-
-#: templates/duties/duty_list.html:30 templates/mailings/mailing_list.html:44
-#, python-format
-msgid "Page %(number)s of %(total)s"
-msgstr "Seite %(number)s von %(total)s"
-
-#: templates/duties/duty_list.html:32 templates/mailings/mailing_list.html:46
-msgid "Next"
-msgstr "Weiter"
-
 #: templates/duties/duty_list.html:38
 msgid "No past duties."
 msgstr "Keine vergangenen Dienste."
@@ -3308,10 +3414,6 @@ msgstr "Diese E-Mail jetzt senden?"
 #: templates/mailings/mailing_form.html:40
 msgid "Send"
 msgstr "Senden"
-
-#: templates/mailings/mailing_list.html:15
-msgid "Subject"
-msgstr "Betreff"
 
 #: templates/mailings/mailing_list.html:29
 #, python-format

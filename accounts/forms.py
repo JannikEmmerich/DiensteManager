@@ -1,3 +1,4 @@
+from allauth.account.forms import LoginForm as AllauthLoginForm
 from allauth.account.models import EmailAddress
 from django import forms
 from django.conf import settings
@@ -46,6 +47,14 @@ def clean_unit_selection(form, cleaned_data):
         form.add_error("units", _("Please select at least one unit."))
         return False
     return "units" in cleaned_data
+
+
+class LoginForm(AllauthLoginForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if settings.DEMO_MODE:
+            # No "Forgot your password?": passwords cannot be reset in demo mode.
+            self.fields["password"].help_text = ""
 
 
 class InvitationForm(forms.ModelForm):
