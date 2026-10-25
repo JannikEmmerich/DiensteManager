@@ -1,0 +1,70 @@
+{% load i18n %}
+{# Accounts with what the viewer may do: change the role, edit (admins), block. #}
+<div class="table-responsive mb-4">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>{% translate "Name" %}</th>
+                <th>{% translate "Email address" %}</th>
+                <th>{% translate "Role" %}</th>
+                <th>{% translate "Access" %}</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in accounts %}
+                {% with account=row.account %}
+                    <tr>
+                        <td>{{ account.get_full_name|default:"–" }}</td>
+                        <td>{{ account.email }}</td>
+                        <td>
+                            {% if row.can_change_role %}
+                                <form class="d-flex gap-1" method="post" action="{% url 'account_role' account.pk %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{{ request.path }}">
+                                    <label class="visually-hidden" for="role-{{ account.pk }}">{% blocktranslate with account=account %}Role of {{ account }}{% endblocktranslate %}</label>
+                                    <select class="form-select form-select-sm w-auto" id="role-{{ account.pk }}" name="role">
+                                        {% for value, label in role_choices %}
+                                            <option value="{{ value }}"{% if value == account.role %} selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit">{% translate "Change" %}</button>
+                                </form>
+                            {% else %}
+                                {{ account.get_role_display }}
+                            {% endif %}
+                            {% if account.is_superuser %}<span class="badge text-bg-secondary">{% translate "Admin" %}</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if account.is_active %}
+                                <span class="badge text-bg-success">{% translate "Active" %}</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">{% translate "Blocked" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex flex-wrap justify-content-end gap-1">
+                                {% if row.can_edit %}
+                                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'account_edit' account.pk %}">{% translate "Edit" %}</a>
+                                {% endif %}
+                                {% if row.can_block %}
+                                    <form method="post" action="{% url 'set_account_active' account.pk %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        {% if account.is_active %}
+                                            <input type="hidden" name="active" value="0">
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Block" %}</button>
+                                        {% else %}
+                                            <input type="hidden" name="active" value="1">
+                                            <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Unblock" %}</button>
+                                        {% endif %}
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
