@@ -148,6 +148,18 @@ def test_cancel_duty(client, dispatcher):
     assert client.get(reverse("duty_update", args=[duty.pk])).status_code == 302
 
 
+def test_started_duty_needs_confirmation_to_cancel(client, dispatcher):
+    duty = create_duty(starts_in=timedelta(days=-1))
+    client.force_login(dispatcher)
+    client.post(reverse("duty_cancel", args=[duty.pk]))
+    duty.refresh_from_db()
+    assert duty.status == Duty.Status.RELEASED
+    assert "already started" in client.get(duty.get_absolute_url()).text
+    client.post(reverse("duty_cancel", args=[duty.pk]), {"confirm_started": "1"})
+    duty.refresh_from_db()
+    assert duty.status == Duty.Status.CANCELLED
+
+
 # --- Who sees which duty? -----------------------------------------------------------------
 
 
