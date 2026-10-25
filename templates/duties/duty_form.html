@@ -38,59 +38,39 @@
                 {% include "core/_field.html" with field=form.description %}
                 <div class="row">
                     <div class="col-sm-6">{% include "core/_choice_list.html" with field=form.pay_type %}</div>
-                    <div class="col-sm-6">{% include "core/_field.html" with field=form.pay_rate %}</div>
+                    <div class="col-sm-6" data-hidden-if="pay_type=none">{% include "core/_field.html" with field=form.pay_rate %}</div>
                 </div>
-                <fieldset class="mb-3">
+                <fieldset class="mb-3" data-formset="{{ formset.prefix }}">
                     <legend class="form-label fs-6 mb-1">{% translate "Helpers needed" %}</legend>
                     <p class="form-text mt-0">
                         {% blocktranslate trimmed %}
-                            One row per qualification; units report each helper for one of these
-                            positions. Empty rows are ignored; after saving there is always one
-                            more.
+                            How many helpers with which qualification, e.g. 2 paramedics and 4 first
+                            aiders. When reporting, units choose one of these qualifications for each
+                            helper. Helpers with a higher qualification also fill places for those it
+                            counts as.
                         {% endblocktranslate %}
                         <a href="{% url 'qualification_list' %}">{% translate "Manage qualifications" %}</a>
                     </p>
                     {{ formset.management_form }}
                     {% for error in formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
-                    <div class="table-responsive">
-                        <table class="table table-sm align-top mb-0">
+                    <div class="table-responsive position-relative">
+                        <table class="table table-sm align-top mb-2">
                             <thead>
                                 <tr>
-                                    <th>{% translate "Qualification" %}</th>
                                     <th class="col-width-7">{{ formset.empty_form.count.label }}</th>
-                                    <th class="col-width-10">{% translate "Own rate in euros" %}</th>
-                                    {% if duty %}<th class="col-width-6">{% translate "Remove" %}</th>{% endif %}
+                                    <th>{% translate "Qualification" %}</th>
+                                    <th class="col-width-10" data-hidden-if="pay_type=none">{% translate "Own rate in euros" %}</th>
+                                    <th class="col-width-6">{% if duty %}{% translate "Remove" %}{% else %}<span class="visually-hidden">{% translate "Remove" %}</span>{% endif %}</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for position_form in formset %}
-                                    <tr>
-                                        <td>
-                                            {% for hidden in position_form.hidden_fields %}{{ hidden }}{% endfor %}
-                                            <label class="visually-hidden" for="{{ position_form.qualification.id_for_label }}">{% translate "Qualification" %}</label>
-                                            {{ position_form.qualification|bs_widget }}
-                                            {% for error in position_form.non_field_errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-                                            {% for error in position_form.qualification.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-                                        </td>
-                                        <td>
-                                            <label class="visually-hidden" for="{{ position_form.count.id_for_label }}">{{ formset.empty_form.count.label }}</label>
-                                            {{ position_form.count|bs_widget }}
-                                            {% for error in position_form.count.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-                                        </td>
-                                        <td>
-                                            <label class="visually-hidden" for="{{ position_form.pay_rate.id_for_label }}">{% translate "Own rate in euros" %}</label>
-                                            {{ position_form.pay_rate|bs_widget }}
-                                            {% for error in position_form.pay_rate.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
-                                        </td>
-                                        {% if duty %}
-                                            <td>{% if position_form.instance.pk %}<label class="visually-hidden" for="{{ position_form.DELETE.id_for_label }}">{% translate "Remove" %}</label>{{ position_form.DELETE|bs_widget }}{% endif %}</td>
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
+                            <tbody data-formset-rows>
+                                {% for position_form in formset %}{% include "duties/_position_row.html" %}{% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <div class="form-text">{% translate "The own rate is only used with duty pay; empty means the rate of the duty." %}</div>
+                    <template data-formset-template>{% include "duties/_position_row.html" with position_form=formset.empty_form %}</template>
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-formset-add hidden>+ {% translate "Add another qualification" %}</button>
+                    <div class="form-text" data-hidden-if="pay_type=none">{% translate "The own rate is only used with duty pay; empty means the rate of the duty." %}</div>
                 </fieldset>
                 {% include "core/_choice_list.html" with field=form.all_units %}
                 {% include "core/_choice_list.html" with field=form.units %}

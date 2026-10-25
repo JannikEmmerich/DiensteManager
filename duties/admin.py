@@ -5,7 +5,7 @@ from .models import Duty, DutyPosition, Qualification, Report
 
 @admin.register(Qualification)
 class QualificationAdmin(admin.ModelAdmin):
-    list_display = ["name", "abbreviation", "sort_order", "is_active"]
+    list_display = ["name", "abbreviation", "includes", "sort_order", "is_active"]
     list_editable = ["sort_order", "is_active"]
     search_fields = ["name", "abbreviation"]
 

@@ -157,8 +157,7 @@
                     <tr>
                         {% if can.manage_duties %}<th>{% translate "Unit" %}</th>{% endif %}
                         <th>{% translate "Name" %}</th>
-                        {% if show_positions %}<th>{% translate "Position" %}</th>{% endif %}
-                        <th>{% translate "Qualification" %}</th>
+                        {% if show_qualifications %}<th>{% translate "Qualification" %}</th>{% endif %}
                         <th>{% translate "Note" %}</th>
                         <th>{% translate "Status" %}</th>
                         <th>{% translate "Reported by" %}</th>
@@ -171,8 +170,7 @@
                             <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
                                 {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
                                 <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
-                                {% if show_positions %}<td class="small">{{ report.position.label|default:"–" }}</td>{% endif %}
-                                <td>{{ report.qualification|default:"–" }}</td>
+                                {% if show_qualifications %}<td>{{ report.qualification_label|default:"–" }}</td>{% endif %}
                                 <td class="small">{{ report.note|default:"–" }}</td>
                                 <td>
                                     <span class="badge {% if report.status == 'confirmed' %}text-bg-success{% elif report.status == 'reported' %}text-bg-warning{% elif report.status == 'declined' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ report.get_status_display }}</span>

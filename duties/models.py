@@ -12,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
 
+from . import staffing
+
 CENT = Decimal("0.01")
 
 
@@ -27,6 +29,17 @@ class Qualification(models.Model):
         _("active"),
         default=True,
         help_text=_("Inactive qualifications cannot be chosen for new positions any more."),
+    )
+    # Helpers with this qualification also fill positions for the one it includes, and
+    # for the one that one includes, and so on (see duties.staffing).
+    includes = models.ForeignKey(
+        "self",
+        verbose_name=_("also counts as"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="included_by",
+        help_text=_("E.g. paramedics also count as first aiders."),
     )
 
     class Meta:
@@ -234,6 +247,18 @@ class Duty(models.Model):
             return rate
         return Decimal(0)
 
+    def positions_with_staffing(self):
+        """The positions with the number of confirmed and pending helpers who fill them.
+
+        Helpers also fill positions whose qualification theirs includes (see
+        duties.staffing).
+        """
+        positions = list(self.positions.select_related("qualification"))
+        reports = self.reports.filter(status__in=Report.ACTIVE).values_list("position", "status")
+        includes = dict(Qualification.objects.values_list("pk", "includes"))
+        staffing.count(positions, list(reports), includes)
+        return positions
+
     def update_helpers_needed(self):
         """``helpers_needed`` is the sum of the positions."""
         total = self.positions.aggregate(total=Sum("count"))["total"] or 0
@@ -304,6 +329,14 @@ class DutyPosition(models.Model):
     def rate(self):
         return self.duty.pay_rate if self.pay_rate is None else self.pay_rate
 
+    @property
+    def open_count(self):
+        """Helpers still missing besides the confirmed and pending ones.
+
+        Only for positions from ``Duty.positions_with_staffing()``.
+        """
+        return max(self.count - self.confirmed_count - self.pending_count, 0)
+
 
 class Report(models.Model):
     """A helper whom a unit reports for a duty; the dispatchers confirm or decline."""
@@ -332,6 +365,8 @@ class Report(models.Model):
         related_name="reports",
     )
     name = models.CharField(_("name"), max_length=150)
+    # What units entered as free text before they reported helpers for a position; no
+    # longer asked for. The position says which qualification the helper is reported for.
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
     note = models.CharField(_("note"), max_length=500, blank=True)
     status = models.CharField(
@@ -405,6 +440,16 @@ class Report(models.Model):
 
     def pay_for(self, hours=None):
         return self.duty.pay_for(hours, self.pay_rate)
+
+    @property
+    def qualification_label(self):
+        """The qualification of the position, or "any qualification".
+
+        Older reports may have what the unit entered as free text instead.
+        """
+        if self.position_id and (self.position.qualification_id or not self.qualification):
+            return self.position.label
+        return self.qualification
 
     @property
     def withdrawal_requested(self):

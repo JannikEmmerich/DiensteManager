@@ -2,9 +2,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
-from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
@@ -71,12 +69,9 @@ def duty_detail(request, pk):
             "duty", "unit", "reported_by", "withdrawal_requested_by", "position__qualification"
         )
     ]
-    positions = list(
-        duty.positions.select_related("qualification").annotate(
-            confirmed_count=Count("reports", filter=Q(reports__status=Report.Status.CONFIRMED)),
-            pending_count=Count("reports", filter=Q(reports__status=Report.Status.REPORTED)),
-        )
-    )
+    positions = list(duty.positions_with_staffing())
+    # A single position "any qualification" needs no breakdown.
+    show_positions = len(positions) > 1 or any(p.qualification_id for p in positions)
     return render(
         request,
         "duties/duty_detail.html",
@@ -84,8 +79,10 @@ def duty_detail(request, pk):
             "duty": duty,
             "reports": reports,
             "positions": positions,
-            # A single position "any qualification" needs no breakdown.
-            "show_positions": len(positions) > 1 or any(p.qualification_id for p in positions),
+            "show_positions": show_positions,
+            # Older reports may have a qualification entered as free text.
+            "show_qualifications": show_positions
+            or any(row["report"].qualification for row in reports),
             "can_report": permissions.can_report(request.user, duty),
             # The history names helpers of all units, so only dispatchers see it.
             "history": history.entries(history.scope_for_duty(duty.pk))
@@ -274,8 +271,6 @@ def report_create(request, pk):
                 % {"count": len(reports)},
             )
             notifications.helpers_reported(request, duty, unit, reports)
-            if "another" in request.POST:
-                return redirect("report_create", pk=duty.pk)
             return redirect(duty)
     return render(request, "duties/report_form.html", {"duty": duty, "formset": formset})
 
@@ -315,8 +310,6 @@ def report_add(request, pk):
                 % {"count": len(reports)},
             )
             notifications.helpers_added(request, duty, unit, reports)
-            if "another" in request.POST:
-                return redirect(f"{reverse('report_add', args=[duty.pk])}?unit={unit.pk}")
             return redirect(duty)
     return render(
         request,
@@ -530,7 +523,9 @@ def report_decide(request, pk, decision):
 def report_confirm_all(request, pk):
     _dispatcher_only(request)
     duty = get_object_or_404(Duty, pk=pk, status=Duty.Status.RELEASED)
-    pending = duty.reports.filter(status=Report.Status.REPORTED).select_related("unit")
+    pending = duty.reports.filter(status=Report.Status.REPORTED).select_related(
+        "unit", "position__qualification"
+    )
     reports = _decide(request, list(pending), Report.Status.CONFIRMED)
     if reports:
         notifications.reports_decided(request, duty, reports)
