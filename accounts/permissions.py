@@ -12,8 +12,8 @@
 Accounts of the roles in MFA_REQUIRED_ROLES (default: dispatchers and admins) must use
 two-factor authentication.
 
-In demo mode (DEMO_MODE), only admins invite, change email addresses and passwords and
-use two-factor authentication.
+In demo mode (DEMO_MODE), only admins change email addresses and passwords and use
+two-factor authentication. Nobody invites; admins add accounts directly instead.
 """
 
 from django.conf import settings
@@ -44,7 +44,7 @@ def is_unit_lead(user):
 
 
 def invitable_roles(user):
-    if not user.is_authenticated or demo_restricted(user):
+    if not user.is_authenticated or settings.DEMO_MODE:
         return []
     if user.is_superuser:
         return [Role.DISPATCHER, Role.UNIT_LEAD, Role.MEMBER]
@@ -55,6 +55,11 @@ def invitable_roles(user):
 
 def can_invite(user):
     return bool(invitable_roles(user))
+
+
+def can_add_accounts(user):
+    """In demo mode, admins add accounts with a password instead of inviting."""
+    return settings.DEMO_MODE and user.is_authenticated and user.is_superuser
 
 
 def invitable_units(user):
@@ -75,7 +80,7 @@ def visible_invitations(user):
 
 def can_manage_invitation(user, invitation):
     """Resend or revoke."""
-    if demo_restricted(user):
+    if settings.DEMO_MODE:
         return False
     if invitation.role == Role.DISPATCHER:
         return user.is_authenticated and user.is_superuser

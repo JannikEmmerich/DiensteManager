@@ -17,4 +17,5 @@ urlpatterns = [
     path("users/<int:pk>/active/", views.set_account_active, name="set_account_active"),
     path("users/<int:pk>/role/", views.account_role, name="account_role"),
     path("users/<int:pk>/edit/", views.account_edit, name="account_edit"),
+    path("users/new/", views.account_create, name="account_create"),
 ]

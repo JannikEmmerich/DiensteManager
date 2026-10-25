@@ -4,6 +4,7 @@ and passwords, use two-factor authentication and create accounts."""
 from datetime import timedelta
 
 import pytest
+from allauth.account.models import EmailAddress
 from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret
 from django.core import mail
 from django.urls import reverse
@@ -83,7 +84,8 @@ def test_inbox_only_in_demo_mode(client, member):
 def test_inbox_and_banner_in_demo_mode(client, demo, member):
     assert "Demo: emails are not sent" in client.get(reverse("account_login")).text
     client.force_login(member)
-    assert reverse("demo_inbox") in client.get(reverse("home")).text
+    page = client.get(reverse("home")).text
+    assert f'<a href="{reverse("demo_inbox")}">inbox</a>' in page  # in the strip
 
 
 def test_old_demo_emails_are_deleted(demo, settings, member):
@@ -154,22 +156,70 @@ def test_admins_keep_two_factor_authentication(client, demo, settings, admin):
 # --- New accounts ------------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("account", ["dispatcher", "unit_lead"])
-def test_only_admins_invite(client, demo, request, account):
+@pytest.mark.parametrize("account", ["admin", "dispatcher", "unit_lead"])
+def test_nobody_invites(client, demo, request, account):
     client.force_login(request.getfixturevalue(account))
     assert client.get(reverse("invitation_create")).status_code == 403
     assert reverse("invitation_list") not in client.get(reverse("home")).text
 
 
-def test_admin_invites_and_the_link_is_in_the_inbox(client, demo, admin, unit):
+def _account_data(**data):
+    return {
+        "first_name": "Erin",
+        "last_name": "Example",
+        "email": "Erin@Example.org",
+        "role": Role.MEMBER,
+        "language": "de",
+        "notify_new_duties": "on",
+        "notify_reports": "on",
+        "password1": "a-long-demo-pass",
+        "password2": "a-long-demo-pass",
+        **data,
+    }
+
+
+def test_admins_add_accounts_with_a_password(client, demo, admin, unit):
     client.force_login(admin)
-    client.post(
-        reverse("invitation_create"),
-        {"email": "new@example.org", "role": Role.MEMBER, "unit": unit.pk, "language": "en"},
+    page = client.get(reverse("unit_detail", args=[unit.pk])).text
+    assert f"{reverse('account_create')}?unit={unit.pk}" in page
+    assert "Open invitations" not in page
+    page = client.get(reverse("account_create") + f"?unit={unit.pk}").text
+    assert f'<option value="{unit.pk}" selected>' in page
+    response = client.post(reverse("account_create"), _account_data(unit=unit.pk))
+    assert response["Location"] == unit.get_absolute_url()
+    erin = User.objects.get(email="erin@example.org")
+    assert (erin.role, erin.unit, erin.language) == (Role.MEMBER, unit, "de")
+    assert EmailAddress.objects.filter(user=erin, primary=True, verified=True).exists()
+    assert not DemoEmail.objects.exists()
+    # She signs in right away.
+    client.logout()
+    response = client.post(
+        reverse("account_login"), {"login": erin.email, "password": "a-long-demo-pass"}
     )
-    email = DemoEmail.objects.get()
-    assert email.to == ["new@example.org"]
-    assert "/invitation/" in email.body
+    assert response["Location"] == reverse("home")
+
+
+def test_internal_accounts_and_wrong_input(client, demo, admin, unit):
+    client.force_login(admin)
+    assert reverse("account_create") in client.get(reverse("unit_list")).text
+    response = client.post(reverse("account_create"), _account_data(password2="something-else"))
+    assert response.status_code == 200 and not User.objects.filter(email="erin@example.org")
+    client.post(reverse("account_create"), _account_data(role=Role.DISPATCHER, unit=unit.pk))
+    erin = User.objects.get(email="erin@example.org")
+    assert (erin.role, erin.unit) == (Role.DISPATCHER, None)
+
+
+@pytest.mark.parametrize("account", ["dispatcher", "unit_lead"])
+def test_only_admins_add_accounts(client, demo, request, account):
+    client.force_login(request.getfixturevalue(account))
+    assert client.get(reverse("account_create")).status_code == 403
+    assert reverse("account_create") not in client.get(reverse("home")).text
+
+
+def test_accounts_are_only_added_in_demo_mode(client, admin):
+    client.force_login(admin)
+    assert client.get(reverse("account_create")).status_code == 403
+    assert reverse("invitation_create") in client.get(reverse("home")).text
 
 
 def test_only_invitations_of_admins_create_accounts(client, demo, admin, unit_lead, unit):

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Add account" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="h3 mb-1">{% translate "Add account" %}</h1>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed %}
+                    In the demo no invitations are sent: the account can sign in with this email
+                    address and password right away.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                {% for field in form.personal_fields %}
+                    {% if field.name == "unit" %}
+                        <div data-hidden-if="role=dispatcher">{% include "core/_field.html" %}</div>
+                    {% else %}
+                        {% include "core/_field.html" %}
+                    {% endif %}
+                {% endfor %}
+                {% for field in form.password_fields %}
+                    {% include "core/_field.html" %}
+                {% endfor %}
+                <h2 class="h5 mt-4">{% translate "Email notifications" %}</h2>
+                {% for field in form.notification_fields %}
+                    {% include "core/_field.html" %}
+                {% endfor %}
+                <button class="btn btn-primary" type="submit">{% translate "Add account" %}</button>
+                <a class="btn btn-link" href="{% if unit %}{{ unit.get_absolute_url }}{% else %}{% url 'unit_list' %}{% endif %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

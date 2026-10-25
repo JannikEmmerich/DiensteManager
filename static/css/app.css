@@ -78,6 +78,16 @@ body {
     font-weight: 600;
 }
 
+/* Dispatchers and admins have many items: they wrap onto a second line instead of
+   pushing the account menu off the screen, and no item breaks within its name. */
+.app-navbar .navbar-nav {
+    flex-wrap: wrap;
+}
+
+.app-navbar .nav-link {
+    white-space: nowrap;
+}
+
 /* Buttons */
 .btn-primary {
     --bs-btn-bg: var(--drk-red);

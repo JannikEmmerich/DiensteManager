@@ -15,7 +15,12 @@
     {% include "core/_navbar.html" %}
     {% if DEMO_MODE %}
         <div class="demo-banner text-center small py-1">
-            {% translate "Demo: emails are not sent; you find them under “Inbox”." %}
+            {% if user.is_authenticated %}
+                {% url 'demo_inbox' as inbox_url %}
+                {% blocktranslate trimmed %}Demo: emails are not sent; you find them in your <a href="{{ inbox_url }}">inbox</a>.{% endblocktranslate %}
+            {% else %}
+                {% translate "Demo: emails are not sent; you find them under “Inbox”." %}
+            {% endif %}
         </div>
     {% endif %}
     <main class="container py-4">

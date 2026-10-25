@@ -26,7 +26,12 @@
         <p class="text-body-secondary">{% translate "No units yet." %}</p>
     {% endif %}
 
-    <h2 class="h5 mt-4">{% translate "Internal accounts" %}</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 mb-2">
+        <h2 class="h5 mb-0">{% translate "Internal accounts" %}</h2>
+        {% if can.add_accounts %}
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'account_create' %}">{% translate "Add account" %}</a>
+        {% endif %}
+    </div>
     <p class="text-body-secondary">{% blocktranslate %}{{ DISPATCH_NAME }} and admins; they belong to no unit.{% endblocktranslate %}</p>
     {% include "accounts/_account_table.html" %}
 {% endblock content %}
