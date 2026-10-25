@@ -1,0 +1,21 @@
+# Optional: without Caddy, behind your own reverse proxy or tunnel (e.g. cloudflared)
+# that terminates HTTPS. Switch it on with this line in .env:
+#   COMPOSE_FILE=compose.yaml:compose.tunnel.yaml
+# The app then listens on 127.0.0.1:8080 of this machine (WEB_PORT); see "Without
+# Caddy" in the README.
+
+services:
+  web:
+    ports:
+      # Only on this machine by default: the app trusts the X-Forwarded-Proto and
+      # CF-Connecting-IP headers, which only the proxy may set.
+      - "${WEB_PORT:-127.0.0.1:8080}:8000"
+    environment:
+      # The visitor's address for the sign-in rate limits, as sent by the proxy.
+      # Cloudflare sends CF-Connecting-IP; for other proxies set it to e.g. X-Real-IP,
+      # or to an empty value to use X-Forwarded-For (ALLAUTH_TRUSTED_PROXY_COUNT).
+      ALLAUTH_TRUSTED_CLIENT_IP_HEADER: ${ALLAUTH_TRUSTED_CLIENT_IP_HEADER-CF-Connecting-IP}
+
+  caddy:
+    # Not started: the proxy or tunnel takes its place.
+    profiles: [caddy]

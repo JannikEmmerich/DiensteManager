@@ -9,6 +9,13 @@ All notable changes are listed here. The format follows
 
 ### Added
 
+- Running without Caddy behind your own reverse proxy or a Cloudflare Tunnel:
+  `COMPOSE_FILE=compose.yaml:compose.tunnel.yaml` in `.env` serves the app on
+  `127.0.0.1:8080`; the client IP for the sign-in rate limits comes from
+  `CF-Connecting-IP` (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER`).
+
+### Added
+
 - Optional report deadline per duty: afterwards units can no longer report helpers or
   withdraw reports themselves (#24).
 - Requests to withdraw: units ask the dispatchers to withdraw a confirmed report (or any

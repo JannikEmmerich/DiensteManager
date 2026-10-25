@@ -1,4 +1,5 @@
 import pytest
+from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailAddress
 from django.urls import reverse
 
@@ -105,3 +106,15 @@ def test_blocked_account_is_signed_out(client, member):
     response = client.get(reverse("home"))
     assert response.status_code == 302
     assert response["Location"].startswith(reverse("account_login"))
+
+
+def test_behind_a_cloudflare_tunnel(client, settings, db, rf):
+    """compose.tunnel.yaml: HTTPS ends at Cloudflare, which passes protocol and client IP."""
+    settings.SECURE_SSL_REDIRECT = True
+    settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "CF-Connecting-IP"
+    headers = {"HTTP_X_FORWARDED_PROTO": "https", "HTTP_CF_CONNECTING_IP": "203.0.113.7"}
+    assert client.get(reverse("account_login"), **headers).status_code == 200
+    # Plain HTTP (no proxy in between) is sent to HTTPS.
+    assert client.get(reverse("account_login")).status_code == 301
+    # The sign-in rate limits count per visitor, not per tunnel.
+    assert get_adapter().get_client_ip(rf.get("/", **headers)) == "203.0.113.7"

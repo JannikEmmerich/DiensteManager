@@ -217,6 +217,9 @@ if set(MFA_REQUIRED_ROLES) - {"dispatcher", "unit_lead", "member"}:
 # Number of trusted reverse proxies in front of the app (Caddy: 1), so that allauth
 # uses the real client IP for its rate limits.
 ALLAUTH_TRUSTED_PROXY_COUNT = env.int("ALLAUTH_TRUSTED_PROXY_COUNT", default=0)
+# Or a header in which the proxy passes the client IP, e.g. CF-Connecting-IP behind a
+# Cloudflare Tunnel (compose.tunnel.yaml); it takes precedence over the count.
+ALLAUTH_TRUSTED_CLIENT_IP_HEADER = env("ALLAUTH_TRUSTED_CLIENT_IP_HEADER", default="") or None
 
 INVITATION_VALIDITY_DAYS = env.int("INVITATION_VALIDITY_DAYS", default=14)
 
