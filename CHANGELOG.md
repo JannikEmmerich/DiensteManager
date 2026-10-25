@@ -7,6 +7,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] – 2026-10-25
+
+When updating from 0.1.0: admins and dispatchers have to set up two-factor
+authentication (an authenticator app) the next time they sign in.
+
 ### Added
 
 - Duties: entered by dispatchers, released before the units see them, offered to all
@@ -18,7 +23,7 @@ All notable changes are listed here. The format follows
   bank details of the units, billing with numbered PDF statements, and helpers entered
   by dispatchers.
 - Change history of duties, reports, billings and bank accounts; an email to the unit
-  leads when the bank details change.
+  leads and the dispatchers when the bank details change.
 - Retention periods: old helper data is anonymised and old history, emails,
   invitations and billings are deleted daily (`apply_retention`, `worker` container).
 - Staffing needs per qualification: a duty lists its positions (e.g. 2 × paramedic,
@@ -32,9 +37,18 @@ All notable changes are listed here. The format follows
 - Version number in the page footer, CI with tests on SQLite and PostgreSQL, Docker
   images in the GitHub Container Registry, GitHub releases for version tags, weekly
   clean-up of old images and Dependabot.
+- `uv.lock` pins the exact versions of all Python packages for CI and the Docker image.
+
+### Changed
+
+- The pages of the sign-in and of two-factor authentication and their emails say "du"
+  like the rest of the portal.
 
 ### Security
 
+- Two-factor authentication is mandatory for admins and dispatchers
+  (`MFA_REQUIRED_ROLES`): without it they are sent to its setup after signing in, and
+  they cannot switch it off.
 - Content Security Policy: the pages only load scripts, styles and images from the
   portal itself and run no inline scripts, which blocks injected code even if text
   were ever output unescaped.
