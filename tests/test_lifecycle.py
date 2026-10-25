@@ -238,9 +238,44 @@ def test_billable_reports_wait_for_their_billing(dispatcher, unit):
     report = create_report(duty, unit, name="Unbilled", status=Report.Status.CONFIRMED)
     assert retention.apply()["reports_anonymised"] == 0
     billing = services.create_billing(unit, [(report, None)], "", dispatcher)
+    services.change_status(billing, Billing.Status.PAID, "paid_at")
     assert retention.apply()["reports_anonymised"] == 1
     # The billing keeps its own copy of the name.
     assert billing.items.get().helper_name == "Unbilled"
+
+
+def test_helpers_in_open_billings_are_kept(dispatcher, unit):
+    duty = create_duty(
+        starts_in=timedelta(days=-400), pay_type=Duty.PayType.FLAT, pay_rate=Decimal("40")
+    )
+    report = create_report(duty, unit, name="Hanna", status=Report.Status.CONFIRMED)
+    billing = services.create_billing(unit, [(report, None)], "", dispatcher)
+    assert retention.apply()["reports_anonymised"] == 0
+    # Cancelling the billing makes the helper billable again – still with a name.
+    services.change_status(billing, Billing.Status.CANCELLED, "cancelled_at")
+    assert [r.name for r in services.billable_reports(unit)] == ["Hanna"]
+
+
+def test_anonymised_helpers_are_never_billed(unit):
+    duty = create_duty(starts_in=timedelta(days=-400))
+    create_report(duty, unit, name="Hanna", status=Report.Status.CONFIRMED)
+    assert retention.apply()["reports_anonymised"] == 1
+    # Duty pay added afterwards: there is nobody to bill any more.
+    Duty.objects.filter(pk=duty.pk).update(pay_type=Duty.PayType.FLAT, pay_rate=Decimal("40"))
+    assert not services.billable_reports(unit).exists()
+
+
+def test_helpers_of_deleted_billings_are_not_billed_again(settings, dispatcher, unit):
+    settings.RETENTION_REPORTS_DAYS = 0  # the helpers keep their names
+    duty = create_duty(
+        starts_in=timedelta(days=-11 * 366), pay_type=Duty.PayType.FLAT, pay_rate=Decimal("40")
+    )
+    report = create_report(duty, unit, name="Hanna", status=Report.Status.CONFIRMED)
+    billing = services.create_billing(unit, [(report, None)], "", dispatcher)
+    services.change_status(billing, Billing.Status.PAID, "paid_at")
+    Billing.objects.filter(pk=billing.pk).update(year=timezone.localdate(duty.starts_at).year)
+    assert retention.apply()["billings_deleted"] == 1
+    assert not services.billable_reports(unit).exists()
 
 
 def test_anonymised_reports_are_shown_as_such(client, dispatcher, unit):

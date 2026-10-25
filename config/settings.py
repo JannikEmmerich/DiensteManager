@@ -10,6 +10,7 @@ from pathlib import Path
 import environ
 from django.contrib.messages import constants as message_constants
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.csp import CSP
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "core.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -99,6 +101,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # The CSP nonce, e.g. for the <style> element of the admin's change lists.
+                "django.template.context_processors.csp",
                 "core.context_processors.site",
             ],
         },
@@ -279,6 +283,20 @@ MESSAGE_TAGS = {message_constants.ERROR: "danger"}
 
 
 # --- Security in production (behind the HTTPS reverse proxy) ------------------------------
+
+# Content Security Policy, also during development so that violations show up early:
+# scripts, styles, fonts and requests only from this site, no inline scripts or style
+# attributes (see static/js/app.js), no embedding in other sites. Images may also be
+# data: URIs (the QR code for two-factor authentication).
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "script-src": [CSP.SELF],
+    "style-src": [CSP.SELF, CSP.NONCE],
+    "img-src": [CSP.SELF, "data:"],
+    "object-src": [CSP.NONE],
+    "base-uri": [CSP.NONE],
+    "frame-ancestors": [CSP.NONE],
+}
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

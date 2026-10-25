@@ -206,3 +206,20 @@ body {
 .card-body textarea.font-monospace {
     min-height: 12rem;
 }
+
+/* Fixed column widths (inline style attributes are forbidden by the Content Security Policy). */
+.col-width-6 {
+    width: 6rem;
+}
+
+.col-width-7 {
+    width: 7rem;
+}
+
+.col-width-9 {
+    width: 9rem;
+}
+
+.col-width-10 {
+    width: 10rem;
+}

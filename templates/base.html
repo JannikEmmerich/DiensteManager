@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#e60005">
+    {# htmx would add a <style> element for its loading indicators, which the CSP forbids. #}
+    <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
     <title>{% block head_title %}{% endblock head_title %} · {{ SITE_NAME }}</title>
     <link rel="stylesheet" href="{% static 'vendor/bootstrap-5.3.8/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
@@ -22,6 +24,7 @@
     {% endif %}
     <script src="{% static 'vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'vendor/htmx-2.0.11/htmx.min.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
     {% block extra_body %}{% endblock extra_body %}
 </body>
 </html>

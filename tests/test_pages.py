@@ -1,5 +1,6 @@
 """Smoke test: every page renders without template errors."""
 
+import re
 from datetime import timedelta
 from decimal import Decimal
 
@@ -138,3 +139,67 @@ def test_billing_pages_render(client, dispatcher, unit_lead, unit):
             reverse("home"),
         ]:
             assert client.get(url).status_code == 200, (user, url)
+
+
+# --- Content Security Policy ----------------------------------------------------------------
+
+INLINE_SCRIPT = re.compile(r"<script(?![^>]*\ssrc=)(?![^>]*type=\"application/json\")[^>]*>")
+EVENT_HANDLER = re.compile(r"<[^>]+\son[a-z]+=", re.IGNORECASE)
+STYLE_ATTRIBUTE = re.compile(r"<[^>]+\sstyle=", re.IGNORECASE)
+STYLE_WITHOUT_NONCE = re.compile(r"<style(?![^>]*\snonce=)[^>]*>")
+
+
+def _assert_csp_compatible(response, url):
+    assert "script-src 'self'" in response["Content-Security-Policy"], url
+    html = response.text
+    for pattern in (INLINE_SCRIPT, EVENT_HANDLER, STYLE_ATTRIBUTE, STYLE_WITHOUT_NONCE):
+        match = pattern.search(html)
+        assert match is None, (url, match and match.group(0))
+
+
+def test_pages_work_with_the_content_security_policy(client, admin, unit_lead, unit):
+    duty = create_duty(
+        starts_in=timedelta(days=-2), pay_type=Duty.PayType.HOURLY, pay_rate=Decimal("12")
+    )
+    report = create_report(duty, unit, status=Report.Status.CONFIRMED)
+    billing = services.create_billing(unit, [(report, Decimal(4))], "", admin)
+    open_duty = create_duty()
+    create_report(open_duty, unit, name="Open", reported_by=unit_lead)
+    create_report(open_duty, unit, name="Other", status=Report.Status.CONFIRMED)
+    pages = {
+        admin: [
+            reverse("home"),
+            reverse("duty_create"),
+            reverse("duty_update", args=[open_duty.pk]),
+            open_duty.get_absolute_url(),
+            create_duty(status=Duty.Status.DRAFT).get_absolute_url(),
+            reverse("billing_create", args=[unit.pk]),
+            billing.get_absolute_url(),
+            reverse("unit_pay", args=[unit.pk]),
+            reverse("mailing_create"),
+            reverse("invitation_list"),
+            reverse("mfa_index"),
+            reverse("account_reauthenticate"),
+            reverse("admin:index"),
+            reverse("admin:accounts_user_changelist"),
+            reverse("admin:accounts_user_change", args=[unit_lead.pk]),
+        ],
+        unit_lead: [open_duty.get_absolute_url(), reverse("report_create", args=[open_duty.pk])],
+        None: [reverse("account_login"), reverse("account_reset_password")],
+    }
+    for user, urls in pages.items():
+        client.logout()
+        if user:
+            client.force_login(user)
+        for url in urls:
+            response = client.get(url)
+            assert response.status_code == 200, url
+            _assert_csp_compatible(response, url)
+
+
+def test_confirmation_questions_are_escaped(client, unit_lead, unit):
+    duty = create_duty()
+    create_report(duty, unit, name='Ann "A" <b>', reported_by=unit_lead)
+    client.force_login(unit_lead)
+    page = client.get(duty.get_absolute_url()).text
+    assert 'data-confirm="Withdraw the report for Ann &quot;A&quot; &lt;b&gt;?"' in page

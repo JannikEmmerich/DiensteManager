@@ -34,7 +34,7 @@ def _initial(request):
     initial = {}
     duty_id = request.GET.get("duty", "")
     unit_id = request.GET.get("unit", "")
-    if duty_id.isdigit():
+    if duty_id.isdecimal():
         duty = Duty.objects.exclude(status=Duty.Status.DRAFT).filter(pk=duty_id).first()
         if duty is not None:
             initial.update(duty=duty, subject=duty.title)
@@ -46,7 +46,7 @@ def _initial(request):
                 units = duty.units.all()
             if units:
                 initial.update(all_units="False", units=list(units))
-    elif unit_id.isdigit():
+    elif unit_id.isdecimal():
         initial.update(all_units="False", units=Unit.objects.filter(pk=unit_id))
     return initial
 
@@ -113,7 +113,7 @@ def mailing_create(request):
             messages.success(request, text % {"count": len(recipients)})
             return redirect(mailing)
     duty_id = str(form["duty"].value() or "")
-    duty = form.fields["duty"].queryset.filter(pk=duty_id).first() if duty_id.isdigit() else None
+    duty = form.fields["duty"].queryset.filter(pk=duty_id).first() if duty_id.isdecimal() else None
     return render(request, "mailings/mailing_form.html", {"form": form, "duty": duty})
 
 

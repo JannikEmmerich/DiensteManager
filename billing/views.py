@@ -44,7 +44,7 @@ def unit_pay(request, pk):
     unit = _unit_for_pay(request, pk)
     years = services.unit_pay_years(unit)
     year = request.GET.get("year", "")
-    year = int(year) if year.isdigit() and int(year) in years else timezone.localdate().year
+    year = int(year) if year.isdecimal() and int(year) in years else timezone.localdate().year
     lines = services.unit_pay_lines(unit, year)
     totals = dict.fromkeys(PayLine.STATES, Decimal(0))
     for line in lines:

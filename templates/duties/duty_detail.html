@@ -24,18 +24,18 @@
                     {% else %}
                         {% translate "Release this duty? The selected units will be notified by email." as confirm_text %}
                     {% endif %}
-                    <form method="post" action="{% url 'duty_release' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                    <form method="post" action="{% url 'duty_release' duty.pk %}" data-confirm="{{ confirm_text }}">
                         {% csrf_token %}
                         <button class="btn btn-primary" type="submit">{% translate "Release" %}</button>
                     </form>
                     {% translate "Delete this draft?" as confirm_text %}
-                    <form method="post" action="{% url 'duty_delete' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                    <form method="post" action="{% url 'duty_delete' duty.pk %}" data-confirm="{{ confirm_text }}">
                         {% csrf_token %}
                         <button class="btn btn-outline-danger" type="submit">{% translate "Delete" %}</button>
                     </form>
                 {% elif duty.status == "released" %}
                     {% translate "Cancel this duty? Units with reported helpers will be notified by email." as confirm_text %}
-                    <form method="post" action="{% url 'duty_cancel' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                    <form method="post" action="{% url 'duty_cancel' duty.pk %}" data-confirm="{{ confirm_text }}">
                         {% csrf_token %}
                         <button class="btn btn-outline-danger" type="submit">{% translate "Cancel duty" %}</button>
                     </form>
@@ -183,7 +183,7 @@
                                     {% endif %}
                                     {% if can_withdraw %}
                                         {% blocktranslate trimmed with name=report.name asvar confirm_text %}Withdraw the report for {{ name }}?{% endblocktranslate %}
-                                        <form method="post" action="{% url 'report_withdraw' report.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                                        <form method="post" action="{% url 'report_withdraw' report.pk %}" data-confirm="{{ confirm_text }}">
                                             {% csrf_token %}
                                             <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Withdraw" %}</button>
                                         </form>

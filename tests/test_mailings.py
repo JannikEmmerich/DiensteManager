@@ -184,6 +184,13 @@ def test_email_to_a_unit_is_prefilled(client, dispatcher, unit):
     assert response.context["form"]["units"].value() == [unit.pk]
 
 
+@pytest.mark.parametrize("parameter", ["duty", "unit"])
+def test_odd_ids_are_ignored(client, dispatcher, parameter):
+    client.force_login(dispatcher)
+    # "²" counts as a digit for str.isdigit(), but int() rejects it.
+    assert client.get(reverse("mailing_create"), {parameter: "²"}).status_code == 200
+
+
 def test_recipient_count(client, dispatcher, unit, unit_lead, member, other_unit_lead):
     client.force_login(dispatcher)
     url = reverse("mailing_recipients")

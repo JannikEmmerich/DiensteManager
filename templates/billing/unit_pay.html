@@ -10,7 +10,7 @@
             {% endif %}
             <form method="get" class="d-flex align-items-center gap-2">
                 <label class="visually-hidden" for="year">{% translate "Year" %}</label>
-                <select class="form-select" id="year" name="year" onchange="this.form.submit()">
+                <select class="form-select" id="year" name="year" data-submit-on-change>
                     {% for option in years %}<option value="{{ option }}"{% if option == year %} selected{% endif %}>{{ option }}</option>{% endfor %}
                 </select>
                 <noscript><button class="btn btn-outline-secondary" type="submit">{% translate "Show" %}</button></noscript>

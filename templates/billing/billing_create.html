@@ -39,7 +39,7 @@
                             <th>{% translate "Duty" %}</th>
                             <th>{% translate "Helper" %}</th>
                             <th>{% translate "Rate" %}</th>
-                            <th style="width: 9rem">{% translate "Hours" %}</th>
+                            <th class="col-width-9">{% translate "Hours" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,7 +64,7 @@
             </div>
             {% include "core/_field.html" with field=form.note %}
             {% translate "Create the statement now? The unit leads receive it by email." as confirm_text %}
-            <button class="btn btn-primary" type="submit" onclick="return confirm('{{ confirm_text|escapejs }}')">{% translate "Create statement" %}</button>
+            <button class="btn btn-primary" type="submit" data-confirm="{{ confirm_text }}">{% translate "Create statement" %}</button>
             <a class="btn btn-link" href="{% url 'billing_list' %}">{% translate "Cancel" %}</a>
         </form>
     {% else %}

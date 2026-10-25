@@ -144,11 +144,11 @@ day. The periods are set in `.env`; `0` keeps the data forever.
 
 | Data | What happens | Setting (default) |
 |---|---|---|
-| Reports (helper name, qualification, note) | anonymised after the end of the duty; the number of helpers stays. Helpers that can still be billed are kept until they are billed – the statement keeps its own copy | `RETENTION_REPORTS_DAYS` (365) |
+| Reports (helper name, qualification, note) | anonymised after the end of the duty; the number of helpers stays. Helpers that can still be billed are kept until their statement is paid – the statement keeps its own copy | `RETENTION_REPORTS_DAYS` (365) |
 | Change history | deleted; for anonymised reports right away | `RETENTION_HISTORY_DAYS` (730) |
 | Emails from dispatchers | deleted after sending | `RETENTION_MAILINGS_DAYS` (365) |
 | Accepted, revoked and expired invitations | deleted after acceptance, revocation or expiry | `RETENTION_INVITATIONS_DAYS` (180) |
-| Paid and cancelled billings | deleted after this many full calendar years (accounting records); open ones never | `RETENTION_BILLINGS_YEARS` (10) |
+| Paid and cancelled billings | deleted after this many full calendar years (accounting records); open ones never. Helpers of duties that old can no longer be billed | `RETENTION_BILLINGS_YEARS` (10) |
 | Sent and failed emails of the email queue | deleted; queued ones never | `RETENTION_OUTBOX_DAYS` (30) |
 
 Duties, units, accounts and bank accounts are current data and not deleted
@@ -298,6 +298,11 @@ docker compose logs -f web worker     # logs (and emails, without SMTP)
 - **Backup:** `docker compose exec db pg_dump -U dienstemanager dienstemanager > backup.sql`.
 - **HSTS** is set to one year (`DJANGO_SECURE_HSTS_SECONDS`); set it to `0` for a local
   test with `DOMAIN=localhost`.
+- A **Content Security Policy** (`SECURE_CSP` in `config/settings.py`, also during
+  development) only allows scripts, styles and images from the portal itself: no
+  inline scripts, no `onclick`/`onsubmit` or `style` attributes (behaviour goes into
+  `static/js/app.js`, e.g. `data-confirm="Question?"` on forms). `tests/test_pages.py`
+  checks the pages for it.
 - `manage.py check --deploy` only reports W005/W021 (HSTS for subdomains/preload). Both
   affect the whole domain and are off on purpose; enable them via
   `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS` if appropriate.
@@ -377,7 +382,7 @@ outbox/      email queue, retries, daily summary and the worker (run_worker)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
-static/      app.css and vendored libraries (Bootstrap, htmx)
+static/      app.css, app.js and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
 docker/      container entry point
 .github/     CI and release workflow, image clean-up, Dependabot, release notes script

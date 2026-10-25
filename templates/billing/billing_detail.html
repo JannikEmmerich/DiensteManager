@@ -11,12 +11,12 @@
             <a class="btn btn-primary" href="{% url 'billing_pdf' billing.pk %}">{% translate "Download PDF" %}</a>
             {% if can.manage_billing and billing.status == "issued" %}
                 {% translate "Mark this statement as paid? The unit leads are notified." as confirm_paid %}
-                <form method="post" action="{% url 'billing_mark_paid' billing.pk %}" onsubmit="return confirm('{{ confirm_paid|escapejs }}')">
+                <form method="post" action="{% url 'billing_mark_paid' billing.pk %}" data-confirm="{{ confirm_paid }}">
                     {% csrf_token %}
                     <button class="btn btn-outline-success" type="submit">{% translate "Mark as paid" %}</button>
                 </form>
                 {% translate "Cancel this statement? Its helpers can then be billed again." as confirm_cancel %}
-                <form method="post" action="{% url 'billing_cancel' billing.pk %}" onsubmit="return confirm('{{ confirm_cancel|escapejs }}')">
+                <form method="post" action="{% url 'billing_cancel' billing.pk %}" data-confirm="{{ confirm_cancel }}">
                     {% csrf_token %}
                     <button class="btn btn-outline-danger" type="submit">{% translate "Cancel statement" %}</button>
                 </form>

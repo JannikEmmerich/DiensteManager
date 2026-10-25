@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktranslate trimmed with unit=unit.name title=duty.title count counter=reports|length %}{{ unit }} reported {{ counter }} helper for {{ title }}{% plural %}{{ unit }} reported {{ counter }} helpers for {{ title }}{% endblocktranslate %}
+{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with unit=unit.name title=duty.title count counter=reports|length %}{{ unit }} reported {{ counter }} helper for {{ title }}{% plural %}{{ unit }} reported {{ counter }} helpers for {{ title }}{% endblocktranslate %}{% endautoescape %}

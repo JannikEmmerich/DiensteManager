@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import Max
 from django.utils import timezone
@@ -20,17 +21,35 @@ class AlreadyBilled(Exception):
     """One of the reports has been billed in the meantime."""
 
 
-def billable_reports(unit):
-    """Confirmed helpers of finished, paid duties that are not billed yet."""
-    return (
+def unbilled_reports():
+    """Confirmed helpers of paid duties that are not billed (yet) and can still be.
+
+    Left out: anonymised helpers (nothing to bill under), and helpers of duties older
+    than the retention period of billings, whose billing may have been deleted
+    (lifecycle/retention.py) – otherwise they would count as unbilled again.
+    """
+    reports = (
         Report.objects.filter(
-            unit=unit,
             status=Report.Status.CONFIRMED,
             duty__status=Duty.Status.RELEASED,
-            duty__ends_at__lt=timezone.now(),
+            anonymized_at__isnull=True,
         )
         .exclude(duty__pay_type=Duty.PayType.NONE)
         .exclude(billing_items__billing__status__in=ACTIVE_BILLING)
+    )
+    if settings.RETENTION_BILLINGS_YEARS:
+        # Billings are deleted after full calendar years, counted from their year, which
+        # is never before the year of their duties.
+        first_year = timezone.localdate().year - settings.RETENTION_BILLINGS_YEARS
+        reports = reports.filter(duty__starts_at__year__gte=first_year)
+    return reports
+
+
+def billable_reports(unit):
+    """Confirmed helpers of finished, paid duties that are not billed yet."""
+    return (
+        unbilled_reports()
+        .filter(unit=unit, duty__ends_at__lt=timezone.now())
         .select_related("duty", "position__qualification")
         .order_by("duty__starts_at", "duty__title", "name")
     )
@@ -93,10 +112,8 @@ def unit_pay_lines(unit, year):
         ).select_related("billing", "duty")
     ]
     reports = (
-        Report.objects.filter(unit=unit, status=Report.Status.CONFIRMED, duty__starts_at__year=year)
-        .exclude(duty__pay_type=Duty.PayType.NONE)
-        .exclude(duty__status=Duty.Status.CANCELLED)
-        .exclude(billing_items__billing__status__in=ACTIVE_BILLING)
+        unbilled_reports()
+        .filter(unit=unit, duty__starts_at__year=year)
         .select_related("duty", "position__qualification")
     )
     for report in reports:
