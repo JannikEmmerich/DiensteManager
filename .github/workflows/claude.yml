@@ -65,10 +65,11 @@ jobs:
           # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
           # prompt: 'Update the pull request description to include a summary of changes.'
 
-          # Commands Claude may run besides git: tests, linting and the translation and
-          # migration commands (see CLAUDE.md and
+          # Commands Claude may run besides committing and pushing: fetching and merging
+          # master (merge conflicts), tests, linting and the translation and migration
+          # commands (see CLAUDE.md and
           # https://code.claude.com/docs/en/cli-reference). "uv run" variants are allowed
           # too, but the packages are already installed, so the plain commands are faster.
           claude_args: |
-            --allowedTools "Bash(python -m pytest:*),Bash(pytest:*),Bash(uv run pytest:*),Bash(ruff check:*),Bash(ruff format:*),Bash(uv run ruff:*),Bash(python manage.py makemessages:*),Bash(python manage.py compilemessages:*),Bash(python manage.py makemigrations:*),Bash(python manage.py check:*),Bash(msgfmt:*)"
+            --allowedTools "Bash(git fetch:*),Bash(git merge:*),Bash(python -m pytest:*),Bash(pytest:*),Bash(uv run pytest:*),Bash(ruff check:*),Bash(ruff format:*),Bash(uv run ruff:*),Bash(python manage.py makemessages:*),Bash(python manage.py compilemessages:*),Bash(python manage.py makemigrations:*),Bash(python manage.py check:*),Bash(msgfmt:*)"
 
