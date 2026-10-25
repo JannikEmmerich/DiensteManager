@@ -345,6 +345,12 @@ translations, a check for missing migrations and the tests (Python 3.12 with SQL
 Python 3.14 with PostgreSQL 18). Then it builds the Docker image; pull requests only
 check that it builds.
 
+Writing `@claude` and a request in an issue or pull request (comment) starts Claude Code
+(`.github/workflows/claude.yml`, for accounts with write access). It works on a branch
+`claude/issue-…`, may run the tests, ruff and the translation and migration commands,
+and answers with a link to open the pull request. `claude-code-review.yml` reviews every
+pull request.
+
 ### Docker images
 
 Pushes to `master` and version tags publish the image for `linux/amd64` and
