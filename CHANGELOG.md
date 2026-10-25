@@ -7,6 +7,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] – 2026-10-25
+
+When updating from 0.2.0: units can no longer withdraw confirmed reports themselves;
+they ask the dispatchers instead, who get an email. You may want to tell the units.
+
 ### Added
 
 - Optional report deadline per duty: afterwards units can no longer report helpers or
