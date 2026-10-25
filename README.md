@@ -288,7 +288,8 @@ with prepared accounts. A strip under the navigation says so.
   under *Units* for internal accounts and on the overview) creates the account with name,
   email address, role, unit, language and a password; it can sign in right away. Nobody
   invites; only invitations an admin sent before demo mode can still be accepted.
-  Dispatchers and unit leads still change roles and block accounts.
+- **Only admins manage accounts and units:** dispatchers and unit leads neither block
+  accounts nor change roles, and dispatchers add no units (they still edit them).
 
 ## Languages
 

@@ -4,7 +4,9 @@
 {% block content %}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h1 class="h3 mb-0">{% translate "Units" %}</h1>
-        <a class="btn btn-primary" href="{% url 'unit_create' %}">{% translate "Add unit" %}</a>
+        {% if can.add_units %}
+            <a class="btn btn-primary" href="{% url 'unit_create' %}">{% translate "Add unit" %}</a>
+        {% endif %}
     </div>
     {% if units %}
         <div class="list-group">

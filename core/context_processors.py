@@ -19,6 +19,7 @@ def site(request):
             "change_sign_in": not permissions.demo_restricted(user),
             "invite": permissions.can_invite(user),
             "add_accounts": permissions.can_add_accounts(user),
+            "add_units": permissions.can_add_units(user),
             "manage_units": permissions.is_dispatcher(user),
             "view_own_unit": permissions.is_unit_lead(user),
             "view_duties": permissions.is_dispatcher(user) or is_unit_account(user),
