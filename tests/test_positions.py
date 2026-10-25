@@ -353,12 +353,15 @@ def test_units_report_helpers_for_positions(client, member, paramedic, first_aid
     client.post(
         reverse("report_create", args=[duty.pk]),
         _report_data(
-            {"position": rs.pk, "name": "Rita"},
-            {"position": sanh.pk, "name": "Sam"},
-            {"position": rs.pk},  # an empty row with the preselected position
+            {"helper_qualification": paramedic.pk, "name": "Rita"},
+            {"helper_qualification": first_aider.pk, "name": "Sam"},
+            {"helper_qualification": paramedic.pk},  # an empty row, preselected
         ),
     )
-    assert {(r.name, r.position) for r in Report.objects.all()} == {("Rita", rs), ("Sam", sanh)}
+    assert {(r.name, r.helper_qualification, r.position) for r in Report.objects.all()} == {
+        ("Rita", paramedic, rs),
+        ("Sam", first_aider, sanh),
+    }
 
 
 def test_choices_show_the_open_places(client, member, unit, other_unit, paramedic, first_aider):
@@ -370,7 +373,7 @@ def test_choices_show_the_open_places(client, member, unit, other_unit, paramedi
     page = client.get(reverse("report_create", args=[duty.pk])).text
     assert ">Paramedic (RS) – all taken</option>" in page
     # Preselected: the first qualification with open places.
-    assert f'value="{sanh.pk}" selected>First aider (SanH) – 3 open</option>' in page
+    assert f'value="{first_aider.pk}" selected>First aider (SanH) – 3 open</option>' in page
     assert "<th>Qualification</th>" in page
 
 
@@ -380,7 +383,7 @@ def test_single_qualification_is_named(client, member, paramedic):
     client.force_login(member)
     page = client.get(reverse("report_create", args=[duty.pk])).text
     assert "Needed: 4 helpers with the qualification <strong>Paramedic (RS)</strong>." in page
-    assert 'name="form-0-position"' not in page
+    assert 'name="form-0-helper_qualification"' not in page
 
 
 def test_reports_show_the_qualification(
@@ -393,7 +396,8 @@ def test_reports_show_the_qualification(
         {
             "unit": unit.pk,
             **_report_data(
-                {"position": rs.pk, "name": "Rita"}, {"position": sanh.pk, "name": "Ann"}
+                {"helper_qualification": paramedic.pk, "name": "Rita"},
+                {"helper_qualification": first_aider.pk, "name": "Ann"},
             ),
         },
     )
@@ -416,13 +420,14 @@ def test_positions_are_listed_in_the_order_of_the_qualifications(
     assert page.index("3 × First aider (SanH)") < page.index("2 × Paramedic (RS)")
 
 
-def test_position_must_belong_to_the_duty(client, member, paramedic, first_aider):
-    duty, rs, _sanh = _duty_with_positions(paramedic, first_aider)
-    other, other_rs, _ = _duty_with_positions(paramedic, first_aider)
+def test_qualification_must_fit_a_position(client, member, paramedic, first_aider):
+    duty, _rs, _sanh = _duty_with_positions(paramedic, first_aider)
+    doctor = Qualification.objects.create(name="Doctor")
     client.force_login(member)
+    assert "Doctor" not in client.get(reverse("report_create", args=[duty.pk])).text
     response = client.post(
         reverse("report_create", args=[duty.pk]),
-        _report_data({"position": other_rs.pk, "name": "Rita"}),
+        _report_data({"helper_qualification": doctor.pk, "name": "Rita"}),
     )
     assert response.status_code == 200
     assert not Report.objects.exists()
@@ -431,9 +436,12 @@ def test_position_must_belong_to_the_duty(client, member, paramedic, first_aider
 def test_single_position_needs_no_choice(client, member):
     duty = create_duty()
     client.force_login(member)
-    assert 'name="form-0-position"' not in client.get(reverse("report_create", args=[duty.pk])).text
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert 'name="form-0-helper_qualification"' not in page
     client.post(reverse("report_create", args=[duty.pk]), _report_data({"name": "Mia"}))
-    assert Report.objects.get().position == duty.positions.get()
+    report = Report.objects.get()
+    assert report.position == duty.positions.get()
+    assert report.helper_qualification == report.position.qualification
 
 
 def test_staffing_per_position(client, member, unit, paramedic, first_aider):
@@ -472,29 +480,46 @@ CHAIN = {1: None, 2: 1, 3: 2}
 
 def test_confirmed_helpers_count_where_they_are_assigned():
     # 2 first aiders (10) and 1 paramedic (20) needed; the second paramedic fills 10.
-    reports = [(10, 10, CONFIRMED), (20, 20, CONFIRMED), (20, 10, CONFIRMED)]
+    reports = [(1, 10, 10, CONFIRMED), (2, 20, 20, CONFIRMED), (2, 20, 10, CONFIRMED)]
     assert _counts([(10, 1, 2), (20, 2, 1)], reports, CHAIN) == {10: (2, 0), 20: (1, 0)}
 
 
 def test_pending_helpers_take_the_places_left():
     positions = [(10, 1, 2), (20, 2, 1)]
-    reports = [(20, None, PENDING), (20, 20, CONFIRMED), (10, None, PENDING), (20, None, PENDING)]
+    reports = [
+        (2, 20, None, PENDING),
+        (2, 20, 20, CONFIRMED),
+        (1, 10, None, PENDING),
+        (2, 20, None, PENDING),
+    ]
     assert _counts(positions, reports, CHAIN) == {10: (0, 2), 20: (1, 1)}
     # First aiders never fill places for paramedics; they overstaff their own position.
-    reports = [(10, None, PENDING)] * 3
+    reports = [(1, 10, None, PENDING)] * 3
     assert _counts(positions, reports, CHAIN) == {10: (0, 3), 20: (0, 0)}
+
+
+def test_pending_helpers_count_with_their_own_qualification():
+    # Emergency paramedics (3) reported for the paramedic's position (20).
+    reports = [(3, 20, None, PENDING)] * 2
+    assert _counts([(10, 1, 1), (20, 2, 1)], reports, CHAIN) == {10: (0, 1), 20: (0, 1)}
+    # A position for emergency paramedics added later is theirs.
+    positions = [(10, 1, 1), (20, 2, 1), (30, 3, 1)]
+    assert _counts(positions, reports, CHAIN) == {10: (0, 0), 20: (0, 1), 30: (0, 1)}
 
 
 def test_newly_confirmed_helpers_fill_the_closest_free_position():
     san, rs = _positions((10, 1, 1), (20, 2, 1))
     positions = [san, rs]
-    assert staffing.assign(rs, positions, Counter(), CHAIN) is rs
-    assert staffing.assign(rs, positions, Counter({20: 1}), CHAIN) is san
-    assert staffing.assign(rs, positions, Counter({10: 1, 20: 1}), CHAIN) is rs  # overstaffed
-    assert staffing.assign(san, positions, Counter({10: 1}), CHAIN) is san
+    assert staffing.assign(2, rs, positions, Counter(), CHAIN) is rs
+    assert staffing.assign(2, rs, positions, Counter({20: 1}), CHAIN) is san
+    assert staffing.assign(2, rs, positions, Counter({10: 1, 20: 1}), CHAIN) is rs  # overstaffed
+    assert staffing.assign(1, san, positions, Counter({10: 1}), CHAIN) is san
+    # An emergency paramedic, reported for the paramedic's position.
+    assert staffing.assign(3, rs, positions, Counter(), CHAIN) is rs
     # Down the chain, the closest first.
     notsan = _positions((30, 3, 1))[0]
-    assert staffing.fitting(notsan, [san, rs, notsan], CHAIN) == [notsan, rs, san]
+    assert staffing.fitting(3, [san, rs, notsan], CHAIN) == [notsan, rs, san]
+    assert staffing.fitting(None, positions, CHAIN) == []
 
 
 def test_circles_do_not_hang():
@@ -589,7 +614,10 @@ def test_helpers_added_by_dispatchers_are_assigned(
     client.force_login(dispatcher)
     client.post(
         reverse("report_add", args=[duty.pk]),
-        {"unit": unit.pk, **_report_data(*({"position": rs.pk, "name": n} for n in "ABC"))},
+        {
+            "unit": unit.pk,
+            **_report_data(*({"helper_qualification": paramedic.pk, "name": n} for n in "ABC")),
+        },
     )
     assigned = sorted(r.assigned_position.label for r in Report.objects.all())
     assert assigned == ["First aider (SanH)", "Paramedic (RS)", "Paramedic (RS)"]
@@ -612,6 +640,80 @@ def test_choices_count_higher_qualifications(client, member, unit, paramedic, fi
     page = client.get(reverse("report_create", args=[duty.pk])).text
     assert ">Paramedic (RS) – all taken</option>" in page
     assert ">First aider (SanH) – 2 open</option>" in page
+
+
+@pytest.fixture
+def emergency_paramedic(paramedic, first_aider):
+    """Counts as paramedic, which counts as first aider."""
+    paramedic.includes = first_aider
+    paramedic.save()
+    return Qualification.objects.create(
+        name="Emergency paramedic", abbreviation="NFS", sort_order=5, includes=paramedic
+    )
+
+
+def test_units_report_higher_qualifications(
+    client, member, dispatcher, unit, paramedic, first_aider, emergency_paramedic, mailoutbox
+):
+    duty, rs, _sanh = _duty_with_positions(paramedic, first_aider)
+    Qualification.objects.create(name="Doctor")  # counts as nothing asked for
+    Qualification.objects.create(name="Retired", includes=paramedic, is_active=False)
+    client.force_login(member)
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert ">Emergency paramedic (NFS) – counts as RS, SanH</option>" in page
+    assert "Doctor" not in page and "Retired" not in page
+    # Preselected is still the first position with open places.
+    assert f'value="{paramedic.pk}" selected>Paramedic (RS) – 2 open</option>' in page
+    client.post(
+        reverse("report_create", args=[duty.pk]),
+        _report_data({"helper_qualification": emergency_paramedic.pk, "name": "Nina"}),
+    )
+    nina = Report.objects.get()
+    assert (nina.helper_qualification, nina.position) == (emergency_paramedic, rs)
+    assert "- Nina (NFS)" in mailoutbox[0].body
+    client.force_login(dispatcher)
+    page = client.get(duty.get_absolute_url()).text
+    assert "<td>Emergency paramedic (NFS)</td>" in page
+    assert ">0/2</span>" in page  # pending for the paramedic's position
+
+
+def test_higher_qualifications_fill_the_closest_free_position(
+    client, dispatcher, unit, paramedic, first_aider, emergency_paramedic
+):
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)  # 2 × RS, 3 × SanH
+    for name in "AB":
+        create_report(duty, unit, name=name, position=rs, status=Report.Status.CONFIRMED)
+    nina = create_report(
+        duty, unit, name="Nina", position=rs, helper_qualification=emergency_paramedic
+    )
+    client.force_login(dispatcher)
+    assert _confirm(client, nina).assigned_position == sanh
+    # The dispatchers may move her to the paramedic's position.
+    page = client.get(duty.get_absolute_url()).text
+    assert f'<option value="{rs.pk}">Paramedic (RS)</option>' in page
+    client.post(reverse("report_assign", args=[nina.pk]), {"position": rs.pk})
+    nina.refresh_from_db()
+    assert nina.assigned_position == rs
+
+
+def test_single_position_offers_higher_qualifications(client, member, unit, paramedic, first_aider):
+    paramedic.includes = first_aider
+    paramedic.save()
+    duty = create_duty(helpers_needed=3)
+    sanh = duty.positions.get()
+    sanh.qualification = first_aider
+    sanh.save()
+    client.force_login(member)
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert "Needed: 3 helpers with the qualification <strong>First aider (SanH)</strong>." in page
+    assert f'value="{first_aider.pk}" selected>First aider (SanH) – 3 open</option>' in page
+    assert ">Paramedic (RS) – counts as SanH</option>" in page
+    client.post(
+        reverse("report_create", args=[duty.pk]),
+        _report_data({"helper_qualification": paramedic.pk, "name": "Rita"}),
+    )
+    rita = Report.objects.get()
+    assert (rita.helper_qualification, rita.position) == (paramedic, sanh)
 
 
 def test_catalogue_sets_what_a_qualification_counts_as(client, dispatcher, paramedic, first_aider):
@@ -663,7 +765,7 @@ def test_billing_uses_the_rate_of_the_position(dispatcher, unit, paramedic, firs
 
 
 @pytest.mark.django_db(transaction=True)
-def test_migration_fills_in_qualifications_and_assignments():
+def test_migrations_fill_in_qualifications_and_assignments():
     before = [("duties", "0006_qualification_includes")]
     after = [("duties", "0008_position_qualification_required")]
     executor = MigrationExecutor(connection)
@@ -684,10 +786,20 @@ def test_migration_fills_in_qualifications_and_assignments():
     pending = reports.create(duty=duty, unit=unit, name="Pending", position=position)
     executor = MigrationExecutor(connection)
     executor.migrate(after)
-    position = DutyPosition.objects.get(pk=position.pk)
+    new = executor.loader.project_state(after).apps
+    position = new.get_model("duties", "DutyPosition").objects.get(pk=position.pk)
     assert position.qualification.name == "Helfer"
-    assert Report.objects.get(pk=confirmed.pk).assigned_position == position
-    assert Report.objects.get(pk=pending.pk).assigned_position is None
+    reports = new.get_model("duties", "Report").objects
+    assert reports.get(pk=confirmed.pk).assigned_position == position
+    assert reports.get(pk=pending.pk).assigned_position is None
+    # Helpers get the qualification of their position.
+    executor = MigrationExecutor(connection)
+    executor.migrate([("duties", "0009_report_helper_qualification")])
+    for report in [confirmed, pending]:
+        assert Report.objects.get(pk=report.pk).helper_qualification_id == position.qualification_id
+    # On to the latest state for the tests after this one.
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
 
 
 def test_positions_table_in_german(client, dispatcher):

@@ -51,6 +51,11 @@ class Qualification(models.Model):
     def __str__(self):
         return f"{self.name} ({self.abbreviation})" if self.abbreviation else self.name
 
+    @property
+    def short_label(self):
+        """For narrow places such as the PDF."""
+        return self.abbreviation or self.name
+
     @classmethod
     def includes_map(cls):
         """The ID of each qualification mapped to the ID of the one it includes."""
@@ -261,7 +266,7 @@ class Duty(models.Model):
         """
         positions = list(self.positions.select_related("qualification"))
         reports = self.reports.filter(status__in=Report.ACTIVE).values_list(
-            "position", "assigned_position", "status"
+            "helper_qualification", "position", "assigned_position", "status"
         )
         staffing.count(positions, list(reports), Qualification.includes_map())
         return positions
@@ -276,7 +281,9 @@ class Duty(models.Model):
             .values_list("assigned_position", "position")
         )
         own = next((p for p in positions if p.pk == report.position_id), None)
-        return staffing.assign(own, positions, filled, Qualification.includes_map())
+        return staffing.assign(
+            report.helper_qualification_id, own, positions, filled, Qualification.includes_map()
+        )
 
     def update_helpers_needed(self):
         """``helpers_needed`` is the sum of the positions."""
@@ -337,7 +344,7 @@ class DutyPosition(models.Model):
     @property
     def short_label(self):
         """For narrow places such as the PDF."""
-        return self.qualification.abbreviation or self.qualification.name
+        return self.qualification.short_label
 
     @property
     def rate(self):
@@ -370,6 +377,17 @@ class Report(models.Model):
     unit = models.ForeignKey(
         Unit, verbose_name=_("unit"), on_delete=models.CASCADE, related_name="reports"
     )
+    # The qualification the helper has; it may be higher than any a position asks for,
+    # e.g. an emergency paramedic for a paramedic's position.
+    helper_qualification = models.ForeignKey(
+        Qualification,
+        verbose_name=_("qualification of the helper"),
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    # The position the helper is reported for: the one closest to their qualification.
     position = models.ForeignKey(
         DutyPosition,
         verbose_name=_("position"),
@@ -388,8 +406,8 @@ class Report(models.Model):
         related_name="assigned_reports",
     )
     name = models.CharField(_("name"), max_length=150)
-    # What units entered as free text before they reported helpers for a position; no
-    # longer asked for. The position says which qualification the helper is reported for.
+    # What units entered as free text before they reported helpers with a qualification
+    # from the catalogue; no longer asked for.
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
     note = models.CharField(_("note"), max_length=500, blank=True)
     status = models.CharField(
@@ -476,7 +494,16 @@ class Report(models.Model):
 
         Older reports may have what the unit entered as free text instead.
         """
-        return self.position.label if self.position_id else self.qualification
+        if self.helper_qualification_id:
+            return str(self.helper_qualification)
+        return self.qualification
+
+    @property
+    def qualification_short_label(self):
+        """For narrow places such as lists in emails."""
+        if self.helper_qualification_id:
+            return self.helper_qualification.short_label
+        return self.qualification
 
     @property
     def withdrawal_requested(self):

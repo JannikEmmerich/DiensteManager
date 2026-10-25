@@ -63,9 +63,9 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   paramedic → paramedic → first aider. Helpers then also fill the places of the lower
   qualifications down the chain, never the other way round: with 2 × first aider and
   1 × paramedic needed, 1 first aider and 2 paramedics fill all places.
-- **Assignment:** when a helper is confirmed, they fill a position – their own if a
-  place is free, otherwise the free one closest down their chain (otherwise their own
-  one, which is then overstaffed). Under *Assigned to* on the duty, dispatchers can
+- **Assignment:** when a helper is confirmed, they fill a position – the free one
+  closest down the chain of their qualification (otherwise the one they were reported
+  for, which is then overstaffed). Under *Assigned to* on the duty, dispatchers can
   change it among the positions the helper can fill, e.g. with 1 × paramedic and
   1 × first aider needed and two paramedics reported, choose who takes which place. The
   helper keeps the qualification they were reported with; **their pay follows the
@@ -86,10 +86,13 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
 - **Reports:** unit leads and members report helpers until the report deadline: name,
   qualification and an optional note, one row per helper, more with "Add another
   helper". The qualification is one of those the duty asks for, each with the places
-  still open (e.g. "Paramedic (RS) – 2 open"); the first one with open places is
-  preselected. With a single qualification there is nothing to choose; it is named
-  above the form. Units only see their own reports plus the staffing per position. A
-  person can only be reported once per duty and unit.
+  still open (e.g. "Paramedic (RS) – 2 open"), or a higher one that counts as one of
+  them (e.g. "Emergency paramedic (NFS) – counts as RS, SanH"), so that dispatchers see
+  what the helpers really are; the helper is reported for the closest position. The
+  first qualification with open places is preselected. If only one qualification fits,
+  there is nothing to choose; with a single position it is named above the form. Units
+  only see their own reports plus the staffing per position. A person can only be
+  reported once per duty and unit.
 - **Decisions:** dispatchers confirm or decline each report (or "Confirm all pending").
   Only confirmed helpers count as planned (confirmed / needed); pending ones are shown
   as "+N pending".

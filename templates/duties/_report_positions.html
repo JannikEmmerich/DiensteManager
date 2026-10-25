@@ -1,5 +1,5 @@
 {% load i18n %}
-{# With a single position there is nothing to choose, so it is named here. #}
+{# A single position is named here; the select may still offer higher qualifications. #}
 {% with positions=formset.positions %}
     {% if positions|length == 1 and positions.0.qualification %}
         <p>
