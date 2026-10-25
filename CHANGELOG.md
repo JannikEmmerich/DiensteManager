@@ -7,6 +7,10 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.7.2] – 2026-10-25
+
+When updating from 0.7.1 nothing needs to be done.
+
 ### Changed
 
 - The access log shows the visitor's IP address instead of the proxy's (Caddy:
