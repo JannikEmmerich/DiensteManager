@@ -53,6 +53,9 @@ services:
     build: .
     restart: unless-stopped
     entrypoint: ["/app/docker/housekeeping.sh"]
+    # The healthcheck of the image asks the web server, which does not run here.
+    healthcheck:
+      disable: true
     env_file:
       - path: .env
         required: false
