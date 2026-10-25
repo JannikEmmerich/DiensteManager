@@ -21,6 +21,10 @@ services:
       retries: 10
 
   web:
+    # The released image from the GitHub Container Registry (DIENSTEMANAGER_VERSION in
+    # .env, e.g. 0.2.0; default: latest release). "docker compose up -d --build" builds it
+    # from the checked-out code instead.
+    image: ghcr.io/jannikemmerich/dienstemanager:${DIENSTEMANAGER_VERSION:-latest}
     build: .
     restart: unless-stopped
     env_file:

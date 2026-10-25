@@ -4,6 +4,7 @@ Everything that depends on the environment is read from environment variables or
 from a local ``.env`` file (template: ``.env.example``).
 """
 
+import tomllib
 from pathlib import Path
 
 import environ
@@ -31,6 +32,12 @@ ALLOWED_HOSTS = env.list(
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 SITE_NAME = env("SITE_NAME", default="DiensteManager")
+
+# The version lives in pyproject.toml only (see CHANGELOG.md). Docker images built by CI
+# additionally carry the Git commit they were built from.
+with (BASE_DIR / "pyproject.toml").open("rb") as pyproject:
+    VERSION = tomllib.load(pyproject)["project"]["version"]
+REVISION = env("APP_REVISION", default="")
 ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/")
 
 

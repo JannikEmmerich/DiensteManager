@@ -1,0 +1,31 @@
+# Lifecycle of the Docker images in the GitHub Container Registry: every push to master
+# publishes an image tagged sha-<commit>. Those tags (and untagged leftovers) are deleted
+# after 30 days. Release tags (1.2.3, 1.2, 1, latest) and edge are never touched.
+
+name: Clean up old images
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"  # Mondays, 03:17 UTC
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Only log what would be deleted
+        type: boolean
+        default: true
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: dienstemanager
+          delete-tags: sha-*
+          delete-untagged: true
+          exclude-tags: latest,edge
+          older-than: 30 days
+          dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}

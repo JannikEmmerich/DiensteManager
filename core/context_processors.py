@@ -5,10 +5,12 @@ from duties.permissions import is_unit_account
 
 
 def site(request):
-    """Site name, HiOrg status and the permissions needed for the navigation."""
+    """Site name, version, HiOrg status and the permissions needed for the navigation."""
     user = request.user
     return {
         "SITE_NAME": settings.SITE_NAME,
+        "APP_VERSION": settings.VERSION,
+        "APP_REVISION": settings.REVISION[:7],
         "HIORG_ENABLED": bool(settings.HIORG_CLIENT_ID),
         "can": {
             "invite": permissions.can_invite(user),
