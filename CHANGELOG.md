@@ -7,6 +7,10 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.7.1] – 2026-10-25
+
+When updating from 0.7.0 nothing needs to be done.
+
 ### Changed
 
 - Demo mode: only admins block accounts, change roles and add units; dispatchers and
