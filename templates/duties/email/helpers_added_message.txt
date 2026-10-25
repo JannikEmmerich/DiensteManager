@@ -1,5 +1,5 @@
 {% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
-{% blocktranslate trimmed with unit=unit.name %}The dispatchers have entered and confirmed these helpers of {{ unit }}:{% endblocktranslate %}
+{% blocktranslate trimmed with unit=unit.name %}The {{ DISPATCH_NAME }} has entered and confirmed these helpers of {{ unit }}:{% endblocktranslate %}
 
 {% include "duties/email/_reports.txt" %}
 {% translate "Duty:" %} {% include "duties/email/_duty.txt" %}

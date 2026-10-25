@@ -11,14 +11,14 @@
             <p>
                 {% blocktranslate trimmed with name=report.name status=report.get_status_display %}
                     The report for <strong>{{ name }}</strong> ({{ status }}) can only be withdrawn
-                    by the dispatchers now. They are told by email and either withdraw it or keep
-                    it; you will be notified either way. Until then, {{ name }} stays planned.
+                    by the {{ DISPATCH_NAME }} now. It is told by email and either withdraws it or
+                    keeps it; you will be notified either way. Until then, {{ name }} stays planned.
                 {% endblocktranslate %}
             </p>
             <form method="post">
                 {% csrf_token %}
                 {% include "core/_field.html" with field=form.withdrawal_note %}
-                <button class="btn btn-danger" type="submit">{% translate "Ask the dispatchers" %}</button>
+                <button class="btn btn-danger" type="submit">{% blocktranslate %}Ask the {{ DISPATCH_NAME }}{% endblocktranslate %}</button>
                 <a class="btn btn-link" href="{{ report.duty.get_absolute_url }}">{% translate "Cancel" %}</a>
             </form>
         </div>

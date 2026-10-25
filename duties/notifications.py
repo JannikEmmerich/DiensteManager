@@ -107,6 +107,7 @@ def _message(request, recipient, template, context, attach=None, digest=False):
         "recipient": recipient,
         "digest": digest,
         "SITE_NAME": settings.SITE_NAME,
+        "DISPATCH_NAME": settings.DISPATCH_NAME,
         "profile_url": request.build_absolute_uri(reverse("profile")),
     }
     if "duty" in context:

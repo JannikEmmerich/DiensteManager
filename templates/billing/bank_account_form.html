@@ -7,8 +7,8 @@
             <h1 class="h3 mb-3">{% translate "Bank account" %} · {{ unit.name }}</h1>
             <p class="text-body-secondary">
                 {% blocktranslate trimmed %}
-                    The duty pay of the unit is transferred to this account. Only the dispatchers
-                    and the unit leads of the unit can see it.
+                    The duty pay of the unit is transferred to this account. Only the
+                    {{ DISPATCH_NAME }} and the unit leads of the unit can see it.
                 {% endblocktranslate %}
             </p>
             <form method="post">

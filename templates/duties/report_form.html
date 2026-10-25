@@ -9,7 +9,7 @@
     <p>
         {% blocktranslate trimmed with unit=user.unit %}
             Enter the people of your unit <strong>{{ unit }}</strong> who will help at this duty, one
-            per row. The dispatchers confirm each report; you will be notified by email.
+            per row. The {{ DISPATCH_NAME }} confirms each report; you will be notified by email.
         {% endblocktranslate %}
     </p>
     {% include "duties/_report_positions.html" %}

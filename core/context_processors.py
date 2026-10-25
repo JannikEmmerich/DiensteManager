@@ -9,6 +9,7 @@ def site(request):
     user = request.user
     return {
         "SITE_NAME": settings.SITE_NAME,
+        "DISPATCH_NAME": settings.DISPATCH_NAME,
         "APP_VERSION": settings.VERSION,
         "APP_REVISION": settings.REVISION[:7],
         "HIORG_ENABLED": bool(settings.HIORG_CLIENT_ID),

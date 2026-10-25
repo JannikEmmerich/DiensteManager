@@ -1,5 +1,5 @@
 {% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
-{% if requested %}{% blocktranslate trimmed with name=report.name %}As requested, the dispatchers have withdrawn the report for {{ name }}.{% endblocktranslate %}{% else %}{% blocktranslate trimmed with name=report.name %}The dispatchers have withdrawn the report for {{ name }}. {{ name }} is no longer planned for this duty.{% endblocktranslate %}{% endif %}
+{% if requested %}{% blocktranslate trimmed with name=report.name %}As requested, the {{ DISPATCH_NAME }} has withdrawn the report for {{ name }}.{% endblocktranslate %}{% else %}{% blocktranslate trimmed with name=report.name %}The {{ DISPATCH_NAME }} has withdrawn the report for {{ name }}. {{ name }} is no longer planned for this duty.{% endblocktranslate %}{% endif %}
 
 {% translate "Duty:" %} {% include "duties/email/_duty.txt" %}
 {{ duty_url }}

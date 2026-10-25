@@ -27,6 +27,6 @@
     {% endif %}
 
     <h2 class="h5 mt-4">{% translate "Internal accounts" %}</h2>
-    <p class="text-body-secondary">{% translate "Dispatchers and admins; they belong to no unit." %}</p>
+    <p class="text-body-secondary">{% blocktranslate %}{{ DISPATCH_NAME }} and admins; they belong to no unit.{% endblocktranslate %}</p>
     {% include "accounts/_account_table.html" %}
 {% endblock content %}

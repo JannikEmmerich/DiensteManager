@@ -33,6 +33,9 @@ ALLOWED_HOSTS = env.list(
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 SITE_NAME = env("SITE_NAME", default="DiensteManager")
+# What the dispatchers are called in the UI and the emails, in every language; the German
+# texts say "die …", so a feminine noun in the singular fits, e.g. "Einsatzleitung".
+DISPATCH_NAME = env("DISPATCH_NAME", default="Disposition")
 
 # The version lives in pyproject.toml only (see CHANGELOG.md). Docker images built by CI
 # additionally carry the Git commit they were built from.

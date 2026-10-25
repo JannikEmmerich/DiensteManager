@@ -36,6 +36,12 @@ confirmed and is used for signing in from then on), role (making someone a dispa
 or back; internal accounts belong to no unit), unit, language and notifications.
 Passwords and the admin status itself stay in the Django admin.
 
+**Name of the dispatchers:** the UI and the emails call them "Disposition", in German
+and English alike. `DISPATCH_NAME` in `.env` sets another name, e.g.
+`DISPATCH_NAME=Einsatzleitung`; it is not translated. The German texts say "die …"
+("die Disposition hat …", "bei der Disposition"), so a feminine noun in the singular
+fits (Einsatzleitung, Leitstelle, Kreisbereitschaftsleitung).
+
 The rules live in `accounts/permissions.py`, `duties/permissions.py` and
 `billing/permissions.py`. Admins and dispatchers must use two-factor authentication
 (see "Sign-in and accounts").

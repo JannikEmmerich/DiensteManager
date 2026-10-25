@@ -1,5 +1,5 @@
 {% load i18n duty_tags %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
-{% blocktranslate trimmed with unit=billing.unit.name %}The dispatchers have created a statement of the duty pay for {{ unit }}:{% endblocktranslate %}
+{% blocktranslate trimmed with unit=billing.unit.name %}The {{ DISPATCH_NAME }} has created a statement of the duty pay for {{ unit }}:{% endblocktranslate %}
 
 {% translate "Number:" %} {{ billing.number }}
 {% translate "Total:" %} {{ billing.total|money }}

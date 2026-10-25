@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from accounts.forms import clean_unit_selection, unit_selection_fields
 from accounts.models import CalendarFeed, Unit
 from accounts.permissions import is_dispatcher
+from core.names import dispatch_text
 
 from . import staffing
 from .models import Duty, DutyPosition, Qualification, Report
@@ -378,7 +379,9 @@ class WithdrawalRequestForm(forms.ModelForm):
         fields = ["withdrawal_note"]
         labels = {"withdrawal_note": _("Reason (optional)")}
         help_texts = {
-            "withdrawal_note": _("For the dispatchers, e.g. who could step in instead."),
+            "withdrawal_note": dispatch_text(
+                _("For the %(DISPATCH_NAME)s, e.g. who could step in instead.")
+            ),
         }
 
 
