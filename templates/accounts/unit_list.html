@@ -25,4 +25,8 @@
     {% else %}
         <p class="text-body-secondary">{% translate "No units yet." %}</p>
     {% endif %}
+
+    <h2 class="h5 mt-4">{% translate "Internal accounts" %}</h2>
+    <p class="text-body-secondary">{% translate "Dispatchers and admins; they belong to no unit." %}</p>
+    {% include "accounts/_account_table.html" %}
 {% endblock content %}

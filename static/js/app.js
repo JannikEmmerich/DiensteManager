@@ -16,14 +16,17 @@ document.addEventListener("change", (event) => {
     }
 });
 
-// Shows or hides elements with data-hidden-if="field=value": hidden while the radio
-// button "field" with that value is checked, e.g. the rates while there is no duty pay.
+// Shows or hides elements with data-hidden-if="field=value": hidden while the field
+// (radio buttons or a select) has that value, e.g. the rates while there is no duty pay.
 // Fields inside are disabled meanwhile, so that they are neither checked nor sent.
 function updateHiddenIf() {
     for (const element of document.querySelectorAll("[data-hidden-if]")) {
         const [name, value] = element.dataset.hiddenIf.split("=");
-        const checked = element.closest("form")?.querySelector(`[name="${name}"]:checked`);
-        element.hidden = checked?.value === value;
+        const form = element.closest("form");
+        const field =
+            form?.querySelector(`input[name="${name}"]:checked`) ||
+            form?.querySelector(`select[name="${name}"]`);
+        element.hidden = field?.value === value;
         for (const field of element.querySelectorAll("input, select, textarea")) {
             field.disabled = element.hidden;
         }
@@ -31,7 +34,7 @@ function updateHiddenIf() {
 }
 
 document.addEventListener("change", (event) => {
-    if (event.target.type === "radio") {
+    if (event.target.matches("input[type=radio], select")) {
         updateHiddenIf();
     }
 });

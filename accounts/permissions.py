@@ -1,9 +1,13 @@
 """Central permission checks: who may invite whom, view which unit, block whom?
 
-- Admins (superusers): everything; the only ones who may invite or block dispatchers.
-- Dispatchers (internal): manage all units, invite and block unit leads and members.
-- Unit leads: only their own unit; invite and block unit leads and members there.
+- Admins (superusers): everything; the only ones who may invite or block dispatchers,
+  and who may change all data of other accounts (name, email, role, unit, …).
+- Dispatchers (internal): manage all units, invite and block unit leads and members,
+  switch accounts of all units between unit lead and member.
+- Unit leads: only their own unit; invite and block unit leads and members there and
+  switch them between unit lead and member.
 - Members: no management permissions.
+- Nobody changes or blocks their own account here.
 
 Accounts of the roles in MFA_REQUIRED_ROLES (default: dispatchers and admins) must use
 two-factor authentication.
@@ -87,3 +91,19 @@ def can_block_account(user, target):
     if is_dispatcher(user):
         return True
     return is_unit_lead(user) and target.unit_id == user.unit_id
+
+
+def can_change_role(user, target):
+    """Switch another account of a unit between unit lead and member."""
+    if not user.is_authenticated or target.pk == user.pk or target.unit_id is None:
+        return False
+    if target.is_superuser:
+        return user.is_superuser
+    if is_dispatcher(user):
+        return True
+    return is_unit_lead(user) and target.unit_id == user.unit_id
+
+
+def can_edit_account(user, target):
+    """Change all data of another account, including the role "dispatcher" and the unit."""
+    return user.is_authenticated and user.is_superuser and target.pk != user.pk

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Edit account" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="h3 mb-1">{% translate "Edit account" %}</h1>
+            <p class="text-body-secondary">
+                {{ account }}{% if account.is_superuser %} · {% translate "Admin" %}{% endif %}
+            </p>
+            <p>
+                {% blocktranslate trimmed %}
+                    As an admin you can change all data of this account. A new email address
+                    counts as confirmed; the person signs in with it from now on.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                {% for field in form.personal_fields %}
+                    {% if field.name == "unit" %}
+                        <div data-hidden-if="role=dispatcher">{% include "core/_field.html" %}</div>
+                    {% else %}
+                        {% include "core/_field.html" %}
+                    {% endif %}
+                {% endfor %}
+                <h2 class="h5 mt-4">{% translate "Email notifications" %}</h2>
+                {% for field in form.notification_fields %}
+                    {% include "core/_field.html" %}
+                {% endfor %}
+                <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+                <a class="btn btn-link" href="{% if account.unit %}{{ account.unit.get_absolute_url }}{% else %}{% url 'unit_list' %}{% endif %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

@@ -19,7 +19,14 @@ from django.views.decorators.http import require_POST
 from django.views.i18n import set_language as django_set_language
 
 from . import invitations, permissions
-from .forms import AcceptInvitationForm, InvitationForm, ProfileForm, UnitForm
+from .forms import (
+    AcceptInvitationForm,
+    AccountForm,
+    InvitationForm,
+    ProfileForm,
+    RoleForm,
+    UnitForm,
+)
 from .models import Unit, User
 
 logger = logging.getLogger(__name__)
@@ -183,7 +190,16 @@ def unit_list(request):
     if not permissions.is_dispatcher(request.user):
         raise PermissionDenied
     units = Unit.objects.annotate(account_count=Count("members"))
-    return render(request, "accounts/unit_list.html", {"units": units})
+    internal = User.objects.filter(unit__isnull=True)
+    return render(
+        request,
+        "accounts/unit_list.html",
+        {
+            "units": units,
+            "accounts": _account_rows(request.user, internal),
+            "role_choices": RoleForm.base_fields["role"].choices,
+        },
+    )
 
 
 def unit_create(request):
@@ -213,10 +229,7 @@ def unit_detail(request, pk):
     unit = get_object_or_404(Unit, pk=pk)
     if not permissions.can_view_unit(request.user, unit):
         raise PermissionDenied
-    accounts = [
-        (account, permissions.can_block_account(request.user, account))
-        for account in unit.members.all()
-    ]
+    accounts = _account_rows(request.user, unit.members.all())
     pending = unit.invitations.filter(
         accepted_at__isnull=True, revoked_at__isnull=True
     ).select_related("unit", "invited_by")
@@ -226,12 +239,59 @@ def unit_detail(request, pk):
         {
             "unit": unit,
             "accounts": accounts,
+            "role_choices": RoleForm.base_fields["role"].choices,
             "invitations": pending,
             "can_invite_here": permissions.invitable_units(request.user)
             .filter(pk=unit.pk)
             .exists(),
         },
     )
+
+
+def _account_rows(user, accounts):
+    """The accounts with what ``user`` may do with each of them."""
+    return [
+        {
+            "account": account,
+            "can_block": permissions.can_block_account(user, account),
+            "can_change_role": permissions.can_change_role(user, account),
+            "can_edit": permissions.can_edit_account(user, account),
+        }
+        for account in accounts
+    ]
+
+
+@require_POST
+def account_role(request, pk):
+    """Switches an account of a unit between unit lead and member."""
+    target = get_object_or_404(User, pk=pk)
+    if not permissions.can_change_role(request.user, target):
+        raise PermissionDenied
+    form = RoleForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, _("Please choose a role."))
+    elif form.cleaned_data["role"] != target.role:
+        target.role = form.cleaned_data["role"]
+        target.save(update_fields=["role"])
+        messages.success(
+            request,
+            _("%(account)s is now: %(role)s.")
+            % {"account": target, "role": target.get_role_display()},
+        )
+    return _redirect_back(request, target.unit)
+
+
+def account_edit(request, pk):
+    """Admins change all data of another account."""
+    target = get_object_or_404(User, pk=pk)
+    if not permissions.can_edit_account(request.user, target):
+        raise PermissionDenied
+    form = AccountForm(request.POST or None, instance=target)
+    if request.method == "POST" and form.is_valid():
+        account = form.save()
+        messages.success(request, _("Saved."))
+        return redirect(account.unit or "unit_list")
+    return render(request, "accounts/account_form.html", {"form": form, "account": target})
 
 
 @require_POST
