@@ -51,7 +51,7 @@ jobs:
       DATABASE_URL: ${{ matrix.database == 'postgres' && 'postgres://dienstemanager:dienstemanager@localhost:5432/dienstemanager' || 'sqlite:///ci.sqlite3' }}
       DJANGO_SECRET_KEY: ci-only-secret-key
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check the version tag against pyproject.toml and CHANGELOG.md
         if: startsWith(github.ref, 'refs/tags/v')
@@ -93,7 +93,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Image name
         id: image
@@ -156,7 +156,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Create or update the release
         env:
