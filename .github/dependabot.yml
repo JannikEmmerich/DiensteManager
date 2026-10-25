@@ -2,7 +2,8 @@
 # each ecosystem are grouped into one pull request.
 version: 2
 updates:
-  - package-ecosystem: pip
+  # The Python packages: pyproject.toml and the exact versions in uv.lock.
+  - package-ecosystem: uv
     directory: /
     schedule:
       interval: weekly
