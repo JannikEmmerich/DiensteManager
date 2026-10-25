@@ -32,6 +32,13 @@ def validate_bic(value):
         raise ValidationError(_("This is not a valid BIC."), code="invalid_bic")
 
 
+def mask_iban(iban):
+    """Only the country, the check digits and the last four characters, for the history."""
+    if not iban:
+        return iban
+    return format_iban(iban[:4] + "*" * (len(iban) - 8) + iban[-4:])
+
+
 def format_iban(iban):
     """Groups of four, e.g. "DE89 3704 0044 0532 0130 00"."""
     return " ".join(iban[i : i + 4] for i in range(0, len(iban), 4))

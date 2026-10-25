@@ -104,6 +104,12 @@
                         <p class="text-body-secondary">{% translate "No bank details yet. The duty pay is transferred to this account." %}</p>
                     {% endif %}
                     <a class="btn btn-sm btn-outline-primary" href="{% url 'bank_account_edit' unit.pk %}">{% if bank_account %}{% translate "Change" %}{% else %}{% translate "Enter bank details" %}{% endif %}</a>
+                    {% if bank_history %}
+                        <details class="mt-3">
+                            <summary class="small">{% translate "Changes of the bank details" %}</summary>
+                            {% include "lifecycle/_history.html" with entries=bank_history %}
+                        </details>
+                    {% endif %}
                 </div>
             </div>
             <h2 class="h5">{% translate "Statements" %}</h2>

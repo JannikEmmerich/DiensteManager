@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with unit=bank_account.unit.name name=changed_by %}{{ name }} has changed the bank details of {{ unit }}. The duty pay is transferred to this account from now on:{% endblocktranslate %}
+
+{% translate "Account holder:" %} {{ bank_account.account_holder }}
+{% translate "IBAN:" %} {{ iban }}
+
+{% translate "If this change was not agreed, please contact the dispatchers right away." %}
+{{ unit_pay_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

@@ -15,7 +15,8 @@ def unit_selection_fields(label, help_text):
     all_units = forms.TypedChoiceField(
         label=label,
         choices=[("True", _("All units")), ("False", _("Only the selected units"))],
-        coerce=lambda value: value == "True",
+        # Also for the stored value (True), so that has_changed() compares correctly.
+        coerce=lambda value: value is True or value == "True",
         widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
         initial="True",
     )

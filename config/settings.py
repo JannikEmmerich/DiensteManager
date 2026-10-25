@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "duties",
     "mailings",
     "billing",
+    "lifecycle",
 ]
 
 MIDDLEWARE = [
@@ -199,6 +200,14 @@ MFA_TOTP_ISSUER = SITE_NAME
 ALLAUTH_TRUSTED_PROXY_COUNT = env.int("ALLAUTH_TRUSTED_PROXY_COUNT", default=0)
 
 INVITATION_VALIDITY_DAYS = env.int("INVITATION_VALIDITY_DAYS", default=14)
+
+# Data lifecycle: retention periods applied by "manage.py apply_retention" (daily in the
+# housekeeping container); 0 keeps the data forever. See "Data lifecycle" in the README.
+RETENTION_REPORTS_DAYS = env.int("RETENTION_REPORTS_DAYS", default=365)
+RETENTION_HISTORY_DAYS = env.int("RETENTION_HISTORY_DAYS", default=730)
+RETENTION_MAILINGS_DAYS = env.int("RETENTION_MAILINGS_DAYS", default=365)
+RETENTION_INVITATIONS_DAYS = env.int("RETENTION_INVITATIONS_DAYS", default=180)
+RETENTION_BILLINGS_YEARS = env.int("RETENTION_BILLINGS_YEARS", default=10)
 
 
 # --- Email ---------------------------------------------------------------------------

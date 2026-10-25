@@ -88,6 +88,40 @@ change is saved anyway and a warning is shown.
   (`billing/fonts/`, Bitstream Vera licence), so that names like "Şahin" or "Łukasz"
   print correctly.
 
+## Data lifecycle
+
+### Change history
+
+Every change of a duty, a report, a billing or a bank account is recorded: who did what
+and when, with the old and the new value of each changed field (`lifecycle` app).
+
+- **Duties:** created, changed (with the fields), released, cancelled, deleted; their
+  reports: reported, entered by the dispatchers, confirmed, declined, withdrawn. Shown
+  under "Change history" on the duty, to dispatchers only (it names helpers of all units).
+- **Billings:** created, marked as paid, voided – on the statement, for everyone who can
+  see it.
+- **Bank accounts:** created and changed, on the duty pay overview. IBANs appear masked
+  (`DE89 **** **** **** **30 00`) in the history. A change of account holder, IBAN or
+  BIC is emailed to the unit leads, and creating a statement warns if the bank details
+  changed within the last 30 days – a changed IBAN does not go unnoticed.
+
+### Retention periods
+
+`manage.py apply_retention` (`--dry-run` shows what it would do) anonymises and deletes
+data whose time has come. With Docker Compose, the `housekeeping` container runs it once
+a day. The periods are set in `.env`; `0` keeps the data forever.
+
+| Data | What happens | Setting (default) |
+|---|---|---|
+| Reports (helper name, qualification, note) | anonymised after the end of the duty; the number of helpers stays. Helpers that can still be billed are kept until they are billed – the statement keeps its own copy | `RETENTION_REPORTS_DAYS` (365) |
+| Change history | deleted; for anonymised reports right away | `RETENTION_HISTORY_DAYS` (730) |
+| Emails from dispatchers | deleted after sending | `RETENTION_MAILINGS_DAYS` (365) |
+| Accepted, revoked and expired invitations | deleted after acceptance, revocation or expiry | `RETENTION_INVITATIONS_DAYS` (180) |
+| Paid and cancelled billings | deleted after this many full calendar years (accounting records); open ones never | `RETENTION_BILLINGS_YEARS` (10) |
+
+Duties, units, accounts and bank accounts are current data and not deleted
+automatically; blocked accounts can be deleted in the Django admin.
+
 ## Emails from dispatchers
 
 Dispatchers write emails to the units under *Emails → Write an email*, or with the
@@ -302,12 +336,13 @@ accounts/    users, units, invitations, permissions, HiOrg sign-in adapter, lang
 duties/      duties, reports, their permissions and email notifications
 mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
 billing/     duty pay overview, bank details, billings and their PDF
+lifecycle/   change history and retention periods (apply_retention)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
 static/      app.css and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
-docker/      container entry point
+docker/      container entry point and the daily housekeeping loop
 .github/     CI and release workflow, image clean-up, Dependabot, release notes script
 ```
 

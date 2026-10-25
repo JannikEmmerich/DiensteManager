@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktranslate trimmed with unit=bank_account.unit.name %}Bank details of {{ unit }} changed{% endblocktranslate %}

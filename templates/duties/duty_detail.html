@@ -131,7 +131,7 @@
                     {% for report, can_withdraw, can_decide in reports %}
                         <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
                             {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
-                            <td>{{ report.name }}</td>
+                            <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
                             <td>{{ report.qualification|default:"–" }}</td>
                             <td class="small">{{ report.note|default:"–" }}</td>
                             <td>
@@ -173,5 +173,12 @@
         </div>
     {% else %}
         <p class="text-body-secondary">{% translate "No helpers reported yet." %}</p>
+    {% endif %}
+
+    {% if history is not None %}
+        <details class="mt-4">
+            <summary class="h5">{% translate "Change history" %}</summary>
+            {% include "lifecycle/_history.html" with entries=history %}
+        </details>
     {% endif %}
 {% endblock content %}

@@ -36,7 +36,8 @@ class BankAccount(models.Model):
         verbose_name_plural = _("bank accounts")
 
     def __str__(self):
-        return f"{self.account_holder}, {self.iban_display}"
+        # Without the IBAN: the text ends up in the change history.
+        return f"{self.unit}: {self.account_holder}"
 
     @property
     def iban_display(self):
