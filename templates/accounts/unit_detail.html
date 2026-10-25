@@ -22,50 +22,7 @@
 
     <h2 class="h5">{% translate "Accounts" %}</h2>
     {% if accounts %}
-        <div class="table-responsive mb-4">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>{% translate "Name" %}</th>
-                        <th>{% translate "Email address" %}</th>
-                        <th>{% translate "Role" %}</th>
-                        <th>{% translate "Access" %}</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for account, can_block in accounts %}
-                        <tr>
-                            <td>{{ account.get_full_name|default:"–" }}</td>
-                            <td>{{ account.email }}</td>
-                            <td>{{ account.get_role_display }}</td>
-                            <td>
-                                {% if account.is_active %}
-                                    <span class="badge text-bg-success">{% translate "Active" %}</span>
-                                {% else %}
-                                    <span class="badge text-bg-secondary">{% translate "Blocked" %}</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-end">
-                                {% if can_block %}
-                                    <form method="post" action="{% url 'set_account_active' account.pk %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="next" value="{{ request.path }}">
-                                        {% if account.is_active %}
-                                            <input type="hidden" name="active" value="0">
-                                            <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Block" %}</button>
-                                        {% else %}
-                                            <input type="hidden" name="active" value="1">
-                                            <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Unblock" %}</button>
-                                        {% endif %}
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% include "accounts/_account_table.html" %}
     {% else %}
         <p class="text-body-secondary mb-4">{% translate "No accounts yet." %}</p>
     {% endif %}

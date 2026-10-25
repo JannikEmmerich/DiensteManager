@@ -22,10 +22,18 @@ the Docker setup are done. Importing duties from HiOrg-Server comes next.
 
 | Role | May |
 |---|---|
-| **Admin** (superuser) | everything incl. the Django admin `/admin/`; the only role that invites or blocks dispatchers |
-| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports, add helpers themselves; send emails to the units; create billings |
-| **Unit lead** | view their own unit, invite and block unit leads and members there; report helpers, withdraw any report of the unit; see the duty pay and billings of the unit, enter its bank details |
+| **Admin** (superuser) | everything incl. the Django admin `/admin/`; the only role that invites or blocks dispatchers; edits all data of other accounts in the portal (name, email, role incl. dispatcher, unit, language, notifications) |
+| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members, switch accounts of all units between unit lead and member; create, release and cancel duties, confirm or decline reports, add helpers themselves; send emails to the units; create billings; edit the units' names and bank details |
+| **Unit lead** | view their own unit, invite and block unit leads and members there and switch them between unit lead and member; report helpers, withdraw any report of the unit; see the duty pay and billings of the unit, enter its bank details |
 | **Member** | see the duties offered to their unit, report helpers, withdraw their own reports |
+
+**Changing roles:** on the unit's page (*Units* or *My unit*), the role of each account
+can be switched between unit lead and member. Nobody changes their own role. Admins
+also get *Edit* for every other account – on the unit's page, and for dispatchers and
+admins under *Units → Internal accounts* – to change name, email address (it counts as
+confirmed and is used for signing in from then on), role (making someone a dispatcher
+or back; internal accounts belong to no unit), unit, language and notifications.
+Passwords and the admin status itself stay in the Django admin.
 
 The rules live in `accounts/permissions.py`, `duties/permissions.py` and
 `billing/permissions.py`. Admins and dispatchers must use two-factor authentication

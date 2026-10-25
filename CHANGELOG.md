@@ -7,14 +7,12 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
-### Removed
-
-- The email to the unit leads when a statement is marked as paid. They still get one
-  when a statement is created (with the PDF) or cancelled; the duty pay overview shows
-  which statements are paid.
-
 ### Added
 
+- Roles can be changed: unit leads switch the accounts of their unit between unit lead
+  and member, dispatchers those of all units (on the unit's page). Admins edit all data
+  of other accounts in the portal – name, email address, role (also dispatcher), unit,
+  language and notifications; the internal accounts are listed under *Units*.
 - Duties can be copied (button "Copy" on the duty page), e.g. for recurring events.
   The new duty form is prefilled with title, location, description, duty pay, offered
   units and positions; only date and times have to be entered. The copy is a draft
@@ -37,6 +35,12 @@ All notable changes are listed here. The format follows
   qualification", instead of empty rows (or one new row per save). Positions read
   "number × qualification"; the rates are only shown with duty pay. New qualifications
   come last in the order.
+
+### Removed
+
+- The email to the unit leads when a statement is marked as paid. They still get one
+  when a statement is created (with the PDF) or cancelled; the duty pay overview shows
+  which statements are paid.
 
 ### Fixed
 

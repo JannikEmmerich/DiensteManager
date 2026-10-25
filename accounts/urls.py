@@ -15,4 +15,6 @@ urlpatterns = [
     path("units/<int:pk>/", views.unit_detail, name="unit_detail"),
     path("units/<int:pk>/edit/", views.unit_update, name="unit_update"),
     path("users/<int:pk>/active/", views.set_account_active, name="set_account_active"),
+    path("users/<int:pk>/role/", views.account_role, name="account_role"),
+    path("users/<int:pk>/edit/", views.account_edit, name="account_edit"),
 ]

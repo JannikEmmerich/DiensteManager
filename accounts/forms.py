@@ -1,3 +1,4 @@
+from allauth.account.models import EmailAddress
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import SetPasswordMixin
@@ -6,6 +7,9 @@ from django.utils.translation import gettext_lazy as _
 
 from . import permissions
 from .models import LANGUAGE_CHOICES, Invitation, Role, Unit, User
+
+# The roles within a unit.
+UNIT_ROLES = [Role.UNIT_LEAD, Role.MEMBER]
 
 
 def unit_selection_fields(label, help_text):
@@ -183,6 +187,86 @@ class ProfileForm(forms.ModelForm):
                 "When helpers I reported are confirmed or declined, and when their duty "
                 "changes or is cancelled."
             )
+
+    def personal_fields(self):
+        return [field for field in self if field.name not in self.NOTIFICATION_FIELDS]
+
+    def notification_fields(self):
+        return [field for field in self if field.name in self.NOTIFICATION_FIELDS]
+
+
+class RoleForm(forms.Form):
+    """Unit lead or member: what unit leads and dispatchers may switch between."""
+
+    role = forms.ChoiceField(
+        label=_("Role"), choices=[(role.value, role.label) for role in UNIT_ROLES]
+    )
+
+
+class AccountForm(forms.ModelForm):
+    """All data of an account, for admins."""
+
+    NOTIFICATION_FIELDS = ProfileForm.NOTIFICATION_FIELDS
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "unit",
+            "language",
+            "notify_new_duties",
+            "notify_reports",
+            "notify_billing",
+            "email_delivery",
+        ]
+        labels = {
+            "notify_new_duties": _("New duties for the unit"),
+            "notify_reports": _("Reports"),
+            "notify_billing": _("Billings and changed bank details"),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True
+        self.fields["unit"].empty_label = _("– none (internal account) –")
+        self.fields["unit"].help_text = _("Internal accounts do not belong to a unit.")
+        self.fields["language"].choices = [
+            ("", _("Automatic (browser setting)")),
+            *LANGUAGE_CHOICES,
+        ]
+        if not settings.EMAIL_QUEUE:
+            del self.fields["email_delivery"]
+
+    def clean_email(self):
+        email = User.objects.normalize_email(self.cleaned_data["email"])
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError(_("An account with this email address already exists."))
+        if Invitation.objects.pending().filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                _("There is already a pending invitation for this email address.")
+            )
+        return email
+
+    def clean(self):
+        cleaned_data = super().clean()
+        role = cleaned_data.get("role")
+        if role == Role.DISPATCHER:
+            cleaned_data["unit"] = None
+        elif role in UNIT_ROLES and "unit" in cleaned_data and cleaned_data["unit"] is None:
+            self.add_error("unit", _("Please select a unit."))
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit)
+        if commit and "email" in self.changed_data:
+            # The address allauth signs in with and sends to; the admin vouches for it.
+            EmailAddress.objects.filter(user=user).delete()
+            EmailAddress.objects.create(user=user, email=user.email, primary=True, verified=True)
+        return user
 
     def personal_fields(self):
         return [field for field in self if field.name not in self.NOTIFICATION_FIELDS]
