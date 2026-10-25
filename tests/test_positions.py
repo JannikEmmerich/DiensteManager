@@ -86,6 +86,38 @@ def test_dispatcher_maintains_qualifications(client, dispatcher):
     assert not Qualification.objects.get(name="Emergency doctor").is_active
 
 
+def test_catalogue_rows(client, dispatcher):
+    client.force_login(dispatcher)
+    # Empty: one row to start with.
+    page = client.get(reverse("qualification_list")).text
+    assert 'name="qualifications-0-name"' in page
+    assert 'value="10"' in page
+    Qualification.objects.create(name="Paramedic", sort_order=20)
+    # Otherwise only the saved ones; new rows come last.
+    page = client.get(reverse("qualification_list")).text
+    assert 'name="qualifications-1-name"' not in page
+    assert "data-formset-add" in page
+    assert 'name="qualifications-__prefix__-sort_order" value="30"' in page
+
+
+def test_empty_new_qualification_rows_are_ignored(client, dispatcher):
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("qualification_list"),
+        {
+            "qualifications-TOTAL_FORMS": "2",
+            "qualifications-INITIAL_FORMS": "0",
+            "qualifications-0-name": "Paramedic",
+            "qualifications-0-sort_order": "10",
+            # Rendered before another dispatcher added a qualification: an outdated order.
+            "qualifications-1-sort_order": "10",
+            "qualifications-1-is_active": "on",
+        },
+    )
+    assert response["Location"] == reverse("qualification_list")
+    assert [q.name for q in Qualification.objects.all()] == ["Paramedic"]
+
+
 @pytest.mark.parametrize("user", ["unit_lead", "member"])
 def test_units_cannot_change_qualifications(client, request, user):
     client.force_login(request.getfixturevalue(user))
@@ -110,6 +142,20 @@ def test_duty_with_positions(client, dispatcher, paramedic):
         ("Paramedic (RS)", 2, Decimal("15.00")),
         ("any qualification", 3, Decimal("10.00")),
     ]
+
+
+def test_duty_form_rows(client, dispatcher, paramedic, first_aider):
+    client.force_login(dispatcher)
+    page = client.get(reverse("duty_create")).text
+    assert 'name="positions-0-count"' in page
+    assert 'name="positions-1-count"' not in page
+    assert 'name="positions-__prefix__-count"' in page
+    # The rates only matter with duty pay.
+    assert 'data-hidden-if="pay_type=none"' in page
+    duty, _rs, _sanh = _duty_with_positions(paramedic, first_aider)
+    page = client.get(reverse("duty_update", args=[duty.pk])).text
+    assert 'name="positions-1-count"' in page
+    assert 'name="positions-2-count"' not in page
 
 
 def test_each_qualification_only_once(client, dispatcher, paramedic):
@@ -177,9 +223,9 @@ def test_inactive_qualifications_only_for_existing_positions(dispatcher, paramed
     paramedic.is_active = False
     paramedic.save()
     formset = DutyPositionFormSet(instance=duty, prefix="positions")
-    existing, _other, new = formset.forms
+    existing, _other = formset.forms
     assert paramedic in existing.fields["qualification"].queryset
-    assert paramedic not in new.fields["qualification"].queryset
+    assert paramedic not in formset.empty_form.fields["qualification"].queryset
 
 
 def test_without_duty_pay_positions_have_no_rate(client, dispatcher, paramedic):
@@ -240,6 +286,63 @@ def test_units_report_helpers_for_positions(client, member, paramedic, first_aid
         ),
     )
     assert {(r.name, r.position) for r in Report.objects.all()} == {("Rita", rs), ("Sam", sanh)}
+
+
+def test_choices_show_the_open_places(client, member, unit, other_unit, paramedic, first_aider):
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    create_report(duty, unit, name="A", position=rs, status=Report.Status.CONFIRMED)
+    create_report(duty, other_unit, name="B", position=rs)
+    create_report(duty, unit, name="C", position=sanh, status=Report.Status.DECLINED)
+    client.force_login(member)
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert ">Paramedic (RS) – all taken</option>" in page
+    # Preselected: the first qualification with open places.
+    assert f'value="{sanh.pk}" selected>First aider (SanH) – 3 open</option>' in page
+    assert "<th>Qualification</th>" in page
+
+
+def test_single_qualification_is_named(client, member, paramedic):
+    duty = create_duty(helpers_needed=4)
+    duty.positions.update(qualification=paramedic)
+    client.force_login(member)
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert "Needed: 4 helpers with the qualification <strong>Paramedic (RS)</strong>." in page
+    assert 'name="form-0-position"' not in page
+
+
+def test_reports_show_the_qualification(
+    client, dispatcher, unit, unit_lead, paramedic, first_aider, mailoutbox
+):
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    any_position = DutyPosition.objects.create(duty=duty, count=1)
+    client.force_login(dispatcher)
+    client.post(
+        reverse("report_add", args=[duty.pk]),
+        {
+            "unit": unit.pk,
+            **_report_data(
+                {"position": rs.pk, "name": "Rita"}, {"position": any_position.pk, "name": "Ann"}
+            ),
+        },
+    )
+    assert "- Rita (RS)\n- Ann\n" in mailoutbox[0].body
+    # Older reports have the qualification as free text.
+    create_report(duty, unit, name="Olga", qualification="Doctor")
+    page = client.get(duty.get_absolute_url()).text
+    assert "<td>Paramedic (RS)</td>" in page
+    assert "<td>any qualification</td>" in page
+    assert "<td>Doctor</td>" in page
+
+
+def test_positions_are_listed_in_the_order_of_the_qualifications(
+    client, member, paramedic, first_aider
+):
+    duty, _rs, _sanh = _duty_with_positions(paramedic, first_aider)
+    paramedic.sort_order = 30
+    paramedic.save()
+    client.force_login(member)
+    page = client.get(duty.get_absolute_url()).text
+    assert page.index("3 × First aider (SanH)") < page.index("2 × Paramedic (RS)")
 
 
 def test_position_must_belong_to_the_duty(client, member, paramedic, first_aider):

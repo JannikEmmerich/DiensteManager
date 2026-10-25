@@ -234,6 +234,18 @@ class Duty(models.Model):
             return rate
         return Decimal(0)
 
+    def positions_with_staffing(self):
+        """The positions in their order, with the number of confirmed and pending reports."""
+        return (
+            self.positions.select_related("qualification")
+            .annotate(
+                confirmed_count=Count("reports", filter=Q(reports__status=Report.Status.CONFIRMED)),
+                pending_count=Count("reports", filter=Q(reports__status=Report.Status.REPORTED)),
+            )
+            # Meta.ordering is not applied to queries with GROUP BY.
+            .order_by(*DutyPosition._meta.ordering)
+        )
+
     def update_helpers_needed(self):
         """``helpers_needed`` is the sum of the positions."""
         total = self.positions.aggregate(total=Sum("count"))["total"] or 0
@@ -304,6 +316,14 @@ class DutyPosition(models.Model):
     def rate(self):
         return self.duty.pay_rate if self.pay_rate is None else self.pay_rate
 
+    @property
+    def open_count(self):
+        """Helpers still missing besides the confirmed and pending ones.
+
+        Only for positions from ``Duty.positions_with_staffing()``.
+        """
+        return max(self.count - self.confirmed_count - self.pending_count, 0)
+
 
 class Report(models.Model):
     """A helper whom a unit reports for a duty; the dispatchers confirm or decline."""
@@ -332,6 +352,8 @@ class Report(models.Model):
         related_name="reports",
     )
     name = models.CharField(_("name"), max_length=150)
+    # What units entered as free text before they reported helpers for a position; no
+    # longer asked for. The position says which qualification the helper is reported for.
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
     note = models.CharField(_("note"), max_length=500, blank=True)
     status = models.CharField(
@@ -405,6 +427,16 @@ class Report(models.Model):
 
     def pay_for(self, hours=None):
         return self.duty.pay_for(hours, self.pay_rate)
+
+    @property
+    def qualification_label(self):
+        """The qualification of the position, or "any qualification".
+
+        Older reports may have what the unit entered as free text instead.
+        """
+        if self.position_id and (self.position.qualification_id or not self.qualification):
+            return self.position.label
+        return self.qualification
 
     @property
     def withdrawal_requested(self):

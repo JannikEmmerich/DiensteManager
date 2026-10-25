@@ -1,0 +1,13 @@
+{% load i18n %}
+{# With a single position there is nothing to choose, so it is named here. #}
+{% with positions=formset.positions %}
+    {% if positions|length == 1 and positions.0.qualification %}
+        <p>
+            {% blocktranslate trimmed with qualification=positions.0.qualification count counter=positions.0.count %}
+                Needed: {{ counter }} helper with the qualification <strong>{{ qualification }}</strong>.
+            {% plural %}
+                Needed: {{ counter }} helpers with the qualification <strong>{{ qualification }}</strong>.
+            {% endblocktranslate %}
+        </p>
+    {% endif %}
+{% endwith %}

@@ -17,9 +17,12 @@
         <div class="row">
             <div class="col-md-6">{% include "core/_field.html" with field=unit_form.unit %}</div>
         </div>
-        {% include "duties/_report_rows.html" %}
-        <button class="btn btn-primary" type="submit">{% translate "Add and confirm" %}</button>
-        <button class="btn btn-outline-primary" type="submit" name="another" value="1">{% translate "Add and enter more" %}</button>
-        <a class="btn btn-link" href="{{ duty.get_absolute_url }}">{% translate "Cancel" %}</a>
+        {% include "duties/_report_positions.html" %}
+        {% translate "Add another helper" as add_label %}
+        {% include "core/_formset_table.html" %}
+        <div>
+            <button class="btn btn-primary" type="submit">{% translate "Add and confirm" %}</button>
+            <a class="btn btn-link" href="{{ duty.get_absolute_url }}">{% translate "Cancel" %}</a>
+        </div>
     </form>
 {% endblock content %}

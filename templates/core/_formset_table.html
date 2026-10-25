@@ -1,0 +1,22 @@
+{% load i18n %}
+{# The rows of a formset as a table; "add_label" names the button that adds a row. #}
+{# position-relative keeps the visually hidden labels inside the scrolling table on phones. #}
+<div data-formset="{{ formset.prefix }}">
+    {{ formset.management_form }}
+    {% for error in formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    <div class="table-responsive position-relative">
+        <table class="table align-top mb-2 formset-table">
+            <thead>
+                <tr>
+                    {% for field in formset.empty_form.visible_fields %}<th>{{ field.label }}</th>{% endfor %}
+                    <th class="col-width-3"><span class="visually-hidden">{% translate "Remove" %}</span></th>
+                </tr>
+            </thead>
+            <tbody data-formset-rows>
+                {% for form in formset %}{% include "core/_formset_row.html" %}{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <template data-formset-template>{% include "core/_formset_row.html" with form=formset.empty_form %}</template>
+    <button class="btn btn-sm btn-outline-secondary mb-3" type="button" data-formset-add hidden>+ {{ add_label }}</button>
+</div>

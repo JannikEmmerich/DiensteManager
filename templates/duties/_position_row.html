@@ -1,0 +1,29 @@
+{% load i18n form_tags %}
+<tr data-formset-row>
+    <td>
+        {% for hidden in position_form.hidden_fields %}{{ hidden }}{% endfor %}
+        <label class="visually-hidden" for="{{ position_form.count.id_for_label }}">{{ position_form.count.label }}</label>
+        {{ position_form.count|bs_widget }}
+        {% for error in position_form.count.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </td>
+    <td>
+        <label class="visually-hidden" for="{{ position_form.qualification.id_for_label }}">{% translate "Qualification" %}</label>
+        {{ position_form.qualification|bs_widget }}
+        {% for error in position_form.non_field_errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        {% for error in position_form.qualification.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </td>
+    <td data-hidden-if="pay_type=none">
+        <label class="visually-hidden" for="{{ position_form.pay_rate.id_for_label }}">{% translate "Own rate in euros" %}</label>
+        {{ position_form.pay_rate|bs_widget }}
+        {% for error in position_form.pay_rate.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </td>
+    <td>
+        {% if position_form.instance.pk %}
+            {# Saved positions are removed when saving the duty. #}
+            <label class="visually-hidden" for="{{ position_form.DELETE.id_for_label }}">{% translate "Remove" %}</label>
+            {{ position_form.DELETE|bs_widget }}
+        {% elif not forloop.first %}
+            <button class="btn-close mt-2" type="button" data-formset-remove aria-label="{% translate 'Remove row' %}" title="{% translate 'Remove row' %}"></button>
+        {% endif %}
+    </td>
+</tr>

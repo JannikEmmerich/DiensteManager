@@ -1,2 +1,2 @@
-{% for report in reports %}- {{ report.name }}{% if report.qualification %} ({{ report.qualification }}){% endif %}{% if with_status %}: {{ report.get_status_display }}{% elif report.note %} – {{ report.note }}{% endif %}
+{% for report in reports %}- {{ report.name }}{% with qualification=report.position.short_label|default:report.qualification %}{% if qualification %} ({{ qualification }}){% endif %}{% endwith %}{% if with_status %}: {{ report.get_status_display }}{% elif report.note %} – {{ report.note }}{% endif %}
 {% endfor %}

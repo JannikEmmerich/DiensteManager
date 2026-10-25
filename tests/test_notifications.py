@@ -113,14 +113,13 @@ def test_reports_notify_dispatchers_in_one_email(client, dispatcher, admin, memb
             "form-TOTAL_FORMS": "2",
             "form-INITIAL_FORMS": "0",
             "form-0-name": "Hanna Helper",
-            "form-0-qualification": "Paramedic",
             "form-1-name": "Paul Partner",
         },
     )
     assert _recipients(mailoutbox) == ["admin@example.org", "dispatcher@example.org"]
     message = mailoutbox[0]
     assert message.subject == "[DiensteManager] Unit North reported 2 helpers for Marathon"
-    assert "- Hanna Helper (Paramedic)\n- Paul Partner\n" in message.body
+    assert "- Hanna Helper\n- Paul Partner\n" in message.body
 
 
 def test_withdrawal_notifies_dispatchers(client, dispatcher, member, unit, mailoutbox):

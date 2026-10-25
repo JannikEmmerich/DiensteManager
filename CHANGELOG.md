@@ -7,6 +7,23 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Reporting helpers is simpler: the form starts with one row, "Add another helper"
+  adds more. For each helper the unit chooses one of the qualifications the duty asks
+  for, with the places still open; the separate free-text qualification is gone (older
+  reports keep theirs). The dispatchers' "Add helpers" works the same way. "Report and
+  add more" is gone.
+- The positions of a duty ("Helpers needed") and the catalogue of qualifications
+  likewise start with the rows they need and get more with "Add another
+  qualification", instead of empty rows (or one new row per save). Positions read
+  "number × qualification"; the rates are only shown with duty pay. New qualifications
+  come last in the order.
+
+### Fixed
+
+- The positions on a duty's page are listed in the order of the qualifications.
+
 ## [0.3.0] – 2026-10-25
 
 When updating from 0.2.0: units can no longer withdraw confirmed reports themselves;

@@ -227,10 +227,7 @@ def test_unit_lead_reports_several_helpers(client, unit_lead, unit):
     assert client.get(reverse("report_create", args=[duty.pk])).status_code == 200
     response = client.post(
         reverse("report_create", args=[duty.pk]),
-        _report_data(
-            {"name": "Hanna Helper", "qualification": "Paramedic"},
-            {"name": "Paul Partner", "note": "Arrives at 9"},
-        ),
+        _report_data({"name": "Hanna Helper"}, {"name": "Paul Partner", "note": "Arrives at 9"}),
     )
     assert response.status_code == 302
     assert response["Location"] == duty.get_absolute_url()
@@ -238,7 +235,7 @@ def test_unit_lead_reports_several_helpers(client, unit_lead, unit):
     assert [r.name for r in reports] == ["Hanna Helper", "Paul Partner"]
     assert all(r.unit == unit and r.reported_by == unit_lead for r in reports)
     assert all(r.status == Report.Status.REPORTED for r in reports)
-    assert reports[0].qualification == "Paramedic"
+    assert reports[1].note == "Arrives at 9"
 
 
 def test_member_may_report(client, member):
@@ -248,13 +245,17 @@ def test_member_may_report(client, member):
     assert Report.objects.get().reported_by == member
 
 
-def test_report_and_add_more(client, member):
+@pytest.mark.parametrize("url_name", ["report_create", "report_add"])
+def test_report_forms_start_with_one_row(client, member, dispatcher, url_name):
     duty = create_duty()
-    client.force_login(member)
-    response = client.post(
-        reverse("report_create", args=[duty.pk]), {**_report_data({"name": "Mia"}), "another": "1"}
-    )
-    assert response["Location"] == reverse("report_create", args=[duty.pk])
+    client.force_login(dispatcher if url_name == "report_add" else member)
+    page = client.get(reverse(url_name, args=[duty.pk])).text
+    assert 'name="form-0-name"' in page
+    assert 'name="form-1-name"' not in page
+    # The button copies the empty row from the template.
+    assert "data-formset-add" in page
+    assert 'name="form-__prefix__-name"' in page
+    assert 'name="form-0-qualification"' not in page  # no free text any more
 
 
 def test_at_least_one_helper_is_required(client, member):
@@ -509,7 +510,7 @@ def test_dispatcher_adds_confirmed_helpers(client, dispatcher, unit, unit_lead, 
     assert client.get(reverse("report_add", args=[duty.pk])).status_code == 200
     response = client.post(
         reverse("report_add", args=[duty.pk]),
-        _add_data(unit, {"name": "Erik Email", "qualification": "Paramedic"}),
+        _add_data(unit, {"name": "Erik Email", "note": "By phone"}),
     )
     assert response["Location"] == duty.get_absolute_url()
     report = Report.objects.get()
@@ -518,7 +519,7 @@ def test_dispatcher_adds_confirmed_helpers(client, dispatcher, unit, unit_lead, 
     assert report.decided_by == dispatcher
     assert [m.to for m in mailoutbox] == [["lead@example.org"]]
     assert mailoutbox[0].subject == "[DiensteManager] Helpers of your unit entered for Marathon"
-    assert "- Erik Email (Paramedic)" in mailoutbox[0].body
+    assert "- Erik Email – By phone" in mailoutbox[0].body
 
 
 def test_dispatcher_adds_helpers_after_the_duty(client, dispatcher, unit):

@@ -208,6 +208,10 @@ body {
 }
 
 /* Fixed column widths (inline style attributes are forbidden by the Content Security Policy). */
+.col-width-3 {
+    width: 3rem;
+}
+
 .col-width-6 {
     width: 6rem;
 }
@@ -222,4 +226,10 @@ body {
 
 .col-width-10 {
     width: 10rem;
+}
+
+/* Rows of formsets: on narrow screens the table scrolls instead of squeezing the fields. */
+.formset-table .form-control,
+.formset-table .form-select {
+    min-width: 9rem;
 }

@@ -1,6 +1,6 @@
 from django import forms
 from django.core.validators import MaxValueValidator
-from django.db.models import Q
+from django.db.models import Max, Q
 from django.utils.translation import gettext_lazy as _
 
 from accounts.forms import clean_unit_selection, unit_selection_fields
@@ -107,7 +107,7 @@ class DutyForm(forms.ModelForm):
 class DutyPositionForm(forms.ModelForm):
     class Meta:
         model = DutyPosition
-        fields = ["qualification", "count", "pay_rate"]
+        fields = ["count", "qualification", "pay_rate"]
         widgets = {
             "count": forms.NumberInput(attrs={"min": 1, "max": MAX_HELPERS}),
             "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
@@ -124,11 +124,10 @@ class DutyPositionForm(forms.ModelForm):
 
 
 class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
-    """The positions of a duty: at least one, each qualification only once."""
+    """The positions of a duty: at least one, each qualification only once.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.extra = 2 if self.instance.pk is None else 1
+    More rows are added in the browser ("Add another qualification").
+    """
 
     def clean(self):
         super().clean()
@@ -176,6 +175,7 @@ DutyPositionFormSet = forms.inlineformset_factory(
     DutyPosition,
     form=DutyPositionForm,
     formset=BaseDutyPositionFormSet,
+    extra=0,
     min_num=1,
     validate_min=True,
     can_delete=True,
@@ -188,8 +188,32 @@ class QualificationForm(forms.ModelForm):
         fields = ["name", "abbreviation", "sort_order", "is_active"]
         widgets = {"sort_order": forms.NumberInput(attrs={"min": 0, "step": 10})}
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk is None:
+            # New qualifications come last.
+            last = Qualification.objects.aggregate(last=Max("sort_order"))["last"]
+            self.initial["sort_order"] = (last or 0) + 10
 
-QualificationFormSet = forms.modelformset_factory(Qualification, form=QualificationForm, extra=3)
+    def has_changed(self):
+        # A new row without name and abbreviation is empty, whatever its order says.
+        if self.instance.pk is None:
+            return bool(self["name"].value() or self["abbreviation"].value())
+        return super().has_changed()
+
+
+class BaseQualificationFormSet(forms.BaseModelFormSet):
+    """The catalogue; more rows are added in the browser ("Add another qualification")."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # An empty row to start with, as long as there are none.
+        self.extra = 0 if self.get_queryset().exists() else 1
+
+
+QualificationFormSet = forms.modelformset_factory(
+    Qualification, form=QualificationForm, formset=BaseQualificationFormSet
+)
 
 
 class HelperUnitForm(forms.Form):
@@ -205,37 +229,45 @@ class HelperUnitForm(forms.Form):
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ["position", "name", "qualification", "note"]
-        labels = {
-            "name": _("Name of the helper"),
-            "qualification": _("Qualification of the helper"),
-        }
-        widgets = {
-            "qualification": forms.TextInput(attrs={"placeholder": _("e.g. first aider")}),
-        }
+        fields = ["name", "position", "note"]
+        labels = {"name": _("Name of the helper"), "position": _("Qualification")}
 
-    def __init__(self, *args, duty, **kwargs):
+    def __init__(self, *args, duty, positions, **kwargs):
         super().__init__(*args, **kwargs)
-        positions = list(duty.positions.select_related("qualification"))
         if len(positions) <= 1:
             # Nothing to choose: the only position (if any) is taken.
             del self.fields["position"]
             self.instance.position = positions[0] if positions else None
             return
+        labels = {position.pk: position_choice_label(position) for position in positions}
         field = self.fields["position"]
-        field.queryset = duty.positions.all()
-        field.label_from_instance = lambda position: position.label
+        field.queryset = duty.positions.select_related("qualification")
+        field.label_from_instance = lambda position: labels.get(position.pk, position.label)
         field.required = True
         field.empty_label = None
-        # The first position is preselected, so that empty rows count as unchanged.
-        field.initial = positions[0].pk
+        # The first position with open places is preselected, so that empty rows count as
+        # unchanged.
+        field.initial = next((p for p in positions if p.open_count), positions[0]).pk
+
+
+def position_choice_label(position):
+    """E.g. "Paramedic (RS) – 2 open", for a position from ``positions_with_staffing()``."""
+    label = str(position.qualification) if position.qualification else _("Any qualification")
+    if position.open_count:
+        return _("%(position)s – %(count)d open") % {
+            "position": label,
+            "count": position.open_count,
+        }
+    return _("%(position)s – all taken") % {"position": label}
 
 
 class BaseReportFormSet(forms.BaseFormSet):
-    """Several helpers at once; empty rows are ignored."""
+    """Several helpers at once; more rows are added in the browser, empty ones are ignored."""
 
     def __init__(self, *args, duty, unit, **kwargs):
-        kwargs.setdefault("form_kwargs", {})["duty"] = duty
+        form_kwargs = kwargs.setdefault("form_kwargs", {})
+        form_kwargs["duty"] = duty
+        form_kwargs["positions"] = list(duty.positions_with_staffing())
         super().__init__(*args, **kwargs)
         self.duty = duty
         self.unit = unit
@@ -266,9 +298,13 @@ class BaseReportFormSet(forms.BaseFormSet):
         """Unsaved reports of the filled-in rows."""
         return [form.save(commit=False) for form in self.forms if form.has_changed()]
 
+    @property
+    def positions(self):
+        return self.form_kwargs["positions"]
+
 
 ReportFormSet = forms.formset_factory(
-    ReportForm, formset=BaseReportFormSet, extra=2, min_num=1, validate_min=True
+    ReportForm, formset=BaseReportFormSet, extra=0, min_num=1, validate_min=True
 )
 
 
