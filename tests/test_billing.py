@@ -247,11 +247,11 @@ def test_hours_are_required_for_hourly_pay(client, dispatcher, unit):
     assert not Billing.objects.exists()
 
 
-def test_at_least_one_helper(client, dispatcher, unit):
+def test_at_least_one_line(client, dispatcher, unit):
     report = _confirmed(_paid_duty(), unit)
     client.force_login(dispatcher)
     response = _bill(client, unit, {f"hours_{report.pk}": "4"})
-    assert "Please select at least one helper." in response.text
+    assert "Please select at least one helper or add a line." in response.text
     assert not Billing.objects.exists()
 
 
@@ -283,6 +283,8 @@ def test_mark_paid(client, dispatcher, unit, unit_lead, mailoutbox):
     )
     mailoutbox.clear()
     client.force_login(dispatcher)
+    page = client.get(billing.get_absolute_url()).text
+    assert 'data-confirm="Mark this statement as paid?"' in page  # nobody is notified
     client.post(reverse("billing_mark_paid", args=[billing.pk]))
     billing.refresh_from_db()
     assert billing.status == Billing.Status.PAID
@@ -397,3 +399,122 @@ def test_blocked_unit_leads_get_no_billing_emails(dispatcher, unit, rf, mailoutb
     request.user = dispatcher
     notifications.billing_created(request, billing)
     assert mailoutbox == []
+
+
+# --- Changing values and other items ------------------------------------------------------------
+
+
+def _extra(*rows):
+    data = {"extra-TOTAL_FORMS": str(len(rows)), "extra-INITIAL_FORMS": "0"}
+    for index, row in enumerate(rows):
+        for field, value in row.items():
+            data[f"extra-{index}-{field}"] = value
+    return data
+
+
+def test_every_value_of_a_line_can_be_changed(client, dispatcher, unit):
+    report = _confirmed(_paid_duty(title="Marathon"), unit, name="Hanna Helper")
+    client.force_login(dispatcher)
+    page = client.get(reverse("billing_create", args=[unit.pk])).text
+    assert f'name="title_{report.pk}" value="Marathon"' in page
+    assert f'name="rate_{report.pk}" value="12.50"' in page
+    _bill(
+        client,
+        unit,
+        {
+            f"include_{report.pk}": "on",
+            f"date_{report.pk}": "2026-05-01",
+            f"title_{report.pk}": "City marathon",
+            f"helper_{report.pk}": "Hanna Helper-Smith",
+            f"qualification_{report.pk}": "RS",
+            f"rate_{report.pk}": "15",
+            f"hours_{report.pk}": "3",
+        },
+    )
+    (item,) = Billing.objects.get().items.all()
+    assert (item.duty_date.isoformat(), item.duty_title) == ("2026-05-01", "City marathon")
+    assert (item.helper_display, item.rate, item.hours) == (
+        "Hanna Helper-Smith (RS)",
+        Decimal("15.00"),
+        Decimal("3.00"),
+    )
+    assert item.amount == Decimal("45.00")
+    assert item.report == report
+
+
+def test_changed_values_must_not_be_empty(client, dispatcher, unit):
+    report = _confirmed(_paid_duty(), unit)
+    client.force_login(dispatcher)
+    response = _bill(
+        client,
+        unit,
+        {
+            f"include_{report.pk}": "on",
+            f"hours_{report.pk}": "4",
+            f"title_{report.pk}": "",
+            f"qualification_{report.pk}": "",  # may be empty
+        },
+    )
+    assert "This field is required." in response.text
+    assert not Billing.objects.exists()
+
+
+def test_other_items_such_as_a_vehicle_flat_rate(client, dispatcher, unit):
+    report = _confirmed(_paid_duty(), unit)
+    client.force_login(dispatcher)
+    _bill(
+        client,
+        unit,
+        {
+            f"include_{report.pk}": "on",
+            f"hours_{report.pk}": "4",
+            **_extra(
+                {"date": "2026-05-01", "description": "Vehicle flat rate", "rate": "50"},
+                {
+                    "date": "2026-05-01",
+                    "description": "Kilometres",
+                    "quantity": "120",
+                    "rate": "0.30",
+                },
+                {"date": "2026-05-01", "description": "Deduction", "rate": "-10"},
+                {"date": "2026-05-01"},  # an empty row: only the prefilled date
+            ),
+        },
+    )
+    billing = Billing.objects.get()
+    others = {
+        item.duty_title: (item.hours, item.amount)
+        for item in billing.items.filter(pay_type="other")
+    }
+    assert others == {
+        "Vehicle flat rate": (None, Decimal("50.00")),
+        "Kilometres": (Decimal("120.00"), Decimal("36.00")),
+        "Deduction": (None, Decimal("-10.00")),
+    }
+    assert billing.total == Decimal("50.00") + 50 + 36 - 10
+    assert billing.period[0] == billing.period[1] == timezone.localdate(report.duty.starts_at)
+    page = client.get(billing.get_absolute_url()).text
+    assert "Hours/qty." in page
+    assert pdf.render(billing).startswith(b"%PDF")
+
+
+def test_statement_with_other_items_only(client, dispatcher, unit):
+    client.force_login(dispatcher)
+    assert (
+        reverse("billing_create", args=[unit.pk])
+        in client.get(reverse("unit_pay", args=[unit.pk])).text
+    )
+    page = client.get(reverse("billing_create", args=[unit.pk])).text
+    assert "There are no helpers to bill for this unit." in page
+    assert 'name="extra-__prefix__-description"' in page
+    _bill(client, unit, _extra({"date": "2026-05-01", "description": "Vehicle", "rate": "80"}))
+    billing = Billing.objects.get()
+    assert billing.total == Decimal("80.00")
+    assert billing.period == (timezone.datetime(2026, 5, 1).date(),) * 2
+
+
+def test_other_items_need_a_description_and_a_price(client, dispatcher, unit):
+    client.force_login(dispatcher)
+    response = _bill(client, unit, _extra({"date": "2026-05-01", "quantity": "3"}))
+    assert response.text.count("This field is required.") == 2
+    assert not Billing.objects.exists()

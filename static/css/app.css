@@ -233,3 +233,12 @@ body {
 .formset-table .form-select {
     min-width: 9rem;
 }
+
+/* Lines of a new statement: the fields keep a usable width, the table scrolls instead. */
+.billing-lines .form-control {
+    min-width: 7rem;
+}
+
+.billing-lines td:nth-child(3) .form-control {
+    min-width: 12rem;
+}

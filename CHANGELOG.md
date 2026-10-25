@@ -9,6 +9,11 @@ All notable changes are listed here. The format follows
 
 ### Added
 
+- More freedom when creating a statement: every value of a helper's line can be
+  changed (date, duty, helper, qualification, rate, hours), and other items such as a
+  vehicle flat rate can be added ("Add a line": date, description, price, optional
+  quantity; a negative price deducts). Statements can also consist of other items only
+  ("Create statement" on the unit's duty pay overview).
 - The name of the dispatchers can be set with `DISPATCH_NAME` in `.env` (default
   "Disposition"), e.g. `DISPATCH_NAME=Einsatzleitung`. It is used as is in German and
   English, in the UI, the role name and the emails; a feminine noun in the singular fits
@@ -19,6 +24,11 @@ All notable changes are listed here. The format follows
 - The English texts call the dispatchers "the Disposition" (or the configured name)
   instead of "the dispatchers". In the change history, helpers entered by the
   dispatchers read "entered for the unit".
+
+### Fixed
+
+- The confirmation when marking a statement as paid no longer says that the unit leads
+  are notified (they are not since 0.4.0).
 
 ## [0.4.0] – 2026-10-25
 

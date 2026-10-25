@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 13:42+0000\n"
+"POT-Creation-Date: 2026-10-25 14:28+0000\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -406,44 +406,96 @@ msgstr "Zugang für %(account)s gesperrt."
 msgid "Duty pay and billing"
 msgstr "Dienstgelder und Abrechnung"
 
-#: billing/forms.py:16
+#: billing/forms.py:18
 msgid "Optional for accounts within the SEPA area."
 msgstr "Für Konten im SEPA-Raum optional."
 
-#: billing/forms.py:29 billing/pdf.py:190
+#: billing/forms.py:35 billing/pdf.py:194
 #: templates/billing/billing_detail.html:66
 #: templates/duties/duty_detail.html:163
 msgid "Note"
 msgstr "Bemerkung"
 
-#: billing/forms.py:32 billing/models.py:72
+#: billing/forms.py:38 billing/models.py:72
 msgid "Printed on the statement."
 msgstr "Wird auf die Abrechnung gedruckt."
 
-#: billing/forms.py:44 billing/pdf.py:139
+#: billing/forms.py:56 billing/forms.py:154 billing/pdf.py:127
+#: billing/pdf.py:143 templates/billing/billing_create.html:40
+#: templates/billing/billing_detail.html:39
+#: templates/billing/billing_list.html:47 templates/billing/unit_pay.html:62
+msgid "Date"
+msgstr "Datum"
+
+#: billing/forms.py:62 billing/pdf.py:143
+#: templates/billing/billing_create.html:41
+#: templates/billing/billing_detail.html:40 templates/billing/unit_pay.html:63
+#: templates/duties/_duty_table.html:7
+#: templates/mailings/mailing_detail.html:16
+msgid "Duty"
+msgstr "Dienst"
+
+#: billing/forms.py:69 billing/pdf.py:143
 #: templates/billing/billing_create.html:42
+#: templates/billing/billing_detail.html:41 templates/billing/unit_pay.html:64
+msgid "Helper"
+msgstr "Helfer"
+
+#: billing/forms.py:76 duties/forms.py:296
+#: templates/billing/billing_create.html:43
+#: templates/duties/_position_row.html:10 templates/duties/duty_detail.html:161
+#: templates/duties/duty_form.html:78
+msgid "Qualification"
+msgstr "Qualifikation"
+
+#: billing/forms.py:83 templates/billing/billing_create.html:44
+msgid "Rate in euros"
+msgstr "Satz in Euro"
+
+#: billing/forms.py:93 billing/pdf.py:142
+#: templates/billing/billing_create.html:45
 #: templates/billing/billing_detail.html:42 templates/billing/unit_pay.html:65
 msgid "Hours"
 msgstr "Stunden"
 
-#: billing/forms.py:75
+#: billing/forms.py:136
+msgid "This field is required."
+msgstr "Dieses Feld ist zwingend erforderlich."
+
+#: billing/forms.py:143
 msgid "Please enter the hours."
 msgstr "Bitte gib die Stunden an."
 
-#: billing/forms.py:79
-msgid "Please select at least one helper."
-msgstr "Bitte wähle mindestens einen Helfer aus."
+#: billing/forms.py:156
+msgid "Description"
+msgstr "Bezeichnung"
+
+#: billing/forms.py:158
+msgid "Quantity"
+msgstr "Menge"
+
+#: billing/forms.py:164
+msgid "Optional, e.g. kilometres."
+msgstr "Optional, z. B. Kilometer."
+
+#: billing/forms.py:167
+msgid "Price in euros"
+msgstr "Preis in Euro"
+
+#: billing/forms.py:171
+msgid "Per unit with a quantity; negative for a deduction."
+msgstr "Mit Menge pro Einheit; negativ für einen Abzug."
 
 #: billing/models.py:20 billing/models.py:74
 msgid "account holder"
 msgstr "Kontoinhaber"
 
-#: billing/models.py:21 billing/models.py:75 billing/pdf.py:174
+#: billing/models.py:21 billing/models.py:75 billing/pdf.py:178
 #: templates/billing/billing_detail.html:79 templates/billing/unit_pay.html:99
 msgid "IBAN"
 msgstr "IBAN"
 
-#: billing/models.py:22 billing/models.py:76 billing/pdf.py:177
+#: billing/models.py:22 billing/models.py:76 billing/pdf.py:181
 #: templates/billing/billing_detail.html:80 templates/billing/unit_pay.html:100
 msgid "BIC"
 msgstr "BIC"
@@ -476,7 +528,7 @@ msgstr "Offen"
 msgid "Paid"
 msgstr "Bezahlt"
 
-#: billing/models.py:62 billing/pdf.py:118 duties/models.py:101
+#: billing/models.py:62 billing/pdf.py:121 duties/models.py:101
 #: templates/duties/_status_badge.html:5
 msgid "Cancelled"
 msgstr "Abgesagt"
@@ -509,150 +561,147 @@ msgstr "bezahlt am"
 msgid "cancelled at"
 msgstr "abgesagt am"
 
-#: billing/models.py:92 billing/models.py:124
+#: billing/models.py:92 billing/models.py:136
 msgid "billing"
 msgstr "Abrechnung"
 
-#: billing/models.py:129 duties/models.py:435
+#: billing/models.py:131 duties/models.py:109
+msgid "Per helper hour"
+msgstr "Pro Helferstunde"
+
+#: billing/models.py:132 duties/models.py:110
+msgid "Flat rate per helper"
+msgstr "Pauschal pro Helfer"
+
+#: billing/models.py:133
+msgid "Other item"
+msgstr "Sonstige Position"
+
+#: billing/models.py:141 duties/models.py:435
 msgid "report"
 msgstr "Meldung"
 
-#: billing/models.py:135 billing/models.py:137 duties/models.py:172
+#: billing/models.py:147 billing/models.py:149 duties/models.py:172
 #: duties/models.py:303 duties/models.py:368 mailings/models.py:33
 msgid "duty"
 msgstr "Dienst"
 
-#: billing/models.py:138
+#: billing/models.py:150
 msgid "date"
 msgstr "Datum"
 
-#: billing/models.py:139
+#: billing/models.py:151
 msgid "helper"
 msgstr "Helfer"
 
-#: billing/models.py:141 duties/models.py:47 duties/models.py:307
+#: billing/models.py:153 duties/models.py:47 duties/models.py:307
 #: duties/models.py:393
 msgid "qualification"
 msgstr "Qualifikation"
 
-#: billing/models.py:142 duties/models.py:135
+#: billing/models.py:154 duties/models.py:135
 msgid "duty pay"
 msgstr "Dienstgeld"
 
-#: billing/models.py:143 duties/models.py:138
+#: billing/models.py:155 duties/models.py:138
 msgid "rate in euros"
 msgstr "Satz in Euro"
 
-#: billing/models.py:144
+#: billing/models.py:157
 msgid "hours"
 msgstr "Stunden"
 
-#: billing/models.py:145
+#: billing/models.py:158
 msgid "amount"
 msgstr "Betrag"
 
-#: billing/models.py:148
+#: billing/models.py:161
 msgid "billing item"
 msgstr "Abrechnungsposten"
 
-#: billing/models.py:149
+#: billing/models.py:162
 msgid "billing items"
 msgstr "Abrechnungsposten"
 
-#: billing/pdf.py:69
+#: billing/pdf.py:70
 #, python-format
 msgid "%(amount)s/h"
 msgstr "%(amount)s/Std."
 
-#: billing/pdf.py:70
+#: billing/pdf.py:72
 #, python-format
 msgid "%(amount)s flat"
 msgstr "%(amount)s pauschal"
 
-#: billing/pdf.py:103
+#: billing/pdf.py:106
 #, python-format
 msgid "Statement of duty pay %(number)s"
 msgstr "Abrechnung Dienstgelder %(number)s"
 
-#: billing/pdf.py:122 duties/forms.py:285 templates/accounts/profile.html:15
+#: billing/pdf.py:125 duties/forms.py:285 templates/accounts/profile.html:15
 #: templates/billing/billing_list.html:13
 #: templates/billing/billing_list.html:48 templates/duties/duty_detail.html:159
 #: templates/mailings/mailing_detail.html:34
 msgid "Unit"
 msgstr "Bereitschaft"
 
-#: billing/pdf.py:123 templates/billing/billing_list.html:46
+#: billing/pdf.py:126 templates/billing/billing_list.html:46
 msgid "Number"
 msgstr "Nummer"
 
-#: billing/pdf.py:124 billing/pdf.py:139
-#: templates/billing/billing_create.html:38
-#: templates/billing/billing_detail.html:39
-#: templates/billing/billing_list.html:47 templates/billing/unit_pay.html:62
-msgid "Date"
-msgstr "Datum"
-
-#: billing/pdf.py:127 templates/core/_navbar.html:19
+#: billing/pdf.py:130 templates/core/_navbar.html:19
 #: templates/duties/duty_list.html:3 templates/duties/duty_list.html:6
 msgid "Duties"
 msgstr "Dienste"
 
-#: billing/pdf.py:129
+#: billing/pdf.py:132
 msgid "Paid on"
 msgstr "Bezahlt am"
 
-#: billing/pdf.py:139 templates/billing/billing_create.html:39
-#: templates/billing/billing_detail.html:40 templates/billing/unit_pay.html:63
-#: templates/duties/_duty_table.html:7
-#: templates/mailings/mailing_detail.html:16
-msgid "Duty"
-msgstr "Dienst"
+#: billing/pdf.py:142 templates/billing/billing_detail.html:42
+msgid "Hours/qty."
+msgstr "Std./Menge"
 
-#: billing/pdf.py:139 templates/billing/billing_create.html:40
-#: templates/billing/billing_detail.html:41 templates/billing/unit_pay.html:64
-msgid "Helper"
-msgstr "Helfer"
-
-#: billing/pdf.py:139 templates/billing/billing_create.html:41
+#: billing/pdf.py:143
 msgid "Rate"
 msgstr "Satz"
 
-#: billing/pdf.py:139 templates/billing/billing_detail.html:43
+#: billing/pdf.py:143 templates/billing/billing_detail.html:43
 #: templates/billing/unit_pay.html:66
 msgid "Amount"
 msgstr "Betrag"
 
-#: billing/pdf.py:151 templates/billing/billing_detail.html:59
+#: billing/pdf.py:155 templates/billing/billing_detail.html:59
 #: templates/billing/billing_list.html:49
 msgid "Total"
 msgstr "Summe"
 
-#: billing/pdf.py:170 templates/billing/bank_account_form.html:3
+#: billing/pdf.py:174 templates/billing/bank_account_form.html:3
 #: templates/billing/bank_account_form.html:7
 #: templates/billing/billing_detail.html:75 templates/billing/unit_pay.html:95
 msgid "Bank account"
 msgstr "Bankverbindung"
 
-#: billing/pdf.py:173 templates/billing/billing_detail.html:78
+#: billing/pdf.py:177 templates/billing/billing_detail.html:78
 #: templates/billing/unit_pay.html:98
 msgid "Account holder"
 msgstr "Kontoinhaber"
 
-#: billing/pdf.py:179 templates/billing/billing_detail.html:81
+#: billing/pdf.py:183 templates/billing/billing_detail.html:81
 #: templates/billing/unit_pay.html:101
 msgid "Bank"
 msgstr "Bank"
 
-#: billing/pdf.py:188
+#: billing/pdf.py:192
 msgid "The unit has not entered any bank details yet."
 msgstr "Die Bereitschaft hat noch keine Bankverbindung hinterlegt."
 
-#: billing/pdf.py:194
+#: billing/pdf.py:198
 #, python-format
 msgid "%(site)s · Statement %(number)s · created by %(name)s"
 msgstr "%(site)s · Abrechnung %(number)s · erstellt von %(name)s"
 
-#: billing/pdf.py:205
+#: billing/pdf.py:209
 #, python-format
 msgid "Page %(page)d"
 msgstr "Seite %(page)d"
@@ -670,35 +719,39 @@ msgstr ""
 msgid "This is not a valid BIC."
 msgstr "Das ist keine gültige BIC."
 
-#: billing/views.py:79
+#: billing/views.py:80
 msgid "Bank details saved."
 msgstr "Bankverbindung gespeichert."
 
-#: billing/views.py:125
+#: billing/views.py:126
+msgid "Please select at least one helper or add a line."
+msgstr "Bitte wähle mindestens einen Helfer aus oder füge eine Zeile hinzu."
+
+#: billing/views.py:138
 msgid "Some of these helpers have been billed in the meantime."
 msgstr "Einige dieser Helfer wurden inzwischen abgerechnet."
 
-#: billing/views.py:130
+#: billing/views.py:143
 #, python-format
 msgid "Statement %(number)s created."
 msgstr "Abrechnung %(number)s erstellt."
 
-#: billing/views.py:181
+#: billing/views.py:196
 #, python-format
 msgid "Statement %(number)s marked as paid."
 msgstr "Abrechnung %(number)s als bezahlt markiert."
 
-#: billing/views.py:184
+#: billing/views.py:199
 msgid "Only open statements can be marked as paid."
 msgstr "Nur offene Abrechnungen können als bezahlt markiert werden."
 
-#: billing/views.py:198
+#: billing/views.py:213
 #, python-format
 msgid "Statement %(number)s cancelled. Its helpers can be billed again."
 msgstr ""
 "Abrechnung %(number)s storniert. Die Helfer können erneut abgerechnet werden."
 
-#: billing/views.py:203
+#: billing/views.py:218
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
@@ -803,11 +856,6 @@ msgstr ""
 msgid "Name of the helper"
 msgstr "Name des Helfers"
 
-#: duties/forms.py:296 templates/duties/_position_row.html:10
-#: templates/duties/duty_detail.html:161 templates/duties/duty_form.html:78
-msgid "Qualification"
-msgstr "Qualifikation"
-
 #: duties/forms.py:320
 #, python-format
 msgid "%(position)s – %(count)d open"
@@ -888,14 +936,6 @@ msgstr "HiOrg-Server"
 #: duties/models.py:108
 msgid "No duty pay"
 msgstr "Kein Dienstgeld"
-
-#: duties/models.py:109
-msgid "Per helper hour"
-msgstr "Pro Helferstunde"
-
-#: duties/models.py:110
-msgid "Flat rate per helper"
-msgstr "Pauschal pro Helfer"
 
 #: duties/models.py:112
 msgid "title"
@@ -1774,7 +1814,7 @@ msgstr "Speichern"
 #: templates/accounts/invitation_form.html:22
 #: templates/accounts/unit_form.html:12
 #: templates/billing/bank_account_form.html:18
-#: templates/billing/billing_create.html:68 templates/duties/duty_form.html:100
+#: templates/billing/billing_create.html:94 templates/duties/duty_form.html:100
 #: templates/duties/report_add.html:25 templates/duties/report_form.html:22
 #: templates/duties/withdrawal_request_form.html:22
 #: templates/mailings/mailing_form.html:41
@@ -2036,7 +2076,7 @@ msgstr ""
 
 #: templates/billing/billing_create.html:3
 #: templates/billing/billing_create.html:5
-#: templates/billing/billing_create.html:67
+#: templates/billing/billing_create.html:93
 #: templates/billing/billing_list.html:25 templates/billing/unit_pay.html:9
 msgid "Create statement"
 msgstr "Abrechnung erstellen"
@@ -2063,33 +2103,59 @@ msgstr ""
 msgid "Enter bank details"
 msgstr "Bankverbindung eintragen"
 
-#: templates/billing/billing_create.html:23
+#: templates/billing/billing_create.html:26
+#: templates/billing/billing_list.html:14 templates/duties/_duty_table.html:8
+msgid "Helpers"
+msgstr "Helfer"
+
+#: templates/billing/billing_create.html:29
 msgid ""
 "Confirmed helpers of finished duties with duty pay that have not been billed "
-"yet. Untick helpers who did not come and correct the hours for hourly pay."
+"yet. Untick helpers who did not come. Every value can be changed for this "
+"statement, e.g. the hours or the rate."
 msgstr ""
 "Bestätigte Helfer beendeter Dienste mit Dienstgeld, die noch nicht "
-"abgerechnet sind. Entferne den Haken bei Helfern, die nicht da waren, und "
-"korrigiere bei Stundensätzen die Stunden."
+"abgerechnet sind. Entferne den Haken bei Helfern, die nicht da waren. Alle "
+"Werte lassen sich für diese Abrechnung ändern, z. B. die Stunden oder der "
+"Satz."
 
-#: templates/billing/billing_create.html:37
+#: templates/billing/billing_create.html:39
 msgid "Bill"
 msgstr "Abrechnen"
 
-#: templates/billing/billing_create.html:66
+#: templates/billing/billing_create.html:62
+msgid "per hour"
+msgstr "pro Stunde"
+
+#: templates/billing/billing_create.html:62
+msgid "flat"
+msgstr "pauschal"
+
+#: templates/billing/billing_create.html:78
+msgid "There are no helpers to bill for this unit."
+msgstr "Für diese Bereitschaft gibt es keine Helfer abzurechnen."
+
+#: templates/billing/billing_create.html:81
+msgid "Other items"
+msgstr "Weitere Positionen"
+
+#: templates/billing/billing_create.html:83
+msgid ""
+"E.g. a vehicle flat rate: description and price, optionally a quantity (the "
+"amount is then quantity × price). A negative price deducts."
+msgstr ""
+"Z. B. eine Fahrzeugpauschale: Bezeichnung und Preis, optional eine Menge (der"
+" Betrag ist dann Menge × Preis). Ein negativer Preis wird abgezogen."
+
+#: templates/billing/billing_create.html:88
+msgid "Add a line"
+msgstr "Zeile hinzufügen"
+
+#: templates/billing/billing_create.html:92
 msgid "Create the statement now? The unit leads receive it by email."
 msgstr ""
 "Abrechnung jetzt erstellen? Die Bereitschaftsleitungen erhalten sie per E-"
 "Mail."
-
-#: templates/billing/billing_create.html:71
-msgid "There is nothing to bill for this unit."
-msgstr "Für diese Bereitschaft gibt es nichts abzurechnen."
-
-#: templates/billing/billing_create.html:72
-#: templates/duties/qualification_list.html:28
-msgid "Back"
-msgstr "Zurück"
 
 #: templates/billing/billing_detail.html:3
 #: templates/billing/billing_detail.html:7
@@ -2101,10 +2167,8 @@ msgid "Download PDF"
 msgstr "PDF herunterladen"
 
 #: templates/billing/billing_detail.html:13
-msgid "Mark this statement as paid? The unit leads are notified."
-msgstr ""
-"Diese Abrechnung als bezahlt markieren? Die Bereitschaftsleitungen werden "
-"benachrichtigt."
+msgid "Mark this statement as paid?"
+msgstr "Diese Abrechnung als bezahlt markieren?"
 
 #: templates/billing/billing_detail.html:16
 msgid "Mark as paid"
@@ -2159,10 +2223,6 @@ msgstr "Abrechnung"
 #: templates/billing/billing_list.html:7
 msgid "To be billed"
 msgstr "Abzurechnen"
-
-#: templates/billing/billing_list.html:14 templates/duties/_duty_table.html:8
-msgid "Helpers"
-msgstr "Helfer"
 
 #: templates/billing/billing_list.html:15
 msgid "Expected amount"
@@ -3099,6 +3159,10 @@ msgstr ""
 "Notfallsanitäter → Rettungssanitäter → Sanitäter: Ein Notfallsanitäter "
 "besetzt auch Plätze für Rettungssanitäter und Sanitäter, aber nicht "
 "umgekehrt."
+
+#: templates/duties/qualification_list.html:28
+msgid "Back"
+msgstr "Zurück"
 
 #: templates/duties/report_add.html:10
 msgid ""

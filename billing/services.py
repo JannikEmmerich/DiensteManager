@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
@@ -155,14 +155,73 @@ def _next_sequence(year):
     return (Billing.objects.filter(year=year).aggregate(Max("sequence"))["sequence__max"] or 0) + 1
 
 
-def create_billing(unit, lines, note, user):
-    """Creates a billing from ``lines``: pairs of a billable report and its hours.
+@dataclass
+class ReportLine:
+    """A billable helper with the values for the billing; ``None`` keeps the report's."""
 
-    The hours only count for hourly pay. Raises ``AlreadyBilled`` if one of the reports
-    has been billed in the meantime.
+    report: Report
+    hours: Decimal | None = None
+    rate: Decimal | None = None
+    duty_title: str | None = None
+    duty_date: date | None = None
+    helper_name: str | None = None
+    qualification: str | None = None
+
+    def item(self, billing):
+        report, duty = self.report, self.report.duty
+        hourly = duty.pay_type == Duty.PayType.HOURLY
+        position = report.filled_position
+        rate = report.pay_rate if self.rate is None else self.rate
+        return BillingItem(
+            billing=billing,
+            report=report,
+            duty=duty,
+            duty_title=duty.title if self.duty_title is None else self.duty_title,
+            duty_date=timezone.localdate(duty.starts_at)
+            if self.duty_date is None
+            else self.duty_date,
+            helper_name=report.name if self.helper_name is None else self.helper_name,
+            qualification=(position.short_label if position else "")
+            if self.qualification is None
+            else self.qualification,
+            pay_type=duty.pay_type,
+            rate=rate,
+            hours=self.hours if hourly else None,
+            amount=duty.pay_for(self.hours if hourly else None, rate),
+        )
+
+
+@dataclass
+class ExtraLine:
+    """Another item of a billing, e.g. a vehicle flat rate: quantity × price, or the price."""
+
+    description: str
+    rate: Decimal
+    date: date
+    quantity: Decimal | None = None
+
+    def item(self, billing):
+        amount = self.rate if self.quantity is None else self.quantity * self.rate
+        return BillingItem(
+            billing=billing,
+            duty_title=self.description,
+            duty_date=self.date,
+            pay_type=BillingItem.PayType.OTHER,
+            rate=self.rate,
+            hours=self.quantity,
+            amount=amount.quantize(Decimal("0.01"), ROUND_HALF_UP),
+        )
+
+
+def create_billing(unit, lines, note, user, extra_lines=()):
+    """Creates a billing from ``lines`` (``ReportLine``s or pairs of a billable report and
+    its hours, which only count for hourly pay) and ``extra_lines`` (``ExtraLine``s).
+
+    Raises ``AlreadyBilled`` if one of the reports has been billed in the meantime.
     """
+    lines = [line if isinstance(line, ReportLine) else ReportLine(*line) for line in lines]
     with transaction.atomic():
-        report_ids = [report.pk for report, _hours in lines]
+        report_ids = [line.report.pk for line in lines]
         # Locks the reports so that nobody bills them at the same time.
         list(Report.objects.select_for_update().filter(pk__in=report_ids))
         if BillingItem.objects.filter(
@@ -190,27 +249,7 @@ def create_billing(unit, lines, note, user):
             except IntegrityError:
                 if attempt == 2:
                     raise
-        items = []
-        for report, hours in lines:
-            duty = report.duty
-            hourly = duty.pay_type == Duty.PayType.HOURLY
-            items.append(
-                BillingItem(
-                    billing=billing,
-                    report=report,
-                    duty=duty,
-                    duty_title=duty.title,
-                    duty_date=timezone.localdate(duty.starts_at),
-                    helper_name=report.name,
-                    qualification=report.filled_position.short_label
-                    if report.filled_position
-                    else "",
-                    pay_type=duty.pay_type,
-                    rate=report.pay_rate,
-                    hours=hours if hourly else None,
-                    amount=report.pay_for(hours if hourly else None),
-                )
-            )
+        items = [line.item(billing) for line in [*lines, *extra_lines]]
         BillingItem.objects.bulk_create(items)
         billing.total = sum((item.amount for item in items), Decimal(0))
         billing.save(update_fields=["total"])

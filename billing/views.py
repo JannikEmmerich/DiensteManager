@@ -14,8 +14,8 @@ from accounts.permissions import is_dispatcher
 from lifecycle import history
 
 from . import notifications, pdf, permissions, services
-from .forms import BankAccountForm, BillingForm
-from .models import BankAccount, Billing
+from .forms import BankAccountForm, BillingForm, ExtraLineFormSet
+from .models import BankAccount, Billing, BillingItem
 from .services import PayLine
 from .validators import mask_iban
 
@@ -60,7 +60,8 @@ def unit_pay(request, pk):
             "totals": totals,
             "billings": unit.billings.all(),
             "bank_account": BankAccount.objects.filter(unit=unit).first(),
-            "can_bill": is_dispatcher(request.user) and services.billable_reports(unit).exists(),
+            # Also without billable helpers, e.g. for a vehicle flat rate only.
+            "can_bill": is_dispatcher(request.user),
             "bank_history": history.entries(history.scope_for_unit(unit.pk)),
         },
     )
@@ -116,10 +117,22 @@ def billing_create(request, unit_pk):
     reports = list(services.billable_reports(unit))
     bank_account = BankAccount.objects.filter(unit=unit).select_related("updated_by").first()
     form = BillingForm(request.POST or None, reports=reports)
-    if request.method == "POST" and form.is_valid():
+    # Without the rows of other items in the request (none added), there are none.
+    sent_extra = "extra-TOTAL_FORMS" in request.POST
+    extra = ExtraLineFormSet(request.POST if sent_extra else None, prefix="extra")
+    valid = request.method == "POST" and form.is_valid() and (not sent_extra or extra.is_valid())
+    extra_lines = extra.extra_lines() if valid and sent_extra else []
+    if valid and not form.cleaned_data["selected"] and not extra_lines:
+        form.add_error(None, _("Please select at least one helper or add a line."))
+        valid = False
+    if valid:
         try:
             billing = services.create_billing(
-                unit, form.cleaned_data["selected"], form.cleaned_data["note"], request.user
+                unit,
+                form.cleaned_data["selected"],
+                form.cleaned_data["note"],
+                request.user,
+                extra_lines=extra_lines,
             )
         except services.AlreadyBilled:
             messages.error(request, _("Some of these helpers have been billed in the meantime."))
@@ -136,6 +149,7 @@ def billing_create(request, unit_pk):
         {
             "unit": unit,
             "form": form,
+            "extra": extra,
             "bank_account": bank_account,
             "bank_recently_changed": bank_account is not None
             and bank_account.updated_at > timezone.now() - BANK_CHANGE_WARNING,
@@ -157,6 +171,7 @@ def billing_detail(request, pk):
         {
             "billing": billing,
             "items": billing.items.all(),
+            "has_other_items": billing.items.filter(pay_type=BillingItem.PayType.OTHER).exists(),
             "history": history.entries(history.scope_for_billing(billing.pk)),
         },
     )

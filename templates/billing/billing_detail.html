@@ -10,7 +10,7 @@
         <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-primary" href="{% url 'billing_pdf' billing.pk %}">{% translate "Download PDF" %}</a>
             {% if can.manage_billing and billing.status == "issued" %}
-                {% translate "Mark this statement as paid? The unit leads are notified." as confirm_paid %}
+                {% translate "Mark this statement as paid?" as confirm_paid %}
                 <form method="post" action="{% url 'billing_mark_paid' billing.pk %}" data-confirm="{{ confirm_paid }}">
                     {% csrf_token %}
                     <button class="btn btn-outline-success" type="submit">{% translate "Mark as paid" %}</button>
@@ -39,7 +39,7 @@
                             <th>{% translate "Date" %}</th>
                             <th>{% translate "Duty" %}</th>
                             <th>{% translate "Helper" %}</th>
-                            <th class="text-end">{% translate "Hours" %}</th>
+                            <th class="text-end">{% if has_other_items %}{% translate "Hours/qty." %}{% else %}{% translate "Hours" %}{% endif %}</th>
                             <th class="text-end">{% translate "Amount" %}</th>
                         </tr>
                     </thead>
@@ -48,7 +48,7 @@
                             <tr>
                                 <td class="small text-nowrap">{{ item.duty_date|date:"SHORT_DATE_FORMAT" }}</td>
                                 <td>{% if item.duty %}<a href="{{ item.duty.get_absolute_url }}">{{ item.duty_title }}</a>{% else %}{{ item.duty_title }}{% endif %}</td>
-                                <td>{{ item.helper_display }}</td>
+                                <td>{{ item.helper_display|default:"–" }}</td>
                                 <td class="text-end">{{ item.hours|hours|default:"–" }}</td>
                                 <td class="text-end text-nowrap">{{ item.amount|money }}</td>
                             </tr>
