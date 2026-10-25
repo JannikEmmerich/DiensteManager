@@ -7,6 +7,17 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] – 2026-10-25
+
+When updating from 0.4.0 nothing needs to be done; the database is migrated when the
+container starts. Optionally:
+
+- `DISPATCH_NAME` in `.env` sets what the dispatchers are called (default
+  "Disposition").
+- Reports keep the qualification of their position; from now on units can also report
+  higher ones that count as one asked for ("Also counts as" under
+  *Duties → Qualifications*).
+
 ### Added
 
 - Helpers can be reported with a higher qualification than the duty asks for, e.g. an
