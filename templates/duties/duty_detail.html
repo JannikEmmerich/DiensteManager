@@ -34,11 +34,22 @@
                         <button class="btn btn-outline-danger" type="submit">{% translate "Delete" %}</button>
                     </form>
                 {% elif duty.status == "released" %}
-                    {% translate "Cancel this duty? Units with reported helpers will be notified by email." as confirm_text %}
-                    <form method="post" action="{% url 'duty_cancel' duty.pk %}" data-confirm="{{ confirm_text }}">
-                        {% csrf_token %}
-                        <button class="btn btn-outline-danger" type="submit">{% translate "Cancel duty" %}</button>
-                    </form>
+                    {% if duty.has_billed_reports %}
+                        <button class="btn btn-outline-danger" type="button" disabled title="{% translate "This duty has been billed and can no longer be cancelled." %}">{% translate "Cancel duty" %}</button>
+                    {% elif duty.has_started %}
+                        {% translate "This duty has already started. Cancelling it notifies the units with reported helpers by email, and helpers not yet billed can no longer be billed. Cancel anyway?" as confirm_text %}
+                        <form method="post" action="{% url 'duty_cancel' duty.pk %}" data-confirm="{{ confirm_text }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="confirm_started" value="1">
+                            <button class="btn btn-outline-danger" type="submit">{% translate "Cancel duty" %}</button>
+                        </form>
+                    {% else %}
+                        {% translate "Cancel this duty? Units with reported helpers will be notified by email." as confirm_text %}
+                        <form method="post" action="{% url 'duty_cancel' duty.pk %}" data-confirm="{{ confirm_text }}">
+                            {% csrf_token %}
+                            <button class="btn btn-outline-danger" type="submit">{% translate "Cancel duty" %}</button>
+                        </form>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>

@@ -2249,6 +2249,25 @@ msgstr ""
 msgid "Cancel duty"
 msgstr "Dienst absagen"
 
+#: duties/views.py templates/duties/duty_detail.html
+msgid "This duty has been billed and can no longer be cancelled."
+msgstr "Dieser Dienst wurde abgerechnet und kann nicht mehr abgesagt werden."
+
+#: duties/views.py
+msgid "Please confirm that you want to cancel a duty that has already started."
+msgstr ""
+"Bitte bestätige, dass du einen Dienst absagen willst, der schon begonnen hat."
+
+#: templates/duties/duty_detail.html
+msgid ""
+"This duty has already started. Cancelling it notifies the units with "
+"reported helpers by email, and helpers not yet billed can no longer be "
+"billed. Cancel anyway?"
+msgstr ""
+"Dieser Dienst hat schon begonnen. Mit der Absage werden die Bereitschaften "
+"mit gemeldeten Helfern per E-Mail benachrichtigt, und noch nicht abgerechnete "
+"Helfer können nicht mehr abgerechnet werden. Trotzdem absagen?"
+
 #: templates/duties/duty_detail.html:48
 msgid "This duty is a draft. The units cannot see it until you release it."
 msgstr ""

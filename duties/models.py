@@ -176,6 +176,17 @@ class Duty(models.Model):
         return self.ends_at < timezone.now()
 
     @property
+    def has_billed_reports(self):
+        """Whether a helper of this duty is in a billing that is not cancelled."""
+        from billing.models import Billing, BillingItem
+
+        return (
+            BillingItem.objects.filter(report__duty=self)
+            .exclude(billing__status=Billing.Status.CANCELLED)
+            .exists()
+        )
+
+    @property
     def is_open_for_reports(self):
         return self.status == self.Status.RELEASED and not self.has_started
 
