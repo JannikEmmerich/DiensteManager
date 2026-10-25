@@ -4,8 +4,8 @@ Staff planning with external units: external units see our duties with open staf
 needs and report people for them. The duties are going to be imported from HiOrg-Server.
 
 **Status:** user management, sign-in (local and with HiOrg-Server), invitations, units,
-duties with release and reports, email notifications, emails from dispatchers,
-German/English UI and the Docker setup are done. Importing duties from HiOrg-Server comes next.
+duties with release and reports, email notifications, emails from dispatchers, duty pay
+and billing with PDF statements, German/English UI and the Docker setup are done. Importing duties from HiOrg-Server comes next.
 
 ## Stack
 
@@ -21,11 +21,12 @@ German/English UI and the Docker setup are done. Importing duties from HiOrg-Ser
 | Role | May |
 |---|---|
 | **Admin** (superuser) | everything incl. the Django admin `/admin/`; the only role that invites or blocks dispatchers |
-| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports; send emails to the units |
-| **Unit lead** | view their own unit, invite and block unit leads and members there; report helpers, withdraw any report of the unit |
+| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports, add helpers themselves; send emails to the units; create billings |
+| **Unit lead** | view their own unit, invite and block unit leads and members there; report helpers, withdraw any report of the unit; see the duty pay and billings of the unit, enter its bank details |
 | **Member** | see the duties offered to their unit, report helpers, withdraw their own reports |
 
-The rules live in `accounts/permissions.py` and `duties/permissions.py`.
+The rules live in `accounts/permissions.py`, `duties/permissions.py` and
+`billing/permissions.py`.
 
 ## Duties and reports
 
@@ -41,6 +42,9 @@ The rules live in `accounts/permissions.py` and `duties/permissions.py`.
   the overall staffing (confirmed / needed). Members withdraw their own reports, unit
   leads every report of their unit. A person can only be reported once per duty and unit.
 - **Decisions:** dispatchers confirm or decline each report (or "Confirm all pending").
+- **Helpers who register with a dispatcher directly** (e.g. by email) are entered by the
+  dispatcher under "Add helpers" on the duty: unit plus names, confirmed right away; the
+  unit leads are notified.
 - Released duties are **cancelled** instead of deleted; only drafts can be deleted.
 
 ## Email notifications
@@ -52,12 +56,37 @@ language). The person who triggered a notification never receives it.
 |---|---|
 | Duty released, or offered to additional units | active accounts of those units with *New duties for my unit* switched on |
 | Helpers reported or withdrawn | dispatchers and admins with *Reports* switched on |
-| Report confirmed or declined | unit leads of the unit and whoever made the report, with *Reports* switched on |
-| Title, time or location of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
+| Report confirmed or declined; helpers added by a dispatcher | unit leads of the unit and whoever made the report, with *Reports* switched on |
+| Title, time, location or duty pay of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
+| Billing created (PDF attached), paid or cancelled | unit leads of the unit with *Billings* switched on |
 
-Both switches are under *My account → Email notifications* and are on by default. The
+The switches are under *My account → Email notifications* and are on by default. The
 emails are sent right away during the request; if the mail server is unreachable, the
 change is saved anyway and a warning is shown.
+
+## Duty pay and billing
+
+- **Duty pay** ("Dienstgeld") is set per duty: none, an amount **per helper hour**, or a
+  **flat rate per helper**. The units see it on the duty and in the duty list.
+- **Duty pay overview** (*Duty pay* for unit leads, *Billing → unit* for dispatchers):
+  per year every confirmed helper of the unit with the amount and its state – upcoming,
+  not billed yet, billed, paid – plus the totals and the unit's statements. Amounts not
+  billed yet are estimates (hourly pay with the full length of the duty).
+- **Bank details:** unit leads (and dispatchers) enter account holder, IBAN (checked with
+  the ISO 13616 check digits), optional BIC and bank. Only dispatchers and the unit leads
+  of the unit see them.
+- **Billing** (dispatchers, *Billing*): lists the units with something to bill, i.e.
+  confirmed helpers of finished, released duties with duty pay that are not billed yet.
+  When creating a statement, untick helpers who did not come and correct the hours for
+  hourly pay. Statements are numbered per year (`2026-001`, …) and keep copies of the
+  items, rates and bank details, so later changes do not alter them. A statement is
+  *open* until it is marked as *paid*; open statements can be *cancelled*, which makes
+  their helpers billable again.
+- **PDF:** every statement can be downloaded as a PDF (A4, in the language of the
+  person downloading it) and is attached to the email to the unit leads. It is created
+  with [ReportLab](https://www.reportlab.com/) and embeds DejaVu Sans
+  (`billing/fonts/`, Bitstream Vera licence), so that names like "Şahin" or "Łukasz"
+  print correctly.
 
 ## Emails from dispatchers
 
@@ -205,6 +234,7 @@ config/      settings (all via environment variables), URLs, WSGI
 accounts/    users, units, invitations, permissions, HiOrg sign-in adapter, language
 duties/      duties, reports, their permissions and email notifications
 mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
+billing/     duty pay overview, bank details, billings and their PDF
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
@@ -222,6 +252,6 @@ docker/      container entry point
    support first. Imported duties get `source = hiorg` and the HiOrg ID in
    `external_id` (unique per source), arrive as drafts and are released as usual.
 2. **Staffing needs per qualification** (e.g. 2 paramedics, 4 first aiders) instead of
-   a single number.
+   a single number, possibly with a rate per qualification.
 3. **Sending emails in the background** (queue or digest) once there are many units
    and accounts.

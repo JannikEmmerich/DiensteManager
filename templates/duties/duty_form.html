@@ -8,9 +8,9 @@
             {% if duty.status == "released" %}
                 <div class="alert alert-info">
                     {% blocktranslate trimmed %}
-                        This duty has been released. If you change its title, time or location, the
-                        units that have reported helpers are notified by email. Units you add are
-                        notified about the duty.
+                        This duty has been released. If you change its title, time, location or
+                        duty pay, the units that have reported helpers are notified by email. Units
+                        you add are notified about the duty.
                     {% endblocktranslate %}
                 </div>
             {% elif not duty %}
@@ -38,6 +38,10 @@
                     <div class="col-sm-6">{% include "core/_field.html" with field=form.helpers_needed %}</div>
                 </div>
                 {% include "core/_field.html" with field=form.description %}
+                <div class="row">
+                    <div class="col-sm-6">{% include "core/_choice_list.html" with field=form.pay_type %}</div>
+                    <div class="col-sm-6">{% include "core/_field.html" with field=form.pay_rate %}</div>
+                </div>
                 {% include "core/_choice_list.html" with field=form.all_units %}
                 {% include "core/_choice_list.html" with field=form.units %}
                 {% if duty %}

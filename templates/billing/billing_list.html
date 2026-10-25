@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{% translate "Billing" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-3">{% translate "Billing" %}</h1>
+
+    <h2 class="h5">{% translate "To be billed" %}</h2>
+    {% if billable %}
+        <div class="table-responsive mb-4">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>{% translate "Unit" %}</th>
+                        <th class="text-end">{% translate "Helpers" %}</th>
+                        <th class="text-end">{% translate "Expected amount" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for unit, count, total in billable %}
+                        <tr>
+                            <td><a href="{% url 'unit_pay' unit.pk %}">{{ unit.name }}</a></td>
+                            <td class="text-end">{{ count }}</td>
+                            <td class="text-end text-nowrap">{{ total|money }}</td>
+                            <td class="text-end"><a class="btn btn-sm btn-primary" href="{% url 'billing_create' unit.pk %}">{% translate "Create statement" %}</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-body-secondary mb-4">
+            {% blocktranslate trimmed %}
+                Nothing to bill: there are no confirmed helpers of finished duties with duty pay
+                that have not been billed yet.
+            {% endblocktranslate %}
+        </p>
+    {% endif %}
+
+    <h2 class="h5">{% translate "Statements" %}</h2>
+    {% if billings %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>{% translate "Number" %}</th>
+                        <th>{% translate "Date" %}</th>
+                        <th>{% translate "Unit" %}</th>
+                        <th class="text-end">{% translate "Total" %}</th>
+                        <th>{% translate "Status" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for billing in billings %}
+                        <tr>
+                            <td><a href="{{ billing.get_absolute_url }}">{{ billing.number }}</a></td>
+                            <td class="small">{{ billing.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+                            <td>{{ billing.unit }}</td>
+                            <td class="text-end text-nowrap">{{ billing.total|money }}</td>
+                            <td>{% include "billing/_status_badge.html" %}</td>
+                            <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{% url 'billing_pdf' billing.pk %}">PDF</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-body-secondary">{% translate "No statements yet." %}</p>
+    {% endif %}
+{% endblock content %}

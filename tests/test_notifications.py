@@ -64,6 +64,7 @@ def test_drafts_are_not_announced(client, dispatcher, member, mailoutbox):
             "starts_at": starts_at.strftime("%Y-%m-%dT%H:%M"),
             "ends_at": (starts_at + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M"),
             "helpers_needed": 1,
+            "pay_type": "none",
             "all_units": "True",
         },
     )
@@ -79,6 +80,8 @@ def _edit(client, duty, **changes):
         "ends_at": timezone.localtime(duty.ends_at).strftime("%Y-%m-%dT%H:%M"),
         "helpers_needed": duty.helpers_needed,
         "description": duty.description,
+        "pay_type": duty.pay_type,
+        "pay_rate": duty.pay_rate or "",
         "all_units": str(duty.all_units),
         "units": [unit.pk for unit in duty.units.all()],
     }
@@ -262,3 +265,15 @@ def test_releasing_twice_notifies_once(client, dispatcher, member, mailoutbox):
     response = client.post(reverse("duty_release", args=[duty.pk]), follow=True)
     assert "Only drafts can be released." in response.text
     assert len(mailoutbox) == 1
+
+
+def test_pay_change_notifies_units_with_active_reports(
+    client, dispatcher, unit, unit_lead, mailoutbox
+):
+    duty = create_duty()
+    create_report(duty, unit)
+    client.force_login(dispatcher)
+    _edit(client, duty, pay_type="flat", pay_rate="30")
+    assert _recipients(mailoutbox) == ["lead@example.org"]
+    assert "(duty pay, rate in euros)" in mailoutbox[0].body
+    assert "Duty pay: 30.00 € flat rate per helper" in mailoutbox[0].body

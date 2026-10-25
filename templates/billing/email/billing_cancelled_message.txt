@@ -1,0 +1,5 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with number=billing.number unit=billing.unit.name %}The dispatchers have cancelled the statement {{ number }} of {{ unit }}. Its helpers will be billed again in a new statement.{% endblocktranslate %}
+
+{{ billing_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

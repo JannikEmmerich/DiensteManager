@@ -18,5 +18,6 @@ urlpatterns = [
     path("", include("accounts.urls")),
     path("duties/", include("duties.urls")),
     path("emails/", include("mailings.urls")),
+    path("billing/", include("billing.urls")),
     path("", include("core.urls")),
 ]

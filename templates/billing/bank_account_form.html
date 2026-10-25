@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Bank account" %} · {{ unit.name }}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <h1 class="h3 mb-3">{% translate "Bank account" %} · {{ unit.name }}</h1>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed %}
+                    The duty pay of the unit is transferred to this account. Only the dispatchers
+                    and the unit leads of the unit can see it.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% include "core/_form_fields.html" %}
+                <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+                <a class="btn btn-link" href="{% url 'unit_pay' unit.pk %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
