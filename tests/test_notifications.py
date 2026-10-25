@@ -9,7 +9,7 @@ from django.utils import timezone
 from accounts.models import Role
 from duties.models import Duty, Report
 
-from .conftest import create_account, create_duty, create_report
+from .conftest import create_account, create_duty, create_report, positions_data
 
 
 def _recipients(outbox):
@@ -63,9 +63,9 @@ def test_drafts_are_not_announced(client, dispatcher, member, mailoutbox):
             "title": "Draft",
             "starts_at": starts_at.strftime("%Y-%m-%dT%H:%M"),
             "ends_at": (starts_at + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M"),
-            "helpers_needed": 1,
             "pay_type": "none",
             "all_units": "True",
+            **positions_data({"count": 1}),
         },
     )
     assert Duty.objects.get().status == Duty.Status.DRAFT
@@ -84,6 +84,7 @@ def _edit(client, duty, **changes):
         "pay_rate": duty.pay_rate or "",
         "all_units": str(duty.all_units),
         "units": [unit.pk for unit in duty.units.all()],
+        **positions_data(duty=duty),
     }
     data.update(changes)
     return client.post(reverse("duty_update", args=[duty.pk]), data)

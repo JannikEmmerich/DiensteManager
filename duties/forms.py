@@ -1,10 +1,11 @@
 from django import forms
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 from accounts.forms import clean_unit_selection, unit_selection_fields
 from accounts.models import Unit
 
-from .models import Duty, Report
+from .models import Duty, DutyPosition, Qualification, Report
 
 
 class DateTimeLocalInput(forms.DateTimeInput):
@@ -40,7 +41,6 @@ class DutyForm(forms.ModelForm):
             "location",
             "starts_at",
             "ends_at",
-            "helpers_needed",
             "description",
             "pay_type",
             "pay_rate",
@@ -51,8 +51,13 @@ class DutyForm(forms.ModelForm):
         widgets = {
             "pay_type": forms.RadioSelect(attrs={"class": "form-check-input"}),
             "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
-            "helpers_needed": forms.NumberInput(attrs={"min": 1}),
             "description": forms.Textarea(attrs={"rows": 4}),
+        }
+        help_texts = {
+            "pay_rate": _(
+                "Per helper hour, or per helper for the whole duty. Positions can have "
+                "their own rate."
+            ),
         }
 
     def clean(self):
@@ -87,6 +92,89 @@ class DutyForm(forms.ModelForm):
             )
 
 
+class DutyPositionForm(forms.ModelForm):
+    class Meta:
+        model = DutyPosition
+        fields = ["qualification", "count", "pay_rate"]
+        widgets = {
+            "count": forms.NumberInput(attrs={"min": 1}),
+            "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        field = self.fields["qualification"]
+        field.empty_label = _("Any qualification")
+        # Inactive qualifications only for positions that already have them.
+        used = Q(pk=self.instance.qualification_id) if self.instance.qualification_id else Q()
+        field.queryset = Qualification.objects.filter(Q(is_active=True) | used)
+
+
+class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
+    """The positions of a duty: at least one, each qualification only once."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.extra = 2 if self.instance.pk is None else 1
+
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+        # Errors on rows marked for deletion would be ignored, so this is a formset error.
+        kept_back = [
+            form.instance.label
+            for form in self.deleted_forms
+            if form.instance.pk and form.instance.reports.filter(status__in=Report.ACTIVE).exists()
+        ]
+        if kept_back:
+            raise forms.ValidationError(
+                _("Helpers have been reported for these positions; keep them: %(positions)s")
+                % {"positions": ", ".join(kept_back)}
+            )
+        seen = set()
+        for form in self.forms:
+            if not form.cleaned_data or form.cleaned_data.get("DELETE"):
+                continue
+            qualification = form.cleaned_data.get("qualification")
+            if qualification in seen:
+                form.add_error("qualification", _("This qualification is listed twice."))
+            seen.add(qualification)
+
+    def total(self):
+        """The number of helpers of all positions."""
+        return sum(
+            form.cleaned_data["count"]
+            for form in self.forms
+            if form.cleaned_data and not form.cleaned_data.get("DELETE")
+        )
+
+    def summary(self):
+        """The saved positions as text, e.g. for the change history."""
+        return [str(position) for position in self.instance.positions.all()]
+
+
+DutyPositionFormSet = forms.inlineformset_factory(
+    Duty,
+    DutyPosition,
+    form=DutyPositionForm,
+    formset=BaseDutyPositionFormSet,
+    min_num=1,
+    validate_min=True,
+    can_delete=True,
+)
+
+
+class QualificationForm(forms.ModelForm):
+    class Meta:
+        model = Qualification
+        fields = ["name", "abbreviation", "sort_order", "is_active"]
+        widgets = {"sort_order": forms.NumberInput(attrs={"min": 0, "step": 10})}
+
+
+QualificationFormSet = forms.modelformset_factory(Qualification, form=QualificationForm, extra=3)
+
+
 class HelperUnitForm(forms.Form):
     """The unit whose helpers a dispatcher enters."""
 
@@ -100,17 +188,37 @@ class HelperUnitForm(forms.Form):
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ["name", "qualification", "note"]
-        labels = {"name": _("Name of the helper")}
+        fields = ["position", "name", "qualification", "note"]
+        labels = {
+            "name": _("Name of the helper"),
+            "qualification": _("Qualification of the helper"),
+        }
         widgets = {
             "qualification": forms.TextInput(attrs={"placeholder": _("e.g. first aider")}),
         }
+
+    def __init__(self, *args, duty, **kwargs):
+        super().__init__(*args, **kwargs)
+        positions = list(duty.positions.select_related("qualification"))
+        if len(positions) <= 1:
+            # Nothing to choose: the only position (if any) is taken.
+            del self.fields["position"]
+            self.instance.position = positions[0] if positions else None
+            return
+        field = self.fields["position"]
+        field.queryset = duty.positions.all()
+        field.label_from_instance = lambda position: position.label
+        field.required = True
+        field.empty_label = None
+        # The first position is preselected, so that empty rows count as unchanged.
+        field.initial = positions[0].pk
 
 
 class BaseReportFormSet(forms.BaseFormSet):
     """Several helpers at once; empty rows are ignored."""
 
     def __init__(self, *args, duty, unit, **kwargs):
+        kwargs.setdefault("form_kwargs", {})["duty"] = duty
         super().__init__(*args, **kwargs)
         self.duty = duty
         self.unit = unit

@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Invitation, Role, Unit, User
-from duties.models import Duty, Report
+from duties.models import Duty, DutyPosition, Report
 
 PASSWORD = "a-secure-Password-42"
 
@@ -79,7 +79,29 @@ def create_duty(status=Duty.Status.RELEASED, units=(), starts_in=timedelta(days=
     values.update(fields)
     duty = Duty.objects.create(**values)
     duty.units.set(units)
+    # Like every duty created in the portal: at least one position.
+    DutyPosition.objects.create(duty=duty, count=duty.helpers_needed)
     return duty
+
+
+def positions_data(*rows, duty=None):
+    """POST data of the positions formset: the existing positions of ``duty`` plus ``rows``."""
+    existing = list(duty.positions.all()) if duty else []
+    data = {
+        "positions-TOTAL_FORMS": str(len(existing) + len(rows)),
+        "positions-INITIAL_FORMS": str(len(existing)),
+        "positions-MIN_NUM_FORMS": "1",
+        "positions-MAX_NUM_FORMS": "1000",
+    }
+    for index, position in enumerate(existing):
+        data[f"positions-{index}-id"] = position.pk
+        data[f"positions-{index}-qualification"] = position.qualification_id or ""
+        data[f"positions-{index}-count"] = position.count
+        data[f"positions-{index}-pay_rate"] = position.pay_rate or ""
+    for index, row in enumerate(rows, start=len(existing)):
+        for field, value in row.items():
+            data[f"positions-{index}-{field}"] = value
+    return data
 
 
 def create_report(duty, unit, name="Hanna Helper", reported_by=None, **fields):

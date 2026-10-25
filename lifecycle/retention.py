@@ -11,6 +11,8 @@
   after that happened.
 - Paid and cancelled billings are deleted after ``RETENTION_BILLINGS_YEARS`` full
   calendar years (retention periods for accounting records); open ones never.
+- Sent and failed emails of the email queue are deleted ``RETENTION_OUTBOX_DAYS`` after
+  they were written; queued ones never.
 
 A period of 0 keeps the data forever.
 """
@@ -27,6 +29,7 @@ from accounts.models import Invitation
 from billing.models import Billing
 from duties.models import Duty, Report
 from mailings.models import Mailing
+from outbox.models import OutgoingEmail
 
 from . import history
 from .models import HistoryEntry
@@ -105,6 +108,18 @@ def delete_billings(now):
     return len(ids)
 
 
+def delete_outgoing_emails(now):
+    days = settings.RETENTION_OUTBOX_DAYS
+    if not days:
+        return 0
+    _total, per_model = (
+        OutgoingEmail.objects.exclude(status=OutgoingEmail.Status.QUEUED)
+        .filter(created_at__lt=now - timedelta(days=days))
+        .delete()
+    )
+    return per_model.get(OutgoingEmail._meta.label, 0)
+
+
 def apply(now=None, dry_run=False):
     """Applies all retention periods; returns what was done (or would be, for a dry run)."""
     now = now or timezone.now()
@@ -115,6 +130,7 @@ def apply(now=None, dry_run=False):
             "mailings_deleted": delete_mailings(now),
             "invitations_deleted": delete_invitations(now),
             "billings_deleted": delete_billings(now),
+            "outgoing_emails_deleted": delete_outgoing_emails(now),
         }
         if dry_run:
             transaction.set_rollback(True)

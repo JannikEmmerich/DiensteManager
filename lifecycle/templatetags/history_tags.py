@@ -41,6 +41,11 @@ def history_changes(entry):
             field = model._meta.get_field(item["field"]) if model else None
         except FieldDoesNotExist:
             field = None
-        label = capfirst(field.verbose_name) if field is not None else item["field"]
+        if field is not None and field.is_relation and field.auto_created:
+            # A reverse relation such as the positions of a duty: a list of texts.
+            label = capfirst(field.related_model._meta.verbose_name_plural)
+            field = None
+        else:
+            label = capfirst(field.verbose_name) if field is not None else item["field"]
         rows.append((label, _display(field, item["old"]), _display(field, item["new"])))
     return rows

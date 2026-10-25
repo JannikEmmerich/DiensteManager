@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n form_tags %}
+{% block head_title %}{% translate "Qualifications" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-9">
+            <h1 class="h3 mb-3">{% translate "Qualifications" %}</h1>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed %}
+                    The qualifications that positions of duties can ask for, e.g. paramedics or
+                    first aiders. Qualifications cannot be deleted; deactivate those you no longer
+                    need. Empty rows are ignored.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                {% for error in formset.non_form_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+                <div class="table-responsive">
+                    <table class="table align-top">
+                        <thead>
+                            <tr>
+                                {% for field in formset.empty_form.visible_fields %}<th>{{ field.label }}</th>{% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for form in formset %}
+                                <tr>
+                                    {% for field in form.visible_fields %}
+                                        <td{% if field|is_checkbox %} class="text-center"{% endif %}>
+                                            {% if forloop.first %}{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}{% endif %}
+                                            <label class="visually-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                            {{ field|bs_widget }}
+                                            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+                <a class="btn btn-link" href="{% url 'duty_list' %}">{% translate "Back" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

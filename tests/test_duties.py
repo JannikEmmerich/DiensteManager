@@ -8,7 +8,7 @@ from django.utils import timezone
 from duties.models import Duty, Report
 from duties.views import _decide
 
-from .conftest import create_duty, create_report
+from .conftest import create_duty, create_report, positions_data
 
 
 def _duty_data(**data):
@@ -22,6 +22,7 @@ def _duty_data(**data):
         "description": "Meet at the main entrance.",
         "pay_type": "none",
         "all_units": "True",
+        **positions_data({"count": 4}),
     }
     values.update(data)
     return values

@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import Duty, Report
+from .models import Duty, DutyPosition, Qualification, Report
+
+
+@admin.register(Qualification)
+class QualificationAdmin(admin.ModelAdmin):
+    list_display = ["name", "abbreviation", "sort_order", "is_active"]
+    list_editable = ["sort_order", "is_active"]
+    search_fields = ["name", "abbreviation"]
+
+
+class DutyPositionInline(admin.TabularInline):
+    model = DutyPosition
+    extra = 0
 
 
 class ReportInline(admin.TabularInline):
@@ -26,7 +38,7 @@ class DutyAdmin(admin.ModelAdmin):
         "released_at",
         "cancelled_at",
     ]
-    inlines = [ReportInline]
+    inlines = [DutyPositionInline, ReportInline]
 
 
 @admin.register(Report)

@@ -137,6 +137,8 @@ class BillingItem(models.Model):
     duty_title = models.CharField(_("duty"), max_length=200)
     duty_date = models.DateField(_("date"))
     helper_name = models.CharField(_("helper"), max_length=150)
+    # Of the position the helper was reported for (abbreviation if there is one).
+    qualification = models.CharField(_("qualification"), max_length=100, blank=True)
     pay_type = models.CharField(_("duty pay"), max_length=10, choices=Duty.PayType.choices)
     rate = models.DecimalField(_("rate in euros"), max_digits=8, decimal_places=2)
     hours = models.DecimalField(_("hours"), max_digits=5, decimal_places=2, null=True, blank=True)
@@ -156,3 +158,9 @@ class BillingItem(models.Model):
 
     def __str__(self):
         return f"{self.helper_name}, {self.duty_title}"
+
+    @property
+    def helper_display(self):
+        return (
+            f"{self.helper_name} ({self.qualification})" if self.qualification else self.helper_name
+        )

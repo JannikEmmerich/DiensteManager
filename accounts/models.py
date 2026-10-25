@@ -50,6 +50,10 @@ class Unit(models.Model):
 
 
 class User(AbstractUser):
+    class EmailDelivery(models.TextChoices):
+        IMMEDIATELY = "immediately", _("Immediately")
+        DAILY = "daily", _("Once a day as a summary")
+
     username = None
     email = models.EmailField(_("email address"), unique=True)
     role = models.CharField(_("role"), max_length=20, choices=Role.choices)
@@ -72,6 +76,13 @@ class User(AbstractUser):
     notify_new_duties = models.BooleanField(_("new duties"), default=True)
     notify_reports = models.BooleanField(_("reports"), default=True)
     notify_billing = models.BooleanField(_("billings"), default=True)
+    # Only with the email queue (outbox app); urgent notifications are always sent right away.
+    email_delivery = models.CharField(
+        _("delivery"),
+        max_length=20,
+        choices=EmailDelivery.choices,
+        default=EmailDelivery.IMMEDIATELY,
+    )
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"

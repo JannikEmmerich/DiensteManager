@@ -10,8 +10,11 @@ a language get the default language). Who receives what:
   cancelled: the unit leads of the unit concerned and whoever reported the helpers, if
   they have "reports" switched on.
 
-The person who triggered a notification never receives it. Sending errors are logged
-and shown as a warning; they never undo the change itself.
+The person who triggered a notification never receives it. With the email queue
+(``EMAIL_QUEUE``, see outbox/queue.py) the emails are sent in the background; news about
+new duties and reports then waits for the daily summary of the accounts that want one.
+Changes and cancellations of duties always go out right away. Errors when sending right
+away are logged and shown as a warning; they never undo the change itself.
 """
 
 import logging
@@ -29,10 +32,19 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext as _
 
 from accounts.models import Role, User
+from outbox import queue
 
 from .models import Report
 
 logger = logging.getLogger(__name__)
+
+
+def _field_label(duty, name):
+    field = duty._meta.get_field(name)
+    if field.is_relation and field.auto_created:  # e.g. "positions"
+        return field.related_model._meta.verbose_name_plural
+    return field.verbose_name
+
 
 # Changes to a released duty that the units with reports are told about.
 RELEVANT_CHANGES = ("title", "starts_at", "ends_at", "location", "pay_type", "pay_rate")
@@ -78,10 +90,11 @@ def _active_reports_by_unit(duty):
 # --- Rendering and sending -----------------------------------------------------------------
 
 
-def _message(request, recipient, template, context, attach=None):
+def _message(request, recipient, template, context, attach=None, digest=False):
     context = {
         **context,
         "recipient": recipient,
+        "digest": digest,
         "SITE_NAME": settings.SITE_NAME,
         "profile_url": request.build_absolute_uri(reverse("profile")),
     }
@@ -91,27 +104,40 @@ def _message(request, recipient, template, context, attach=None):
         subject = render_to_string(f"{template}_subject.txt", context)
         body = render_to_string(f"{template}_message.txt", context)
         attachments = [attach()] if attach else []
-    return mail.EmailMessage(
+    message = mail.EmailMessage(
         subject=settings.EMAIL_SUBJECT_PREFIX + " ".join(subject.split()),
         body=body,
         to=[recipient.email],
         attachments=attachments,
     )
+    return queue.Email(message, recipient=recipient, digest=digest)
 
 
-def send(request, recipients, template, context, attach=None):
+def send(request, recipients, template, context, attach=None, digestible=False):
     """Sends one email per recipient (except the person who triggered it).
 
     ``template`` is the path of the ``_subject.txt`` and ``_message.txt`` templates
     without that ending. ``attach`` optionally returns an attachment as
     ``(filename, content, mimetype)``; it is called in the recipient's language.
+    ``digestible`` emails go into the daily summary of the recipients who want one
+    (rendered without greeting and footer).
     """
     recipients = list(recipients.exclude(pk=request.user.pk))
     if not recipients:
         return
-    emails = [_message(request, recipient, template, context, attach) for recipient in recipients]
+    emails = [
+        _message(
+            request,
+            recipient,
+            template,
+            context,
+            attach,
+            digest=digestible and queue.wants_digest(recipient),
+        )
+        for recipient in recipients
+    ]
     try:
-        mail.mailers.default.send_messages(emails)
+        queue.send(emails)
     except (SMTPException, OSError):
         logger.exception("Could not send %s notifications (%s)", len(emails), template)
         if not getattr(request, "_notification_failed", False):
@@ -122,8 +148,8 @@ def send(request, recipients, template, context, attach=None):
             )
 
 
-def _send(request, recipients, template, context):
-    send(request, recipients, f"duties/email/{template}", context)
+def _send(request, recipients, template, context, digestible=False):
+    send(request, recipients, f"duties/email/{template}", context, digestible=digestible)
 
 
 # --- Notifications -----------------------------------------------------------------------
@@ -133,7 +159,7 @@ def duty_released(request, duty, unit_ids=None):
     """A duty has been released, or offered to additional units (``unit_ids``)."""
     if unit_ids is None:
         unit_ids = duty.offered_unit_ids()
-    _send(request, _unit_accounts(unit_ids), "duty_released", {"duty": duty})
+    _send(request, _unit_accounts(unit_ids), "duty_released", {"duty": duty}, digestible=True)
 
 
 def helpers_reported(request, duty, unit, reports):
@@ -142,6 +168,7 @@ def helpers_reported(request, duty, unit, reports):
         _dispatchers(),
         "helpers_reported",
         {"duty": duty, "unit": unit, "reports": reports},
+        digestible=True,
     )
 
 
@@ -152,6 +179,7 @@ def helpers_added(request, duty, unit, reports):
         _unit_contacts(unit.pk, reports),
         "helpers_added",
         {"duty": duty, "unit": unit, "reports": reports},
+        digestible=True,
     )
 
 
@@ -161,6 +189,7 @@ def report_withdrawn(request, report):
         _dispatchers(),
         "report_withdrawn",
         {"duty": report.duty, "unit": report.unit, "report": report},
+        digestible=True,
     )
 
 
@@ -175,6 +204,7 @@ def reports_decided(request, duty, reports):
             _unit_contacts(unit_id, unit_reports),
             "reports_decided",
             {"duty": duty, "unit": unit_reports[0].unit, "reports": unit_reports},
+            digestible=True,
         )
 
 
@@ -183,7 +213,7 @@ def duty_changed(request, duty, changed_fields):
     # Stays lazy so that it is translated into each recipient's language.
     changes = format_lazy(
         ", ".join("{}" for _name in changed_fields),
-        *(duty._meta.get_field(name).verbose_name for name in changed_fields),
+        *(_field_label(duty, name) for name in changed_fields),
     )
     for unit_id, reports in _active_reports_by_unit(duty).items():
         _send(

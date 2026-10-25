@@ -4,8 +4,10 @@ Staff planning with external units: external units see our duties with open staf
 needs and report people for them. The duties are going to be imported from HiOrg-Server.
 
 **Status:** user management, sign-in (local and with HiOrg-Server), invitations, units,
-duties with release and reports, email notifications, emails from dispatchers, duty pay
-and billing with PDF statements, German/English UI and the Docker setup are done. Importing duties from HiOrg-Server comes next.
+duties with release, staffing needs per qualification and reports, email notifications
+(in the background, optionally as a daily summary), emails from dispatchers, duty pay and
+billing with PDF statements, change history and retention periods, German/English UI and
+the Docker setup are done. Importing duties from HiOrg-Server comes next.
 
 ## Stack
 
@@ -31,15 +33,21 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
 ## Duties and reports
 
 - **Duties** are entered by dispatchers under *Duties → Add duty* (title, location, start,
-  end, number of helpers needed, description). Each duty records its source (*entered
-  manually*, later *HiOrg-Server*) for the upcoming import.
+  end, helpers needed, description). Each duty records its source (*entered manually*,
+  later *HiOrg-Server*) for the upcoming import.
+- **Helpers needed** are listed per qualification, e.g. 2 × paramedic and 4 × first
+  aider, or as a number of helpers with *any qualification*. Each of these positions can
+  have its own rate (see "Duty pay"). Dispatchers maintain the qualifications under
+  *Duties → Qualifications* (name, abbreviation, order); qualifications in use cannot be
+  deleted, only deactivated, and a position with reported helpers cannot be removed.
 - **Release:** new duties are drafts that only dispatchers see. Units see a duty once it
   has been released ("Save and release" or "Release" on the duty).
 - **Offered to:** all units, or only selected ones. Other units neither see the duty nor
   get notified. A unit that has reported helpers must stay selected.
-- **Reports:** unit leads and members report helpers (name, optional qualification and
-  note; several at once) until the duty starts. Units only see their own reports plus
-  the overall staffing (confirmed / needed). Members withdraw their own reports, unit
+- **Reports:** unit leads and members report helpers (position, name, optional
+  qualification and note; several at once) until the duty starts; with a single position
+  there is nothing to choose. Units only see their own reports plus the staffing per
+  position (confirmed / needed). Members withdraw their own reports, unit
   leads every report of their unit. A person can only be reported once per duty and unit.
 - **Decisions:** dispatchers confirm or decline each report (or "Confirm all pending").
 - **Helpers who register with a dispatcher directly** (e.g. by email) are entered by the
@@ -60,14 +68,37 @@ language). The person who triggered a notification never receives it.
 | Title, time, location or duty pay of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
 | Billing created (PDF attached), paid or cancelled | unit leads of the unit with *Billings* switched on |
 
-The switches are under *My account → Email notifications* and are on by default. The
-emails are sent right away during the request; if the mail server is unreachable, the
-change is saved anyway and a warning is shown.
+The switches are under *My account → Email notifications* and are on by default.
+
+### Sending in the background and daily summary
+
+With `EMAIL_QUEUE=True` (the default with Docker Compose), notifications and emails from
+dispatchers are stored in the database and sent by the `worker` container
+(`manage.py run_worker`), so pages do not wait for the mail server:
+
+- An email that cannot be sent is tried again after 1, 5, 15, 60 and 240 minutes, then
+  it counts as failed. The Django admin lists the emails under *Outgoing emails*;
+  "Send again" queues failed ones once more.
+- **Daily summary:** under *My account*, everyone can choose *Once a day as a summary*
+  instead of *Immediately*. News about new duties, reports, decisions and added helpers
+  then arrives in one email a day at `EMAIL_DIGEST_HOUR` (18:00 by default), in the
+  account's language. Changed and cancelled duties, billings, changed bank details and
+  emails from dispatchers always come right away.
+- Invitations and the emails of the sign-in (e.g. password reset, verification codes)
+  are always sent right away.
+- `SITE_URL` (with Compose: `https://` + `DOMAIN`) is the address for the links in the
+  summary.
+
+Without the queue (e.g. locally with `runserver`), emails are sent during the request; if
+the mail server is unreachable, the change is saved anyway and a warning is shown. Run
+`manage.py run_worker --once` to send queued emails by hand.
 
 ## Duty pay and billing
 
 - **Duty pay** ("Dienstgeld") is set per duty: none, an amount **per helper hour**, or a
-  **flat rate per helper**. The units see it on the duty and in the duty list.
+  **flat rate per helper**. A position can have its own rate (e.g. more for paramedics);
+  otherwise the rate of the duty applies. The units see it on the duty and in the duty
+  list; statements show the qualification next to the helper.
 - **Duty pay overview** (*Duty pay* for unit leads, *Billing → unit* for dispatchers):
   per year every confirmed helper of the unit with the amount and its state – upcoming,
   not billed yet, billed, paid – plus the totals and the unit's statements. Amounts not
@@ -108,8 +139,8 @@ and when, with the old and the new value of each changed field (`lifecycle` app)
 ### Retention periods
 
 `manage.py apply_retention` (`--dry-run` shows what it would do) anonymises and deletes
-data whose time has come. With Docker Compose, the `housekeeping` container runs it once
-a day. The periods are set in `.env`; `0` keeps the data forever.
+data whose time has come. With Docker Compose, the `worker` container runs it once a
+day. The periods are set in `.env`; `0` keeps the data forever.
 
 | Data | What happens | Setting (default) |
 |---|---|---|
@@ -118,6 +149,7 @@ a day. The periods are set in `.env`; `0` keeps the data forever.
 | Emails from dispatchers | deleted after sending | `RETENTION_MAILINGS_DAYS` (365) |
 | Accepted, revoked and expired invitations | deleted after acceptance, revocation or expiry | `RETENTION_INVITATIONS_DAYS` (180) |
 | Paid and cancelled billings | deleted after this many full calendar years (accounting records); open ones never | `RETENTION_BILLINGS_YEARS` (10) |
+| Sent and failed emails of the email queue | deleted; queued ones never | `RETENTION_OUTBOX_DAYS` (30) |
 
 Duties, units, accounts and bank accounts are current data and not deleted
 automatically; blocked accounts can be deleted in the Django admin.
@@ -137,7 +169,8 @@ buttons on a duty ("Email the units") and on a unit.
 - Opened from a duty, the units with reported helpers (otherwise those the duty is
   offered to) are preselected and the email links to the duty.
 - Optionally a copy goes to the dispatcher. Sent emails are listed with their recipients
-  under *Emails*; an email is only recorded if it could be sent.
+  under *Emails*; an email is only recorded if it could be sent (or queued, see
+  "Sending in the background").
 
 ## Sign-in and accounts
 
@@ -250,8 +283,11 @@ cp .env.example .env
 docker compose pull                   # the released image from ghcr.io …
 docker compose up -d                  # … or build it yourself: docker compose up -d --build
 docker compose exec web python manage.py createsuperuser
-docker compose logs -f web            # logs (and emails, without SMTP)
+docker compose logs -f web worker     # logs (and emails, without SMTP)
 ```
+
+- Three containers run the app: `web` (gunicorn), `worker` (sends the emails and applies
+  the retention periods) and `caddy`, plus the database `db`.
 
 - The image is `ghcr.io/jannikemmerich/dienstemanager`; pin a version with
   `DIENSTEMANAGER_VERSION` in `.env` (see "Versions, releases and updates"). While the
@@ -337,12 +373,13 @@ duties/      duties, reports, their permissions and email notifications
 mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
 billing/     duty pay overview, bank details, billings and their PDF
 lifecycle/   change history and retention periods (apply_retention)
+outbox/      email queue, retries, daily summary and the worker (run_worker)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
 static/      app.css and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
-docker/      container entry point and the daily housekeeping loop
+docker/      container entry point
 .github/     CI and release workflow, image clean-up, Dependabot, release notes script
 ```
 
@@ -354,7 +391,5 @@ docker/      container entry point and the daily housekeeping loop
    positions and assigned staff, but no staffing target – clarify its use with HiOrg
    support first. Imported duties get `source = hiorg` and the HiOrg ID in
    `external_id` (unique per source), arrive as drafts and are released as usual.
-2. **Staffing needs per qualification** (e.g. 2 paramedics, 4 first aiders) instead of
-   a single number, possibly with a rate per qualification.
-3. **Sending emails in the background** (queue or digest) once there are many units
-   and accounts.
+2. **Positions from HiOrg-Server:** map the positions of imported duties to the
+   qualifications here, so that imported duties arrive with their staffing needs.

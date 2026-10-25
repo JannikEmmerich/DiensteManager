@@ -31,7 +31,7 @@ def billable_reports(unit):
         )
         .exclude(duty__pay_type=Duty.PayType.NONE)
         .exclude(billing_items__billing__status__in=ACTIVE_BILLING)
-        .select_related("duty")
+        .select_related("duty", "position__qualification")
         .order_by("duty__starts_at", "duty__title", "name")
     )
 
@@ -42,7 +42,7 @@ def units_with_billable_reports():
     for unit in Unit.objects.all():
         reports = list(billable_reports(unit))
         if reports:
-            total = sum((report.duty.pay_for() for report in reports), Decimal(0))
+            total = sum((report.pay_for() for report in reports), Decimal(0))
             result.append((unit, len(reports), total))
     return result
 
@@ -97,7 +97,7 @@ def unit_pay_lines(unit, year):
         .exclude(duty__pay_type=Duty.PayType.NONE)
         .exclude(duty__status=Duty.Status.CANCELLED)
         .exclude(billing_items__billing__status__in=ACTIVE_BILLING)
-        .select_related("duty")
+        .select_related("duty", "position__qualification")
     )
     for report in reports:
         duty = report.duty
@@ -110,9 +110,9 @@ def unit_pay_lines(unit, year):
                 duty_title=duty.title,
                 helper_name=report.name,
                 pay_type=duty.pay_type,
-                rate=duty.pay_rate,
+                rate=report.pay_rate,
                 hours=duty.duration_hours if hourly else None,
-                amount=duty.pay_for(),
+                amount=report.pay_for(),
             )
         )
     lines.sort(key=lambda line: (line.date, line.duty_title, line.helper_name))
@@ -185,10 +185,11 @@ def create_billing(unit, lines, note, user):
                     duty_title=duty.title,
                     duty_date=timezone.localdate(duty.starts_at),
                     helper_name=report.name,
+                    qualification=report.position.short_label if report.position else "",
                     pay_type=duty.pay_type,
-                    rate=duty.pay_rate,
+                    rate=report.pay_rate,
                     hours=hours if hourly else None,
-                    amount=duty.pay_for(hours if hourly else None),
+                    amount=report.pay_for(hours if hourly else None),
                 )
             )
         BillingItem.objects.bulk_create(items)

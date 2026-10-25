@@ -20,8 +20,14 @@ All notable changes are listed here. The format follows
 - Change history of duties, reports, billings and bank accounts; an email to the unit
   leads when the bank details change.
 - Retention periods: old helper data is anonymised and old history, emails,
-  invitations and billings are deleted daily (`apply_retention`, `housekeeping`
-  container).
+  invitations and billings are deleted daily (`apply_retention`, `worker` container).
+- Staffing needs per qualification: a duty lists its positions (e.g. 2 × paramedic,
+  4 × first aider, or any qualification), each optionally with its own rate; units
+  report each helper for a position and see the staffing per position. Dispatchers
+  maintain the qualifications; statements show the qualification of each helper.
+- Emails in the background: notifications and emails from dispatchers are queued and
+  sent by the `worker` container (`run_worker`) with retries; failed emails can be sent
+  again in the admin. Accounts can get news about duties and reports as a daily summary.
 - Colours of the German Red Cross (DRK).
 - Version number in the page footer, CI with tests on SQLite and PostgreSQL, Docker
   images in the GitHub Container Registry, GitHub releases for version tags, weekly

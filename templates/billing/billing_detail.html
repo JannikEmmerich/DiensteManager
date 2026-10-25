@@ -48,7 +48,7 @@
                             <tr>
                                 <td class="small text-nowrap">{{ item.duty_date|date:"SHORT_DATE_FORMAT" }}</td>
                                 <td>{% if item.duty %}<a href="{{ item.duty.get_absolute_url }}">{{ item.duty_title }}</a>{% else %}{{ item.duty_title }}{% endif %}</td>
-                                <td>{{ item.helper_name }}</td>
+                                <td>{{ item.helper_display }}</td>
                                 <td class="text-end">{{ item.hours|hours|default:"–" }}</td>
                                 <td class="text-end text-nowrap">{{ item.amount|money }}</td>
                             </tr>

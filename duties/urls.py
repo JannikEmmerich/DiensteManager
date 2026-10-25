@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path("", views.duty_list, name="duty_list"),
     path("new/", views.duty_create, name="duty_create"),
+    path("qualifications/", views.qualification_list, name="qualification_list"),
     path("<int:pk>/", views.duty_detail, name="duty_detail"),
     path("<int:pk>/edit/", views.duty_update, name="duty_update"),
     path("<int:pk>/release/", views.duty_release, name="duty_release"),
