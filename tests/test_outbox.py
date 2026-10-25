@@ -270,6 +270,29 @@ def test_no_summary_for_deactivated_accounts(client, queue, dispatcher, daily_me
     assert OutgoingEmail.objects.get().status == "failed"
 
 
+def test_queued_emails_of_deactivated_accounts_are_not_sent(
+    client, queue, dispatcher, member, mailoutbox
+):
+    _release(client, dispatcher)
+    assert OutgoingEmail.objects.filter(recipient=member).exists()
+    member.is_active = False
+    member.save()
+    worker.send_due()
+    assert all(m.to != [member.email] for m in mailoutbox)
+    assert OutgoingEmail.objects.get(recipient=member).status == "failed"
+
+
+@pytest.mark.parametrize("hour", ["-1", "24"])
+def test_digest_hour_is_checked(hour, monkeypatch):
+    from runpy import run_path
+
+    from django.core.exceptions import ImproperlyConfigured
+
+    monkeypatch.setenv("EMAIL_DIGEST_HOUR", hour)
+    with pytest.raises(ImproperlyConfigured):
+        run_path("config/settings.py")
+
+
 def test_without_queue_everything_is_sent_right_away(client, dispatcher, daily_member, mailoutbox):
     _release(client, dispatcher, title="Marathon")
     (message,) = mailoutbox

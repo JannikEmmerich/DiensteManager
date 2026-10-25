@@ -712,6 +712,11 @@ msgstr ""
 msgid "This qualification is listed twice."
 msgstr "Diese Qualifikation steht doppelt in der Liste."
 
+#: duties/forms.py
+#, python-format
+msgid "A duty can have at most %(max)d helpers in total."
+msgstr "Ein Dienst kann insgesamt höchstens %(max)d Helfer haben."
+
 #: duties/forms.py:193
 msgid "Name of the helper"
 msgstr "Name des Helfers"

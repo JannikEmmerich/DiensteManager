@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import MaxValueValidator
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -6,6 +7,10 @@ from accounts.forms import clean_unit_selection, unit_selection_fields
 from accounts.models import Unit
 
 from .models import Duty, DutyPosition, Qualification, Report
+
+
+# Upper limit of helpers per position and per duty (the database fields are small integers).
+MAX_HELPERS = 10000
 
 
 class DateTimeLocalInput(forms.DateTimeInput):
@@ -97,12 +102,13 @@ class DutyPositionForm(forms.ModelForm):
         model = DutyPosition
         fields = ["qualification", "count", "pay_rate"]
         widgets = {
-            "count": forms.NumberInput(attrs={"min": 1}),
+            "count": forms.NumberInput(attrs={"min": 1, "max": MAX_HELPERS}),
             "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["count"].validators.append(MaxValueValidator(MAX_HELPERS))
         field = self.fields["qualification"]
         field.empty_label = _("Any qualification")
         # Inactive qualifications only for positions that already have them.
@@ -140,6 +146,10 @@ class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
             if qualification in seen:
                 form.add_error("qualification", _("This qualification is listed twice."))
             seen.add(qualification)
+        if self.total() > MAX_HELPERS:
+            raise forms.ValidationError(
+                _("A duty can have at most %(max)d helpers in total.") % {"max": MAX_HELPERS}
+            )
 
     def total(self):
         """The number of helpers of all positions."""
