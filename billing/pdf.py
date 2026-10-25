@@ -141,7 +141,7 @@ def render(billing):
         [
             _date(item.duty_date),
             item.duty_title,
-            item.helper_name,
+            item.helper_display,
             format_hours(item.hours) if item.hours is not None else "–",
             _rate(item),
             money(item.amount),

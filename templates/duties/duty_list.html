@@ -5,7 +5,10 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h1 class="h3 mb-0">{% translate "Duties" %}</h1>
         {% if can.manage_duties %}
-            <a class="btn btn-primary" href="{% url 'duty_create' %}">{% translate "Add duty" %}</a>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" href="{% url 'qualification_list' %}">{% translate "Qualifications" %}</a>
+                <a class="btn btn-primary" href="{% url 'duty_create' %}">{% translate "Add duty" %}</a>
+            </div>
         {% endif %}
     </div>
     <ul class="nav nav-tabs mb-3">

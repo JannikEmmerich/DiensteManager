@@ -34,6 +34,14 @@ from .models import Report
 
 logger = logging.getLogger(__name__)
 
+
+def _field_label(duty, name):
+    field = duty._meta.get_field(name)
+    if field.is_relation and field.auto_created:  # e.g. "positions"
+        return field.related_model._meta.verbose_name_plural
+    return field.verbose_name
+
+
 # Changes to a released duty that the units with reports are told about.
 RELEVANT_CHANGES = ("title", "starts_at", "ends_at", "location", "pay_type", "pay_rate")
 
@@ -183,7 +191,7 @@ def duty_changed(request, duty, changed_fields):
     # Stays lazy so that it is translated into each recipient's language.
     changes = format_lazy(
         ", ".join("{}" for _name in changed_fields),
-        *(duty._meta.get_field(name).verbose_name for name in changed_fields),
+        *(_field_label(duty, name) for name in changed_fields),
     )
     for unit_id, reports in _active_reports_by_unit(duty).items():
         _send(

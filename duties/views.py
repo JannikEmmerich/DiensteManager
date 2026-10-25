@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -13,7 +14,13 @@ from accounts.permissions import is_dispatcher
 from lifecycle import history
 
 from . import notifications, permissions
-from .forms import DutyForm, HelperUnitForm, ReportFormSet
+from .forms import (
+    DutyForm,
+    DutyPositionFormSet,
+    HelperUnitForm,
+    QualificationFormSet,
+    ReportFormSet,
+)
 from .models import Duty, Report
 
 DUTIES_PER_PAGE = 50
@@ -57,14 +64,23 @@ def duty_detail(request, pk):
         )
         for report in permissions.visible_reports(request.user)
         .filter(duty=duty)
-        .select_related("duty", "unit", "reported_by")
+        .select_related("duty", "unit", "reported_by", "position__qualification")
     ]
+    positions = list(
+        duty.positions.select_related("qualification").annotate(
+            confirmed_count=Count("reports", filter=Q(reports__status=Report.Status.CONFIRMED)),
+            pending_count=Count("reports", filter=Q(reports__status=Report.Status.REPORTED)),
+        )
+    )
     return render(
         request,
         "duties/duty_detail.html",
         {
             "duty": duty,
             "reports": reports,
+            "positions": positions,
+            # A single position "any qualification" needs no breakdown.
+            "show_positions": len(positions) > 1 or any(p.qualification_id for p in positions),
             "can_report": permissions.can_report(request.user, duty),
             # The history names helpers of all units, so only dispatchers see it.
             "history": history.entries(history.scope_for_duty(duty.pk))
@@ -75,14 +91,26 @@ def duty_detail(request, pk):
     )
 
 
+def _save_positions(duty, formset):
+    formset.instance = duty
+    formset.save()
+    if duty.pay_type == Duty.PayType.NONE:
+        # Without duty pay, rates of positions mean nothing.
+        duty.positions.exclude(pay_rate=None).update(pay_rate=None)
+    return formset.summary()
+
+
 def duty_create(request):
     _dispatcher_only(request)
     form = DutyForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
+    formset = DutyPositionFormSet(request.POST or None, instance=Duty(), prefix="positions")
+    if request.method == "POST" and all([form.is_valid(), formset.is_valid()]):
         duty = form.save(commit=False)
         duty.created_by = request.user
+        duty.helpers_needed = formset.total()
         duty.save()
         form.save_m2m()
+        _save_positions(duty, formset)
         history.record(duty, history.Action.CREATED, request.user, history.scope_for_duty(duty.pk))
         if "release" in request.POST:
             _release(request, duty)
@@ -92,7 +120,7 @@ def duty_create(request):
                 _("Duty saved as a draft. The units will only see it once you release it."),
             )
         return redirect(duty)
-    return render(request, "duties/duty_form.html", {"form": form})
+    return render(request, "duties/duty_form.html", {"form": form, "formset": formset})
 
 
 def duty_update(request, pk):
@@ -103,27 +131,35 @@ def duty_update(request, pk):
         return redirect(duty)
     # Before validating: the form already applies its values to the instance.
     offered_before = duty.offered_unit_ids()
+    positions_before = [str(position) for position in duty.positions.all()]
     form = DutyForm(request.POST or None, instance=duty)
-    if request.method == "POST" and form.is_valid():
+    formset = DutyPositionFormSet(request.POST or None, instance=duty, prefix="positions")
+    if request.method == "POST" and all([form.is_valid(), formset.is_valid()]):
+        duty.helpers_needed = formset.total()
         form.save()
-        if form.has_changed():
+        positions_after = _save_positions(duty, formset)
+        changes = history.form_changes(form)
+        changed_fields = [
+            name for name in notifications.RELEVANT_CHANGES if name in form.changed_data
+        ]
+        if positions_after != positions_before:
+            changes.append(history.change("positions", positions_before, positions_after))
+            changed_fields.append("positions")
+        if changes:
             history.record(
-                duty,
-                history.Action.CHANGED,
-                request.user,
-                history.scope_for_duty(duty.pk),
-                history.form_changes(form),
+                duty, history.Action.CHANGED, request.user, history.scope_for_duty(duty.pk), changes
             )
         messages.success(request, _("Saved."))
         if duty.status == Duty.Status.RELEASED:
-            changes = [name for name in notifications.RELEVANT_CHANGES if name in form.changed_data]
-            if changes:
-                notifications.duty_changed(request, duty, changes)
+            if changed_fields:
+                notifications.duty_changed(request, duty, changed_fields)
             added_units = duty.offered_unit_ids() - offered_before
             if added_units:
                 notifications.duty_released(request, duty, added_units)
         return redirect(duty)
-    return render(request, "duties/duty_form.html", {"form": form, "duty": duty})
+    return render(
+        request, "duties/duty_form.html", {"form": form, "formset": formset, "duty": duty}
+    )
 
 
 def _change_status(duty, old_status, new_status, timestamp_field):
@@ -187,6 +223,17 @@ def duty_delete(request, pk):
     duty.delete()
     messages.success(request, _("Duty “%(title)s” deleted.") % {"title": duty.title})
     return redirect("duty_list")
+
+
+def qualification_list(request):
+    """The catalogue of qualifications that positions can ask for."""
+    _dispatcher_only(request)
+    formset = QualificationFormSet(request.POST or None, prefix="qualifications")
+    if request.method == "POST" and formset.is_valid():
+        formset.save()
+        messages.success(request, _("Saved."))
+        return redirect("qualification_list")
+    return render(request, "duties/qualification_list.html", {"formset": formset})
 
 
 # --- Reports -----------------------------------------------------------------------------

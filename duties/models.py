@@ -3,7 +3,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, Sum
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils import timezone
@@ -13,6 +13,29 @@ from django.utils.translation import gettext_lazy as _
 from accounts.models import Unit
 
 CENT = Decimal("0.01")
+
+
+class Qualification(models.Model):
+    """A qualification that positions of duties can ask for, e.g. "Rettungssanitäter"."""
+
+    name = models.CharField(_("name"), max_length=100, unique=True)
+    abbreviation = models.CharField(_("abbreviation"), max_length=20, blank=True)
+    sort_order = models.PositiveSmallIntegerField(
+        _("order"), default=0, help_text=_("Lower numbers come first, e.g. 10, 20, 30.")
+    )
+    is_active = models.BooleanField(
+        _("active"),
+        default=True,
+        help_text=_("Inactive qualifications cannot be chosen for new positions any more."),
+    )
+
+    class Meta:
+        verbose_name = _("qualification")
+        verbose_name_plural = _("qualifications")
+        ordering = ["sort_order", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.abbreviation})" if self.abbreviation else self.name
 
 
 class DutyQuerySet(models.QuerySet):
@@ -166,14 +189,25 @@ class Duty(models.Model):
     def has_pay(self):
         return self.pay_type != self.PayType.NONE
 
-    def pay_for(self, hours=None):
-        """Duty pay for one helper; hourly pay for ``hours`` (default: the whole duty)."""
+    def pay_for(self, hours=None, rate=None):
+        """Duty pay for one helper; hourly pay for ``hours`` (default: the whole duty).
+
+        ``rate`` replaces the rate of the duty, e.g. by the rate of a position.
+        """
+        rate = self.pay_rate if rate is None else rate
         if self.pay_type == self.PayType.HOURLY:
             hours = self.duration_hours if hours is None else hours
-            return (self.pay_rate * hours).quantize(CENT, ROUND_HALF_UP)
+            return (rate * hours).quantize(CENT, ROUND_HALF_UP)
         if self.pay_type == self.PayType.FLAT:
-            return self.pay_rate
+            return rate
         return Decimal(0)
+
+    def update_helpers_needed(self):
+        """``helpers_needed`` is the sum of the positions."""
+        total = self.positions.aggregate(total=Sum("count"))["total"] or 0
+        if total and total != self.helpers_needed:
+            self.helpers_needed = total
+            self.save(update_fields=["helpers_needed", "updated_at"])
 
     def offered_unit_ids(self):
         if self.all_units:
@@ -184,6 +218,59 @@ class Duty(models.Model):
         if self.status == self.Status.DRAFT or unit_id is None:
             return False
         return self.all_units or self.units.filter(pk=unit_id).exists()
+
+
+class DutyPosition(models.Model):
+    """How many helpers with a qualification a duty needs, optionally at their own rate."""
+
+    duty = models.ForeignKey(
+        Duty, verbose_name=_("duty"), on_delete=models.CASCADE, related_name="positions"
+    )
+    qualification = models.ForeignKey(
+        Qualification,
+        verbose_name=_("qualification"),
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="positions",
+        help_text=_("Empty: any qualification."),
+    )
+    count = models.PositiveSmallIntegerField(_("number"), validators=[MinValueValidator(1)])
+    pay_rate = models.DecimalField(
+        _("own rate in euros"),
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        help_text=_("Empty: the rate of the duty."),
+    )
+
+    class Meta:
+        verbose_name = _("position")
+        verbose_name_plural = _("positions")
+        ordering = [F("qualification__sort_order").asc(nulls_last=True), "pk"]
+        constraints = [
+            models.CheckConstraint(condition=Q(count__gte=1), name="duty_position_count"),
+        ]
+
+    def __str__(self):
+        return f"{self.count} × {self.label}"
+
+    @property
+    def label(self):
+        return str(self.qualification) if self.qualification else gettext("any qualification")
+
+    @property
+    def short_label(self):
+        """For narrow places such as the PDF; empty for "any qualification"."""
+        if self.qualification is None:
+            return ""
+        return self.qualification.abbreviation or self.qualification.name
+
+    @property
+    def rate(self):
+        return self.duty.pay_rate if self.pay_rate is None else self.pay_rate
 
 
 class Report(models.Model):
@@ -203,6 +290,14 @@ class Report(models.Model):
     )
     unit = models.ForeignKey(
         Unit, verbose_name=_("unit"), on_delete=models.CASCADE, related_name="reports"
+    )
+    position = models.ForeignKey(
+        DutyPosition,
+        verbose_name=_("position"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reports",
     )
     name = models.CharField(_("name"), max_length=150)
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
@@ -254,6 +349,16 @@ class Report(models.Model):
     @property
     def is_active(self):
         return self.status in self.ACTIVE
+
+    @property
+    def pay_rate(self):
+        """The rate of the position, or else of the duty."""
+        if self.position_id and self.position.pay_rate is not None:
+            return self.position.pay_rate
+        return self.duty.pay_rate
+
+    def pay_for(self, hours=None):
+        return self.duty.pay_for(hours, self.pay_rate)
 
     @property
     def can_be_withdrawn(self):

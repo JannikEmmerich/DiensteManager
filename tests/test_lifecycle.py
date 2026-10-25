@@ -15,7 +15,7 @@ from lifecycle import history, retention
 from lifecycle.models import HistoryEntry
 from mailings.models import Mailing
 
-from .conftest import create_duty, create_invitation, create_report
+from .conftest import create_duty, create_invitation, create_report, positions_data
 
 IBAN = "DE89370400440532013000"
 OTHER_IBAN = "GB82WEST12345698765432"
@@ -37,6 +37,7 @@ def _duty_data(duty, **changes):
         "pay_rate": duty.pay_rate or "",
         "all_units": str(duty.all_units),
         "units": [unit.pk for unit in duty.units.all()],
+        **positions_data(duty=duty),
     }
     data.update(changes)
     return data

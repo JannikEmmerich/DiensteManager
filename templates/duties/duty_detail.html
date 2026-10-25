@@ -62,7 +62,16 @@
                         <dt class="col-sm-4">{% translate "Location" %}</dt>
                         <dd class="col-sm-8">{{ duty.location|default:"–" }}</dd>
                         <dt class="col-sm-4">{% translate "Helpers needed" %}</dt>
-                        <dd class="col-sm-8">{{ duty.helpers_needed }}</dd>
+                        <dd class="col-sm-8">
+                            {{ duty.helpers_needed }}
+                            {% if show_positions %}
+                                <ul class="list-unstyled small mb-0">
+                                    {% for position in positions %}
+                                        <li>{{ position }}{% if duty.has_pay and position.pay_rate %} · {{ duty|pay:position.pay_rate }}{% endif %}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </dd>
                         <dt class="col-sm-4">{% translate "Duty pay" %}</dt>
                         <dd class="col-sm-8">{% if duty.has_pay %}{{ duty|pay }}{% else %}{% translate "none" %}{% endif %}</dd>
                         {% if can.manage_duties %}
@@ -94,6 +103,19 @@
                             {% endblocktranslate %}
                         </div>
                     {% endif %}
+                    {% if show_positions %}
+                        <ul class="list-unstyled small mt-3 mb-0">
+                            {% for position in positions %}
+                                <li class="d-flex justify-content-between gap-2">
+                                    <span>{{ position.label }}</span>
+                                    <span class="text-nowrap">
+                                        <span class="badge {% if position.confirmed_count >= position.count %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ position.confirmed_count }}/{{ position.count }}</span>
+                                        {% if position.pending_count %}<span class="text-body-secondary">+{{ position.pending_count }}</span>{% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -120,6 +142,7 @@
                     <tr>
                         {% if can.manage_duties %}<th>{% translate "Unit" %}</th>{% endif %}
                         <th>{% translate "Name" %}</th>
+                        {% if show_positions %}<th>{% translate "Position" %}</th>{% endif %}
                         <th>{% translate "Qualification" %}</th>
                         <th>{% translate "Note" %}</th>
                         <th>{% translate "Status" %}</th>
@@ -132,6 +155,7 @@
                         <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
                             {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
                             <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
+                            {% if show_positions %}<td class="small">{{ report.position.label|default:"–" }}</td>{% endif %}
                             <td>{{ report.qualification|default:"–" }}</td>
                             <td class="small">{{ report.note|default:"–" }}</td>
                             <td>

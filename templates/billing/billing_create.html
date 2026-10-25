@@ -49,7 +49,7 @@
                                 <td class="small text-nowrap">{{ report.duty.starts_at|date:"SHORT_DATE_FORMAT" }}</td>
                                 <td><a href="{{ report.duty.get_absolute_url }}">{{ report.duty.title }}</a></td>
                                 <td>{{ report.name }}</td>
-                                <td class="small">{{ report.duty|pay }}</td>
+                                <td class="small">{{ report.duty|pay:report.pay_rate }}{% if report.position.qualification %}<div class="text-body-secondary">{{ report.position.label }}</div>{% endif %}</td>
                                 <td>
                                     {% if hours %}
                                         <label class="visually-hidden" for="{{ hours.id_for_label }}">{{ hours.label }}</label>

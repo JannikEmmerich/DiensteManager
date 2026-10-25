@@ -39,10 +39,14 @@ def hours(value):
 
 
 @register.filter
-def pay(duty):
-    """The duty pay of a duty, e.g. "12.00 € per helper hour"; empty without pay."""
+def pay(duty, rate=None):
+    """The duty pay of a duty, e.g. "12.00 € per helper hour"; empty without pay.
+
+    ``rate`` replaces the rate of the duty, e.g. by that of a position or a report.
+    """
+    rate = duty.pay_rate if rate in (None, "") else rate
     if duty.pay_type == duty.PayType.HOURLY:
-        return _("%(amount)s per helper hour") % {"amount": money(duty.pay_rate)}
+        return _("%(amount)s per helper hour") % {"amount": money(rate)}
     if duty.pay_type == duty.PayType.FLAT:
-        return _("%(amount)s flat rate per helper") % {"amount": money(duty.pay_rate)}
+        return _("%(amount)s flat rate per helper") % {"amount": money(rate)}
     return ""
