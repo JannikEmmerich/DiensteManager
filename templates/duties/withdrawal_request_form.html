@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{% translate "Ask to withdraw a report" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-7">
+            <h1 class="h3 mb-1">{% translate "Ask to withdraw a report" %}</h1>
+            <p class="text-body-secondary">
+                <a href="{{ report.duty.get_absolute_url }}">{{ report.duty.title }}</a> · {{ report.duty|period }}
+            </p>
+            <p>
+                {% blocktranslate trimmed with name=report.name status=report.get_status_display %}
+                    The report for <strong>{{ name }}</strong> ({{ status }}) can only be withdrawn
+                    by the dispatchers now. They are told by email and either withdraw it or keep
+                    it; you will be notified either way. Until then, {{ name }} stays planned.
+                {% endblocktranslate %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                {% include "core/_field.html" with field=form.withdrawal_note %}
+                <button class="btn btn-danger" type="submit">{% translate "Ask the dispatchers" %}</button>
+                <a class="btn btn-link" href="{{ report.duty.get_absolute_url }}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

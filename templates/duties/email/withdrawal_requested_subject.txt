@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with unit=unit.name name=report.name title=duty.title %}{{ unit }} asks to withdraw {{ name }} from {{ title }}{% endblocktranslate %}{% endautoescape %}

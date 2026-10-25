@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with name=report.name %}The dispatchers have not withdrawn the report for {{ name }}: {{ name }} stays planned for this duty. Please contact the dispatchers if this is a problem.{% endblocktranslate %}
+
+{% translate "Duty:" %} {% include "duties/email/_duty.txt" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

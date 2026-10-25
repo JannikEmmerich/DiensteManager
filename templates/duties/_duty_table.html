@@ -13,7 +13,10 @@
         <tbody>
             {% for duty in duties %}
                 <tr>
-                    <td class="small">{{ duty|period }}</td>
+                    <td class="small">
+                        {{ duty|period }}
+                        {% if duty.report_deadline %}<div class="text-body-secondary">{% blocktranslate trimmed with deadline=duty.report_deadline|date:"SHORT_DATETIME_FORMAT" %}Report deadline: {{ deadline }}{% endblocktranslate %}</div>{% endif %}
+                    </td>
                     <td>
                         <a href="{{ duty.get_absolute_url }}">{{ duty.title }}</a>
                         {% if duty.location or duty.has_pay %}

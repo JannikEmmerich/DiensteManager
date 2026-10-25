@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with unit=unit.name name=report.name requester=report.withdrawal_requested_by status=report.get_status_display %}{{ requester }} ({{ unit }}) asks you to withdraw the report for {{ name }} (status: {{ status }}).{% endblocktranslate %}
+{% if report.withdrawal_note %}
+{% translate "Reason:" %} {{ report.withdrawal_note }}
+{% endif %}
+{% translate "On the page of the duty you can withdraw the report or keep it; the unit is told either way." %}
+
+{% translate "Duty:" %} {% include "duties/email/_duty.txt" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}
