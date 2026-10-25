@@ -7,14 +7,12 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
-### Removed
-
-- The email to the unit leads when a statement is marked as paid. They still get one
-  when a statement is created (with the PDF) or cancelled; the duty pay overview shows
-  which statements are paid.
-
 ### Added
 
+- Roles can be changed: unit leads switch the accounts of their unit between unit lead
+  and member, dispatchers those of all units (on the unit's page). Admins edit all data
+  of other accounts in the portal – name, email address, role (also dispatcher), unit,
+  language and notifications; the internal accounts are listed under *Units*.
 - Qualifications can count as another one ("Also counts as" in the catalogue), e.g.
   emergency paramedic → paramedic → first aider. Helpers with a higher qualification
   then also fill places for the lower ones: with 2 × first aider and 1 × paramedic
@@ -33,6 +31,12 @@ All notable changes are listed here. The format follows
   qualification", instead of empty rows (or one new row per save). Positions read
   "number × qualification"; the rates are only shown with duty pay. New qualifications
   come last in the order.
+
+### Removed
+
+- The email to the unit leads when a statement is marked as paid. They still get one
+  when a statement is created (with the PDF) or cancelled; the duty pay overview shows
+  which statements are paid.
 
 ### Fixed
 
