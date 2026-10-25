@@ -134,7 +134,7 @@ jobs:
             org.opencontainers.image.description=Staff planning with external units, based on duties from HiOrg-Server
 
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           # Pull requests only check that the image builds (one platform is enough).
