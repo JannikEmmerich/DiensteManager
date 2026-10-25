@@ -59,6 +59,10 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   counted in the places left, which are the open places shown when reporting.
 - **Release:** new duties are drafts that only dispatchers see. Units see a duty once it
   has been released ("Save and release" or "Release" on the duty).
+- **Copy:** "Copy" on a duty opens the form for a new duty, prefilled with title,
+  location, description, duty pay, offered units and positions (inactive qualifications
+  are left out). Only date and times have to be entered; the copy is a draft without
+  reports.
 - **Offered to:** all units, or only selected ones. Other units neither see the duty nor
   get notified. A unit that has reported helpers must stay selected.
 - **Report deadline** (optional, per duty): until then units report helpers and withdraw
