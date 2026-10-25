@@ -12,6 +12,10 @@ os.environ["HIORG_CLIENT_ID"] = "test-client-id"
 os.environ["HIORG_CLIENT_SECRET"] = "test-client-secret"
 os.environ["HIORG_OV"] = ""
 os.environ["CACHE_URL"] = "locmemcache://"
+# Tests that need the email queue switch it on themselves.
+os.environ["EMAIL_QUEUE"] = "False"
+os.environ["EMAIL_DIGEST_HOUR"] = "18"
+os.environ["SITE_URL"] = "https://dienste.example.org"
 
 from .settings import *  # noqa: E402, F403
 from .settings import STORAGES  # noqa: E402

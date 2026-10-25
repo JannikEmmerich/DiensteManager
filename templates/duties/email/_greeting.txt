@@ -1,1 +1,1 @@
-{% load i18n %}{% if recipient.first_name %}{% blocktranslate trimmed with name=recipient.first_name %}Hello {{ name }},{% endblocktranslate %}{% else %}{% translate "Hello," %}{% endif %}
+{% load i18n %}{% if not digest %}{% if recipient.first_name %}{% blocktranslate trimmed with name=recipient.first_name %}Hello {{ name }},{% endblocktranslate %}{% else %}{% translate "Hello," %}{% endif %}{% endif %}

@@ -12,6 +12,8 @@ from django.core import mail
 from django.template.loader import render_to_string
 from django.utils import translation
 
+from outbox import queue
+
 
 def _one_line(text):
     return " ".join(str(text).split())
@@ -41,18 +43,22 @@ def _message(request, mailing, recipient, recipient_count, is_copy=False):
         context["duty_url"] = request.build_absolute_uri(mailing.duty.get_absolute_url())
     with translation.override(recipient.language or settings.LANGUAGE_CODE):
         body = render_to_string("mailings/email/mailing_message.txt", context)
-    return mail.EmailMessage(
+    message = mail.EmailMessage(
         subject=settings.EMAIL_SUBJECT_PREFIX + _one_line(mailing.subject),
         body=body,
         from_email=_from_email(sender),
         to=[recipient.email],
         reply_to=[_reply_to(sender)],
     )
+    return queue.Email(message, recipient=recipient)
 
 
 def send(request, mailing, recipients, copy_to_sender=False):
-    """Sends the mailing; raises SMTPException or OSError if that fails."""
+    """Sends the mailing, or queues it (``EMAIL_QUEUE``; never in a daily summary).
+
+    Raises SMTPException or OSError if sending right away fails.
+    """
     emails = [_message(request, mailing, recipient, len(recipients)) for recipient in recipients]
     if copy_to_sender:
         emails.append(_message(request, mailing, mailing.sent_by, len(recipients), is_copy=True))
-    mail.mailers.default.send_messages(emails)
+    queue.send(emails)

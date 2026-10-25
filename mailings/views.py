@@ -1,6 +1,7 @@
 import logging
 from smtplib import SMTPException
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -85,7 +86,7 @@ def mailing_create(request):
         mailing = form.save(commit=False)
         mailing.sent_by = request.user
         try:
-            # Recorded only if the emails went out.
+            # Recorded only if the emails went out (or are queued, with EMAIL_QUEUE).
             with transaction.atomic():
                 mailing.save()
                 form.save_m2m()
@@ -97,15 +98,19 @@ def mailing_create(request):
             logger.exception("Could not send the email “%s”", mailing.subject)
             messages.error(request, _("The email could not be sent. Please try again later."))
         else:
-            messages.success(
-                request,
-                ngettext(
+            if settings.EMAIL_QUEUE:
+                text = ngettext(
+                    "The email to %(count)d person is being sent.",
+                    "The email to %(count)d people is being sent.",
+                    len(recipients),
+                )
+            else:
+                text = ngettext(
                     "Email sent to %(count)d person.",
                     "Email sent to %(count)d people.",
                     len(recipients),
                 )
-                % {"count": len(recipients)},
-            )
+            messages.success(request, text % {"count": len(recipients)})
             return redirect(mailing)
     duty_id = str(form["duty"].value() or "")
     duty = form.fields["duty"].queryset.filter(pk=duty_id).first() if duty_id.isdigit() else None

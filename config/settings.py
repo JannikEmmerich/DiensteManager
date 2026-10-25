@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "mailings",
     "billing",
     "lifecycle",
+    "outbox",
 ]
 
 MIDDLEWARE = [
@@ -202,12 +203,13 @@ ALLAUTH_TRUSTED_PROXY_COUNT = env.int("ALLAUTH_TRUSTED_PROXY_COUNT", default=0)
 INVITATION_VALIDITY_DAYS = env.int("INVITATION_VALIDITY_DAYS", default=14)
 
 # Data lifecycle: retention periods applied by "manage.py apply_retention" (daily in the
-# housekeeping container); 0 keeps the data forever. See "Data lifecycle" in the README.
+# worker container); 0 keeps the data forever. See "Data lifecycle" in the README.
 RETENTION_REPORTS_DAYS = env.int("RETENTION_REPORTS_DAYS", default=365)
 RETENTION_HISTORY_DAYS = env.int("RETENTION_HISTORY_DAYS", default=730)
 RETENTION_MAILINGS_DAYS = env.int("RETENTION_MAILINGS_DAYS", default=365)
 RETENTION_INVITATIONS_DAYS = env.int("RETENTION_INVITATIONS_DAYS", default=180)
 RETENTION_BILLINGS_YEARS = env.int("RETENTION_BILLINGS_YEARS", default=10)
+RETENTION_OUTBOX_DAYS = env.int("RETENTION_OUTBOX_DAYS", default=30)
 
 
 # --- Email ---------------------------------------------------------------------------
@@ -236,6 +238,15 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=f"{SITE_NAME} <noreply@lo
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # Notifications (duties/notifications.py) use the same subject prefix as allauth.
 EMAIL_SUBJECT_PREFIX = ACCOUNT_EMAIL_SUBJECT_PREFIX
+# Notifications and emails from dispatchers are stored and sent in the background by
+# "manage.py run_worker" (the worker container), with retries; accounts can choose a
+# daily summary, sent at EMAIL_DIGEST_HOUR (local time). Off: they are sent right away.
+# Invitations and the emails of the sign-in (e.g. password reset) are always sent right away.
+EMAIL_QUEUE = env.bool("EMAIL_QUEUE", default=False)
+EMAIL_DIGEST_HOUR = env.int("EMAIL_DIGEST_HOUR", default=18)
+# Address of the portal for links in emails that the worker writes itself (the daily
+# summary), e.g. https://dienste.example.org; Docker Compose sets it from DOMAIN.
+SITE_URL = env("SITE_URL", default="").rstrip("/")
 
 
 # --- Languages, time zone, static files -------------------------------------------------

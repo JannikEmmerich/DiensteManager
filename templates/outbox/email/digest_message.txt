@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed count counter=items|length %}Here is what happened since the last summary:{% plural %}Here are the {{ counter }} things that happened since the last summary:{% endblocktranslate %}
+{% for item in items %}
+== {{ item.title }} ==
+
+{{ item.body }}
+{% endfor %}
+-- 
+{% blocktranslate trimmed with site=SITE_NAME %}You receive this summary from {{ site }} once a day because of your notification settings. You can change them under “My account”.{% endblocktranslate %}{% if profile_url %}
+{{ profile_url }}{% endif %}{% endautoescape %}
