@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 11:51+0100\n"
+"POT-Creation-Date: 2026-10-25 11:55+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -116,8 +116,8 @@ msgid ""
 "When a statement of the duty pay of my unit is created (with the PDF), paid "
 "or cancelled, and when its bank details change."
 msgstr ""
-"Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit "
-"PDF), bezahlt oder storniert wird und wenn sich ihre Bankverbindung ändert."
+"Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit PDF),"
+" bezahlt oder storniert wird und wenn sich ihre Bankverbindung ändert."
 
 #: accounts/forms.py:156
 msgid "Changed bank details"
@@ -126,8 +126,8 @@ msgstr "Geänderte Bankverbindungen"
 #: accounts/forms.py:158
 msgid "When a unit changes the account to which its duty pay is transferred."
 msgstr ""
-"Wenn eine Bereitschaft das Konto ändert, auf das ihre Dienstgelder "
-"überwiesen werden."
+"Wenn eine Bereitschaft das Konto ändert, auf das ihre Dienstgelder überwiesen"
+" werden."
 
 #: accounts/forms.py:165
 #, python-format
@@ -297,8 +297,8 @@ msgstr "Einladungen"
 #: accounts/views.py:46
 #, python-format
 msgid ""
-"The invitation for %(email)s has been saved, but the email could not be "
-"sent. Please use “Resend” later."
+"The invitation for %(email)s has been saved, but the email could not be sent."
+" Please use “Resend” later."
 msgstr ""
 "Die Einladung an %(email)s ist gespeichert, aber die E-Mail konnte nicht "
 "verschickt werden. Bitte später „Erneut senden“ verwenden."
@@ -517,7 +517,7 @@ msgstr "%(amount)s pauschal"
 msgid "Statement of duty pay %(number)s"
 msgstr "Abrechnung Dienstgelder %(number)s"
 
-#: billing/pdf.py:122 duties/forms.py:189 templates/accounts/profile.html:15
+#: billing/pdf.py:122 duties/forms.py:198 templates/accounts/profile.html:15
 #: templates/billing/billing_list.html:13
 #: templates/billing/billing_list.html:48 templates/duties/duty_detail.html:158
 #: templates/mailings/mailing_detail.html:34
@@ -645,11 +645,11 @@ msgstr ""
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
-#: config/settings.py:277
+#: config/settings.py:282
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:278
+#: config/settings.py:283
 msgid "English"
 msgstr "Englisch"
 
@@ -665,16 +665,16 @@ msgstr "Grundfunktionen"
 msgid "Duties and reports"
 msgstr "Dienste und Meldungen"
 
-#: duties/forms.py:34 templates/duties/duty_detail.html:93
+#: duties/forms.py:38 templates/duties/duty_detail.html:93
 msgid "Offered to"
 msgstr "Angeboten für"
 
-#: duties/forms.py:34
+#: duties/forms.py:38
 msgid "Only relevant if the duty is offered to selected units only."
 msgstr ""
 "Nur relevant, wenn der Dienst nur ausgewählten Bereitschaften angeboten wird."
 
-#: duties/forms.py:63
+#: duties/forms.py:67
 msgid ""
 "Per helper hour, or per helper for the whole duty. Positions can have their "
 "own rate."
@@ -682,65 +682,70 @@ msgstr ""
 "Pro Helferstunde oder pro Helfer für den ganzen Dienst. Positionen können "
 "einen eigenen Satz haben."
 
-#: duties/forms.py:73
+#: duties/forms.py:77
 msgid "The end must be after the start."
 msgstr "Das Ende muss nach dem Beginn liegen."
 
-#: duties/forms.py:76
+#: duties/forms.py:80
 msgid "The report deadline must be before the start."
 msgstr "Der Meldeschluss muss vor dem Beginn liegen."
 
-#: duties/forms.py:80
+#: duties/forms.py:84
 msgid "Please enter the rate."
 msgstr "Bitte gib den Satz an."
 
-#: duties/forms.py:98
+#: duties/forms.py:102
 #, python-format
 msgid "These units have reported helpers and must stay selected: %(units)s"
 msgstr ""
 "Diese Bereitschaften haben Helfer gemeldet und müssen ausgewählt bleiben: "
 "%(units)s"
 
-#: duties/forms.py:115
+#: duties/forms.py:120
 msgid "Any qualification"
 msgstr "Beliebige Qualifikation"
 
-#: duties/forms.py:140
+#: duties/forms.py:145
 #, python-format
 msgid ""
 "Helpers have been reported for these positions; keep them: %(positions)s"
 msgstr ""
 "Für diese Positionen wurden Helfer gemeldet; behalte sie: %(positions)s"
 
-#: duties/forms.py:149
+#: duties/forms.py:154
 msgid "This qualification is listed twice."
 msgstr "Diese Qualifikation steht doppelt in der Liste."
 
-#: duties/forms.py:201
+#: duties/forms.py:158
+#, python-format
+msgid "A duty can have at most %(max)d helpers in total."
+msgstr "Ein Dienst kann insgesamt höchstens %(max)d Helfer haben."
+
+#: duties/forms.py:210
 msgid "Name of the helper"
 msgstr "Name des Helfers"
 
-#: duties/forms.py:202
+#: duties/forms.py:211
 msgid "Qualification of the helper"
 msgstr "Qualifikation des Helfers"
 
-#: duties/forms.py:205
+#: duties/forms.py:214
 msgid "e.g. first aider"
 msgstr "z. B. Sanitätshelfer"
 
-#: duties/forms.py:251
+#: duties/forms.py:260
 msgid "This person has already been reported for this duty."
 msgstr "Diese Person wurde für diesen Dienst bereits gemeldet."
 
-#: duties/forms.py:253
+#: duties/forms.py:262
 msgid "This person is listed twice."
 msgstr "Diese Person steht doppelt in der Liste."
 
-#: duties/forms.py:272
+#: duties/forms.py:281
 msgid "Reason (optional)"
 msgstr "Grund (optional)"
 
-#: duties/forms.py:274
+#: duties/forms.py:283
 msgid "For the dispatchers, e.g. who could step in instead."
 msgstr "Für die Disposition, z. B. wer stattdessen einspringen könnte."
 
@@ -823,8 +828,8 @@ msgid ""
 "Optional. Afterwards, units can no longer report helpers or withdraw reports "
 "themselves; they can ask you to withdraw them. Without it: until the start."
 msgstr ""
-"Optional. Danach können Bereitschaften keine Helfer mehr melden und "
-"Meldungen nicht mehr selbst zurückziehen; sie können dich darum bitten. Ohne "
+"Optional. Danach können Bereitschaften keine Helfer mehr melden und Meldungen"
+" nicht mehr selbst zurückziehen; sie können dich darum bitten. Ohne "
 "Meldeschluss: bis zum Beginn."
 
 #: duties/models.py:107
@@ -1374,7 +1379,7 @@ msgstr "Anhang"
 msgid "attachments"
 msgstr "Anhänge"
 
-#: outbox/worker.py:120
+#: outbox/worker.py:130
 #, python-format
 msgid "Summary: %(count)d notification"
 msgid_plural "Summary: %(count)d notifications"
@@ -1430,8 +1435,8 @@ msgstr "Kein Konto gefunden"
 #: templates/account/signup_closed.html:8
 msgid "There is no account for this sign-in yet. Access is by invitation only."
 msgstr ""
-"Zu dieser Anmeldung gibt es noch kein Konto. Zugänge werden nur per "
-"Einladung vergeben."
+"Zu dieser Anmeldung gibt es noch kein Konto. Zugänge werden nur per Einladung"
+" vergeben."
 
 #: templates/account/signup_closed.html:11
 msgid "Already have an account with a password?"
@@ -1518,8 +1523,8 @@ msgid ""
 "You have been invited as <strong>%(role)s</strong> of the unit "
 "<strong>%(unit)s</strong>."
 msgstr ""
-"Du wurdest als <strong>%(role)s</strong> der Bereitschaft <strong>%(unit)s</"
-"strong> eingeladen."
+"Du wurdest als <strong>%(role)s</strong> der Bereitschaft "
+"<strong>%(unit)s</strong> eingeladen."
 
 #: templates/accounts/accept_invitation.html:12
 #, python-format
@@ -1853,11 +1858,11 @@ msgstr "Noch keine Bereitschaften angelegt."
 
 #: templates/billing/bank_account_form.html:9
 msgid ""
-"The duty pay of the unit is transferred to this account. Only the "
-"dispatchers and the unit leads of the unit can see it."
+"The duty pay of the unit is transferred to this account. Only the dispatchers"
+" and the unit leads of the unit can see it."
 msgstr ""
-"Auf dieses Konto werden die Dienstgelder der Bereitschaft überwiesen. Nur "
-"die Disposition und die Bereitschaftsleitungen der Bereitschaft sehen es."
+"Auf dieses Konto werden die Dienstgelder der Bereitschaft überwiesen. Nur die"
+" Disposition und die Bereitschaftsleitungen der Bereitschaft sehen es."
 
 #: templates/billing/billing_create.html:3
 #: templates/billing/billing_create.html:5
@@ -1904,8 +1909,8 @@ msgstr "Abrechnen"
 #: templates/billing/billing_create.html:66
 msgid "Create the statement now? The unit leads receive it by email."
 msgstr ""
-"Abrechnung jetzt erstellen? Die Bereitschaftsleitungen erhalten sie per E-"
-"Mail."
+"Abrechnung jetzt erstellen? Die Bereitschaftsleitungen erhalten sie per "
+"E-Mail."
 
 #: templates/billing/billing_create.html:71
 msgid "There is nothing to bill for this unit."
@@ -2197,8 +2202,8 @@ msgstr "Hallo %(name)s!"
 msgid ""
 "Signed in as <strong>%(role)s</strong> of the unit <strong>%(unit)s</strong>."
 msgstr ""
-"Angemeldet als <strong>%(role)s</strong> der Bereitschaft <strong>%(unit)s</"
-"strong>."
+"Angemeldet als <strong>%(role)s</strong> der Bereitschaft "
+"<strong>%(unit)s</strong>."
 
 #: templates/core/home.html:12
 #, python-format
@@ -2331,26 +2336,26 @@ msgstr "Dienst absagen"
 
 #: templates/duties/duty_detail.html:40
 msgid ""
-"This duty has already started. Cancelling it notifies the units with "
-"reported helpers by email, and helpers not yet billed can no longer be "
-"billed. Cancel anyway?"
+"This duty has already started. Cancelling it notifies the units with reported"
+" helpers by email, and helpers not yet billed can no longer be billed. Cancel"
+" anyway?"
 msgstr ""
 "Dieser Dienst hat schon begonnen. Mit der Absage werden die Bereitschaften "
-"mit gemeldeten Helfern per E-Mail benachrichtigt, und noch nicht "
-"abgerechnete Helfer können nicht mehr abgerechnet werden. Trotzdem absagen?"
+"mit gemeldeten Helfern per E-Mail benachrichtigt, und noch nicht abgerechnete"
+" Helfer können nicht mehr abgerechnet werden. Trotzdem absagen?"
 
 #: templates/duties/duty_detail.html:47
 msgid ""
 "Cancel this duty? Units with reported helpers will be notified by email."
 msgstr ""
-"Diesen Dienst absagen? Bereitschaften mit gemeldeten Helfern werden per E-"
-"Mail benachrichtigt."
+"Diesen Dienst absagen? Bereitschaften mit gemeldeten Helfern werden per "
+"E-Mail benachrichtigt."
 
 #: templates/duties/duty_detail.html:59
 msgid "This duty is a draft. The units cannot see it until you release it."
 msgstr ""
-"Dieser Dienst ist ein Entwurf. Die Bereitschaften sehen ihn erst, wenn du "
-"ihn freigibst."
+"Dieser Dienst ist ein Entwurf. Die Bereitschaften sehen ihn erst, wenn du ihn"
+" freigibst."
 
 #: templates/duties/duty_detail.html:61
 msgid "This duty has been cancelled."
@@ -2503,9 +2508,9 @@ msgid ""
 "pay, the units that have reported helpers are notified by email. Units you "
 "add are notified about the duty."
 msgstr ""
-"Dieser Dienst ist freigegeben. Wenn du Bezeichnung, Zeit, Ort oder "
-"Dienstgeld änderst, werden die Bereitschaften mit gemeldeten Helfern per E-"
-"Mail benachrichtigt. Neu hinzugefügte Bereitschaften werden über den Dienst "
+"Dieser Dienst ist freigegeben. Wenn du Bezeichnung, Zeit, Ort oder Dienstgeld"
+" änderst, werden die Bereitschaften mit gemeldeten Helfern per E-Mail "
+"benachrichtigt. Neu hinzugefügte Bereitschaften werden über den Dienst "
 "informiert."
 
 #: templates/duties/duty_form.html:18
@@ -2711,11 +2716,11 @@ msgstr ""
 #: templates/duties/email/report_taken_back_message.txt:2
 #, python-format
 msgid ""
-"The dispatchers have withdrawn the report for %(name)s. %(name)s is no "
-"longer planned for this duty."
+"The dispatchers have withdrawn the report for %(name)s. %(name)s is no longer"
+" planned for this duty."
 msgstr ""
-"die Disposition hat die Meldung für %(name)s zurückgenommen. %(name)s ist "
-"für diesen Dienst nicht mehr eingeplant."
+"die Disposition hat die Meldung für %(name)s zurückgenommen. %(name)s ist für"
+" diesen Dienst nicht mehr eingeplant."
 
 #: templates/duties/email/report_taken_back_subject.txt:1
 #, python-format
@@ -2764,8 +2769,8 @@ msgid ""
 "%(requester)s (%(unit)s) asks you to withdraw the report for %(name)s "
 "(status: %(status)s)."
 msgstr ""
-"%(requester)s (%(unit)s) bittet dich, die Meldung für %(name)s "
-"zurückzunehmen (Status: %(status)s)."
+"%(requester)s (%(unit)s) bittet dich, die Meldung für %(name)s zurückzunehmen"
+" (Status: %(status)s)."
 
 #: templates/duties/email/withdrawal_requested_message.txt:4
 msgid "Reason:"
@@ -2802,8 +2807,8 @@ msgid ""
 "email."
 msgstr ""
 "Für Helfer, die sich direkt bei dir gemeldet haben, z. B. per E-Mail oder "
-"Telefon. Diese Helfer werden sofort bestätigt; die Bereitschaftsleitungen "
-"der Bereitschaft werden per E-Mail benachrichtigt."
+"Telefon. Diese Helfer werden sofort bestätigt; die Bereitschaftsleitungen der"
+" Bereitschaft werden per E-Mail benachrichtigt."
 
 #: templates/duties/report_add.html:21
 msgid "Add and confirm"
@@ -2816,13 +2821,13 @@ msgstr "Eintragen und weitere hinzufügen"
 #: templates/duties/report_form.html:10
 #, python-format
 msgid ""
-"Enter the people of your unit <strong>%(unit)s</strong> who will help at "
-"this duty, one per row. Empty rows are ignored. The dispatchers confirm each "
+"Enter the people of your unit <strong>%(unit)s</strong> who will help at this"
+" duty, one per row. Empty rows are ignored. The dispatchers confirm each "
 "report; you will be notified by email."
 msgstr ""
-"Trage die Personen deiner Bereitschaft <strong>%(unit)s</strong> ein, die "
-"bei diesem Dienst helfen – eine pro Zeile. Leere Zeilen werden ignoriert. "
-"Die Disposition bestätigt jede Meldung; du wirst per E-Mail benachrichtigt."
+"Trage die Personen deiner Bereitschaft <strong>%(unit)s</strong> ein, die bei"
+" diesem Dienst helfen – eine pro Zeile. Leere Zeilen werden ignoriert. Die "
+"Disposition bestätigt jede Meldung; du wirst per E-Mail benachrichtigt."
 
 #: templates/duties/report_form.html:19
 msgid "Report"
@@ -2841,8 +2846,8 @@ msgstr "Rücknahme einer Meldung anfragen"
 #, python-format
 msgid ""
 "The report for <strong>%(name)s</strong> (%(status)s) can only be withdrawn "
-"by the dispatchers now. They are told by email and either withdraw it or "
-"keep it; you will be notified either way. Until then, %(name)s stays planned."
+"by the dispatchers now. They are told by email and either withdraw it or keep"
+" it; you will be notified either way. Until then, %(name)s stays planned."
 msgstr ""
 "Die Meldung für <strong>%(name)s</strong> (%(status)s) kann jetzt nur noch "
 "die Disposition zurücknehmen. Die Disposition bekommt eine E-Mail und nimmt "
@@ -2876,8 +2881,8 @@ msgstr[1] "Dies ist eine Kopie deiner E-Mail an %(counter)s Personen."
 msgid ""
 "%(sender)s sent this email via %(site)s. Replies go directly to %(sender)s."
 msgstr ""
-"%(sender)s hat diese E-Mail über %(site)s gesendet. Antworten gehen direkt "
-"an %(sender)s."
+"%(sender)s hat diese E-Mail über %(site)s gesendet. Antworten gehen direkt an"
+" %(sender)s."
 
 #: templates/mailings/email/mailing_message.txt:10
 #, python-format
@@ -2909,8 +2914,8 @@ msgstr "Alle E-Mails"
 #, python-format
 msgid ""
 "Every recipient gets their own email from the portal. Replies go directly to "
-"your address <strong>%(email)s</strong>. The email reaches everyone "
-"selected, regardless of their notification settings."
+"your address <strong>%(email)s</strong>. The email reaches everyone selected,"
+" regardless of their notification settings."
 msgstr ""
 "Jeder Empfänger erhält eine eigene E-Mail vom Portal. Antworten gehen direkt "
 "an deine Adresse <strong>%(email)s</strong>. Die E-Mail erreicht alle "
@@ -2963,6 +2968,5 @@ msgid ""
 "You receive this summary from %(site)s once a day because of your "
 "notification settings. You can change them under “My account”."
 msgstr ""
-"Du erhältst diese Zusammenfassung von %(site)s einmal täglich aufgrund "
-"deiner Benachrichtigungseinstellungen. Du kannst sie unter „Mein Konto“ "
-"ändern."
+"Du erhältst diese Zusammenfassung von %(site)s einmal täglich aufgrund deiner"
+" Benachrichtigungseinstellungen. Du kannst sie unter „Mein Konto“ ändern."

@@ -125,6 +125,25 @@ def test_each_qualification_only_once(client, dispatcher, paramedic):
     assert not Duty.objects.exists()
 
 
+def test_staffing_is_limited(client, dispatcher, paramedic, first_aider):
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("duty_create"),
+        _duty_data({"qualification": paramedic.pk, "count": "10001"}),
+    )
+    assert response.status_code == 200
+    assert not Duty.objects.exists()
+    response = client.post(
+        reverse("duty_create"),
+        _duty_data(
+            {"qualification": paramedic.pk, "count": "6000"},
+            {"qualification": first_aider.pk, "count": "6000"},
+        ),
+    )
+    assert "at most 10000 helpers in total" in response.text
+    assert not Duty.objects.exists()
+
+
 def test_a_duty_needs_a_position(client, dispatcher):
     client.force_login(dispatcher)
     response = client.post(reverse("duty_create"), _duty_data())

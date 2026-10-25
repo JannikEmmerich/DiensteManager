@@ -45,7 +45,11 @@ def _claim(now):
             .values_list("pk", flat=True)[:BATCH_SIZE]
         )
         OutgoingEmail.objects.filter(pk__in=ids).update(next_attempt_at=now + CLAIM_DURATION)
-    return list(OutgoingEmail.objects.filter(pk__in=ids).prefetch_related("attachments"))
+    return list(
+        OutgoingEmail.objects.filter(pk__in=ids)
+        .select_related("recipient")
+        .prefetch_related("attachments")
+    )
 
 
 def _failed(email, error, now):
@@ -75,6 +79,12 @@ def send_due(now=None):
         return len(emails)
     try:
         for email in emails:
+            if email.recipient is not None and not email.recipient.is_active:
+                # Deactivated after the email was queued.
+                email.status = OutgoingEmail.Status.FAILED
+                email.last_error = "The account has been deactivated or deleted."
+                email.save(update_fields=["status", "last_error"])
+                continue
             try:
                 connection.send_messages([to_message(email)])
             except Exception as error:

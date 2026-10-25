@@ -265,6 +265,8 @@ EMAIL_SUBJECT_PREFIX = ACCOUNT_EMAIL_SUBJECT_PREFIX
 # Invitations and the emails of the sign-in (e.g. password reset) are always sent right away.
 EMAIL_QUEUE = env.bool("EMAIL_QUEUE", default=False)
 EMAIL_DIGEST_HOUR = env.int("EMAIL_DIGEST_HOUR", default=18)
+if not 0 <= EMAIL_DIGEST_HOUR <= 23:
+    raise ImproperlyConfigured("EMAIL_DIGEST_HOUR must be an hour between 0 and 23.")
 # Address of the portal for links in emails that the worker writes itself (the daily
 # summary), e.g. https://dienste.example.org; Docker Compose sets it from DOMAIN.
 SITE_URL = env("SITE_URL", default="").rstrip("/")

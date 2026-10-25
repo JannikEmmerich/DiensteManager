@@ -29,6 +29,13 @@ All notable changes are listed here. The format follows
 - Duties with billed helpers can no longer be cancelled (until the billing is cancelled);
   duties that have started ask for confirmation first (#19).
 
+### Fixed
+
+- An `EMAIL_DIGEST_HOUR` outside 0–23 stopped the worker from sending any email; it is
+  now rejected at start-up. More than 32767 helpers per duty caused a server error on
+  PostgreSQL; duties now have at most 10000. Queued emails to accounts blocked in the
+  meantime are no longer sent (#18).
+
 ## [0.2.0] – 2026-10-25
 
 When updating from 0.1.0: admins and dispatchers have to set up two-factor
