@@ -1,6 +1,7 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
 from allauth.core.exceptions import ImmediateHttpResponse
+from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.providers.base import AuthProcess
 from django.contrib import messages
@@ -9,7 +10,7 @@ from django.shortcuts import redirect
 from django.utils import translation
 from django.utils.translation import gettext as _
 
-from . import invitations
+from . import invitations, permissions
 from .models import User
 
 # Only these claims from the HiOrg sign-in are stored (data minimisation).
@@ -100,3 +101,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             raise ImmediateHttpResponse(redirect("account_login")) from None
         invitations.forget_from_session(request)
         return user
+
+
+class MFAAdapter(DefaultMFAAdapter):
+    def can_delete_authenticator(self, authenticator):
+        # Accounts that must use two-factor authentication cannot switch it off.
+        return not permissions.must_use_mfa(authenticator.user)

@@ -16,6 +16,8 @@ os.environ["CACHE_URL"] = "locmemcache://"
 os.environ["EMAIL_QUEUE"] = "False"
 os.environ["EMAIL_DIGEST_HOUR"] = "18"
 os.environ["SITE_URL"] = "https://dienste.example.org"
+# Tests that need mandatory two-factor authentication switch it on themselves.
+os.environ["MFA_REQUIRED_ROLES"] = ""
 
 from .settings import *  # noqa: E402, F403
 from .settings import STORAGES  # noqa: E402

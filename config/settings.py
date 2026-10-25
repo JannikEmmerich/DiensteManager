@@ -86,6 +86,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    # Needs the signed-in user and messages: sends accounts that must use two-factor
+    # authentication (MFA_REQUIRED_ROLES) to its setup first.
+    "accounts.middleware.MfaRequiredMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -198,7 +201,18 @@ if HIORG_CLIENT_ID:
         ],
     }
 
+MFA_ADAPTER = "accounts.adapters.MFAAdapter"
 MFA_TOTP_ISSUER = SITE_NAME
+# Roles whose accounts must use two-factor authentication: they are sent to its setup
+# before anything else and cannot switch it off (accounts/middleware.py). Admins count
+# as dispatchers. Empty: nobody is forced.
+MFA_REQUIRED_ROLES = [
+    role.strip() for role in env.list("MFA_REQUIRED_ROLES", default=["dispatcher"])
+]
+if set(MFA_REQUIRED_ROLES) - {"dispatcher", "unit_lead", "member"}:
+    raise ImproperlyConfigured(
+        "MFA_REQUIRED_ROLES may only contain dispatcher, unit_lead and member."
+    )
 
 # Number of trusted reverse proxies in front of the app (Caddy: 1), so that allauth
 # uses the real client IP for its rate limits.

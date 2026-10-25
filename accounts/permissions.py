@@ -4,7 +4,12 @@
 - Dispatchers (internal): manage all units, invite and block unit leads and members.
 - Unit leads: only their own unit; invite and block unit leads and members there.
 - Members: no management permissions.
+
+Accounts of the roles in MFA_REQUIRED_ROLES (default: dispatchers and admins) must use
+two-factor authentication.
 """
+
+from django.conf import settings
 
 from .models import Invitation, Role, Unit
 
@@ -12,6 +17,14 @@ from .models import Invitation, Role, Unit
 def is_dispatcher(user):
     """Internal view of all units. Superusers count as dispatchers."""
     return user.is_authenticated and (user.is_superuser or user.role == Role.DISPATCHER)
+
+
+def must_use_mfa(user):
+    """Two-factor authentication is mandatory for the roles in MFA_REQUIRED_ROLES."""
+    if not user.is_authenticated:
+        return False
+    role = Role.DISPATCHER if is_dispatcher(user) else user.role
+    return role in settings.MFA_REQUIRED_ROLES
 
 
 def is_unit_lead(user):

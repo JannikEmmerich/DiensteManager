@@ -28,7 +28,8 @@ the Docker setup are done. Importing duties from HiOrg-Server comes next.
 | **Member** | see the duties offered to their unit, report helpers, withdraw their own reports |
 
 The rules live in `accounts/permissions.py`, `duties/permissions.py` and
-`billing/permissions.py`.
+`billing/permissions.py`. Admins and dispatchers must use two-factor authentication
+(see "Sign-in and accounts").
 
 ## Duties and reports
 
@@ -187,6 +188,12 @@ buttons on a duty ("Email the units") and on a unit.
 - **Data minimisation:** of the HiOrg sign-in only `sub`, name, user name and email are
   stored; date of birth, address, phone and gender are discarded; HiOrg tokens are not
   stored.
+- **Two-factor authentication** (authenticator app, plus recovery codes) is available
+  to everyone under *My account → Two-factor authentication*. It is **mandatory for
+  admins and dispatchers**, who see the bank details of all units: without it they are
+  sent to its setup after signing in and can open nothing else, and they cannot switch
+  it off. `MFA_REQUIRED_ROLES` sets the roles (`dispatcher`, `unit_lead`, `member`,
+  separated by commas; empty: nobody is forced).
 - The Django admin uses the same sign-in including two-factor authentication.
 
 ## Languages
