@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "allauth.mfa",
     "core",
     "accounts",
+    "duties",
 ]
 
 MIDDLEWARE = [
@@ -215,6 +216,8 @@ else:
     MAILERS = {"default": {"BACKEND": "django.core.mail.backends.console.EmailBackend"}}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default=f"{SITE_NAME} <noreply@localhost>")
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Notifications (duties/notifications.py) use the same subject prefix as allauth.
+EMAIL_SUBJECT_PREFIX = ACCOUNT_EMAIL_SUBJECT_PREFIX
 
 
 # --- Languages, time zone, static files -------------------------------------------------

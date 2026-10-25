@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% translate "Duties" %}{% endblock head_title %}
+{% block content %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h1 class="h3 mb-0">{% translate "Duties" %}</h1>
+        {% if can.manage_duties %}
+            <a class="btn btn-primary" href="{% url 'duty_create' %}">{% translate "Add duty" %}</a>
+        {% endif %}
+    </div>
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link{% if not show_past %} active{% endif %}" href="{% url 'duty_list' %}">{% translate "Upcoming" %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link{% if show_past %} active{% endif %}" href="{% url 'duty_list' %}?show=past">{% translate "Past" %}</a>
+        </li>
+    </ul>
+    {% if page.object_list %}
+        {% include "duties/_duty_table.html" with duties=page.object_list %}
+        {% if page.has_other_pages %}
+            <nav aria-label="{% translate 'Pages' %}">
+                <ul class="pagination">
+                    {% if page.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{% if show_past %}show=past&amp;{% endif %}page={{ page.previous_page_number }}">{% translate "Previous" %}</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">{% blocktranslate trimmed with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span></li>
+                    {% if page.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{% if show_past %}show=past&amp;{% endif %}page={{ page.next_page_number }}">{% translate "Next" %}</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% elif show_past %}
+        <p class="text-body-secondary">{% translate "No past duties." %}</p>
+    {% else %}
+        <p class="text-body-secondary">{% translate "No upcoming duties." %}</p>
+    {% endif %}
+{% endblock content %}

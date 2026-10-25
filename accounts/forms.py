@@ -79,9 +79,15 @@ class AcceptInvitationForm(SetPasswordMixin, forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
+    NOTIFICATION_FIELDS = ["notify_new_duties", "notify_reports"]
+
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "language"]
+        fields = ["first_name", "last_name", "language", "notify_new_duties", "notify_reports"]
+        labels = {
+            "notify_new_duties": _("New duties for my unit"),
+            "notify_reports": _("Reports"),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -91,6 +97,27 @@ class ProfileForm(forms.ModelForm):
             ("", _("Automatic (browser setting)")),
             *LANGUAGE_CHOICES,
         ]
+        user = self.instance
+        if permissions.is_dispatcher(user):
+            # Dispatchers release the duties themselves.
+            del self.fields["notify_new_duties"]
+            self.fields["notify_reports"].help_text = _("When units report or withdraw helpers.")
+        elif user.role == Role.UNIT_LEAD:
+            self.fields["notify_reports"].help_text = _(
+                "When reports of my unit are confirmed or declined, and when a duty with "
+                "reports of my unit changes or is cancelled."
+            )
+        else:
+            self.fields["notify_reports"].help_text = _(
+                "When helpers I reported are confirmed or declined, and when their duty "
+                "changes or is cancelled."
+            )
+
+    def personal_fields(self):
+        return [field for field in self if field.name not in self.NOTIFICATION_FIELDS]
+
+    def notification_fields(self):
+        return [field for field in self if field.name in self.NOTIFICATION_FIELDS]
 
 
 class UnitForm(forms.ModelForm):

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{{ duty.title }}{% endblock head_title %}
+{% block content %}
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+            <h1 class="h3 mb-1">{{ duty.title }} <span class="fs-6 align-middle">{% include "duties/_status_badge.html" %}</span></h1>
+            <div class="text-body-secondary">{{ duty|period }}{% if duty.location %} · {{ duty.location }}{% endif %}</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {% if can_report %}
+                <a class="btn btn-primary" href="{% url 'report_create' duty.pk %}">{% translate "Report helpers" %}</a>
+            {% endif %}
+            {% if can.manage_duties %}
+                {% if duty.status != "cancelled" %}
+                    <a class="btn btn-outline-secondary" href="{% url 'duty_update' duty.pk %}">{% translate "Edit" %}</a>
+                {% endif %}
+                {% if duty.status == "draft" %}
+                    {% if duty.all_units %}
+                        {% translate "Release this duty? All units will be notified by email." as confirm_text %}
+                    {% else %}
+                        {% translate "Release this duty? The selected units will be notified by email." as confirm_text %}
+                    {% endif %}
+                    <form method="post" action="{% url 'duty_release' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                        {% csrf_token %}
+                        <button class="btn btn-primary" type="submit">{% translate "Release" %}</button>
+                    </form>
+                    {% translate "Delete this draft?" as confirm_text %}
+                    <form method="post" action="{% url 'duty_delete' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-danger" type="submit">{% translate "Delete" %}</button>
+                    </form>
+                {% elif duty.status == "released" %}
+                    {% translate "Cancel this duty? Units with reported helpers will be notified by email." as confirm_text %}
+                    <form method="post" action="{% url 'duty_cancel' duty.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-danger" type="submit">{% translate "Cancel duty" %}</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% if duty.status == "draft" %}
+        <div class="alert alert-secondary">{% translate "This duty is a draft. The units cannot see it until you release it." %}</div>
+    {% elif duty.status == "cancelled" %}
+        <div class="alert alert-danger">{% translate "This duty has been cancelled." %}</div>
+    {% elif duty.has_started and not can.manage_duties %}
+        <div class="alert alert-info">{% translate "The duty has started. Helpers can no longer be reported or withdrawn." %}</div>
+    {% endif %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">{% translate "When" %}</dt>
+                        <dd class="col-sm-8">{{ duty|period }}</dd>
+                        <dt class="col-sm-4">{% translate "Location" %}</dt>
+                        <dd class="col-sm-8">{{ duty.location|default:"–" }}</dd>
+                        <dt class="col-sm-4">{% translate "Helpers needed" %}</dt>
+                        <dd class="col-sm-8">{{ duty.helpers_needed }}</dd>
+                        {% if can.manage_duties %}
+                            <dt class="col-sm-4">{% translate "Offered to" %}</dt>
+                            <dd class="col-sm-8">{% if duty.all_units %}{% translate "All units" %}{% else %}{{ offered_units|join:", " }}{% endif %}</dd>
+                            <dt class="col-sm-4">{% translate "Source" %}</dt>
+                            <dd class="col-sm-8">{{ duty.get_source_display }}</dd>
+                        {% endif %}
+                    </dl>
+                    {% if duty.description %}
+                        <hr>
+                        <div>{{ duty.description|linebreaksbr }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-body-secondary">{% translate "Staffing" %}</h2>
+                    <div class="fs-2 fw-semibold">{{ duty.confirmed_count }} / {{ duty.helpers_needed }}</div>
+                    <div class="text-body-secondary">{% translate "helpers confirmed" %}</div>
+                    {% if duty.pending_count %}
+                        <div class="small mt-2">
+                            {% blocktranslate trimmed count counter=duty.pending_count %}
+                                {{ counter }} report awaiting a decision
+                            {% plural %}
+                                {{ counter }} reports awaiting a decision
+                            {% endblocktranslate %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="h5 mb-0">{% if can.manage_duties %}{% translate "Reported helpers" %}{% else %}{% translate "Helpers reported by your unit" %}{% endif %}</h2>
+        {% if can.manage_duties and duty.pending_count and duty.status == "released" %}
+            <form method="post" action="{% url 'report_confirm_all' duty.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-success" type="submit">{% translate "Confirm all pending" %}</button>
+            </form>
+        {% endif %}
+    </div>
+    {% if reports %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        {% if can.manage_duties %}<th>{% translate "Unit" %}</th>{% endif %}
+                        <th>{% translate "Name" %}</th>
+                        <th>{% translate "Qualification" %}</th>
+                        <th>{% translate "Note" %}</th>
+                        <th>{% translate "Status" %}</th>
+                        <th>{% translate "Reported by" %}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report, can_withdraw, can_decide in reports %}
+                        <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
+                            {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
+                            <td>{{ report.name }}</td>
+                            <td>{{ report.qualification|default:"–" }}</td>
+                            <td class="small">{{ report.note|default:"–" }}</td>
+                            <td>
+                                <span class="badge {% if report.status == 'confirmed' %}text-bg-success{% elif report.status == 'reported' %}text-bg-warning{% elif report.status == 'declined' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ report.get_status_display }}</span>
+                            </td>
+                            <td class="small">
+                                {{ report.reported_by|default:"–" }}
+                                <div class="text-body-secondary">{{ report.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    {% if can_decide %}
+                                        {% if report.status != "confirmed" %}
+                                            <form method="post" action="{% url 'report_confirm' report.pk %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-sm btn-outline-success" type="submit">{% translate "Confirm" %}</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if report.status != "declined" %}
+                                            <form method="post" action="{% url 'report_decline' report.pk %}">
+                                                {% csrf_token %}
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Decline" %}</button>
+                                            </form>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if can_withdraw %}
+                                        {% blocktranslate trimmed with name=report.name asvar confirm_text %}Withdraw the report for {{ name }}?{% endblocktranslate %}
+                                        <form method="post" action="{% url 'report_withdraw' report.pk %}" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                                            {% csrf_token %}
+                                            <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Withdraw" %}</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-body-secondary">{% translate "No helpers reported yet." %}</p>
+    {% endif %}
+{% endblock content %}

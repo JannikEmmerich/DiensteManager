@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{% if duty %}{% translate "Edit duty" %}{% else %}{% translate "Add duty" %}{% endif %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="h3 mb-3">{% if duty %}{% translate "Edit duty" %}{% else %}{% translate "Add duty" %}{% endif %}</h1>
+            {% if duty.status == "released" %}
+                <div class="alert alert-info">
+                    {% blocktranslate trimmed %}
+                        This duty has been released. If you change its title, time or location, the
+                        units that have reported helpers are notified by email. Units you add are
+                        notified about the duty.
+                    {% endblocktranslate %}
+                </div>
+            {% elif not duty %}
+                <p class="text-body-secondary">
+                    {% blocktranslate trimmed %}
+                        New duties are saved as drafts. The units only see a duty once it has been
+                        released; they are then notified by email.
+                    {% endblocktranslate %}
+                </p>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+                {% include "core/_field.html" with field=form.title %}
+                {% include "core/_field.html" with field=form.location %}
+                <div class="row">
+                    <div class="col-sm-6">{% include "core/_field.html" with field=form.starts_at %}</div>
+                    <div class="col-sm-6">{% include "core/_field.html" with field=form.ends_at %}</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">{% include "core/_field.html" with field=form.helpers_needed %}</div>
+                </div>
+                {% include "core/_field.html" with field=form.description %}
+                {% include "core/_choice_list.html" with field=form.all_units %}
+                {% include "core/_choice_list.html" with field=form.units %}
+                {% if duty %}
+                    <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
+                {% else %}
+                    <button class="btn btn-primary" type="submit">{% translate "Save as draft" %}</button>
+                    <button class="btn btn-outline-primary" type="submit" name="release" value="1">{% translate "Save and release" %}</button>
+                {% endif %}
+                <a class="btn btn-link" href="{% if duty %}{{ duty.get_absolute_url }}{% else %}{% url 'duty_list' %}{% endif %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

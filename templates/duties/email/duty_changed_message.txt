@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed %}A duty for which your unit has reported helpers has changed ({{ changes }}). The current details:{% endblocktranslate %}
+
+{% include "duties/email/_duty.txt" %}
+{% translate "Helpers reported by your unit:" %}
+{% include "duties/email/_reports.txt" with with_status=True %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

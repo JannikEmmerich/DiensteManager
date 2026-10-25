@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% translate "A new duty has been released for your unit:" %}
+
+{% include "duties/email/_duty.txt" %}{% if duty.description %}
+{{ duty.description }}
+{% endif %}
+{% translate "Report helpers here:" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n duty_tags %}
 {% block head_title %}{% translate "Overview" %}{% endblock head_title %}
 {% block content %}
     <h1 class="h3 mb-1">{% blocktranslate trimmed with name=user.first_name|default:user.email %}Hello {{ name }}!{% endblocktranslate %}</h1>
@@ -14,22 +14,58 @@
             {% endblocktranslate %}
         {% endif %}
     </p>
+    {% if pending_report_count %}
+        <div class="alert alert-warning">
+            {% blocktranslate trimmed count counter=pending_report_count %}
+                {{ counter }} reported helper is awaiting your decision.
+            {% plural %}
+                {{ counter }} reported helpers are awaiting your decision.
+            {% endblocktranslate %}
+            <a class="alert-link" href="{% url 'duty_list' %}">{% translate "Go to the duties" %}</a>
+        </div>
+    {% endif %}
+    {% if draft_count %}
+        <div class="alert alert-secondary">
+            {% blocktranslate trimmed count counter=draft_count %}
+                {{ counter }} upcoming duty has not been released yet.
+            {% plural %}
+                {{ counter }} upcoming duties have not been released yet.
+            {% endblocktranslate %}
+            <a class="alert-link" href="{% url 'duty_list' %}">{% translate "Go to the duties" %}</a>
+        </div>
+    {% endif %}
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h5">{% translate "Duties with open staffing needs" %}</h2>
-                    <p class="text-body-secondary mb-0">
-                        {% blocktranslate trimmed %}
-                            Duties from HiOrg-Server that still need staff will appear here soon.
-                            Units will then be able to report people for them.
-                        {% endblocktranslate %}
-                    </p>
+                    {% if open_duties %}
+                        <div class="list-group list-group-flush mb-3">
+                            {% for duty in open_duties %}
+                                <a class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center gap-3"
+                                   href="{{ duty.get_absolute_url }}">
+                                    <div>
+                                        <div class="fw-semibold">{{ duty.title }}</div>
+                                        <div class="small text-body-secondary">{{ duty|period }}{% if duty.location %} · {{ duty.location }}{% endif %}</div>
+                                    </div>
+                                    <div class="text-end text-nowrap">{% include "duties/_staffing.html" %}</div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-body-secondary">{% translate "No duties with open staffing needs at the moment." %}</p>
+                    {% endif %}
+                    {% if can.view_duties %}
+                        <a class="btn btn-sm btn-outline-primary" href="{% url 'duty_list' %}">{% translate "All duties" %}</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="list-group">
+                {% if can.manage_duties %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'duty_create' %}">{% translate "Add duty" %}</a>
+                {% endif %}
                 {% if can.invite %}
                     <a class="list-group-item list-group-item-action" href="{% url 'invitation_create' %}">{% translate "Invite a person" %}</a>
                 {% endif %}

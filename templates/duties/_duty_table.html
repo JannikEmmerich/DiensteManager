@@ -1,0 +1,34 @@
+{% load i18n duty_tags %}
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>{% translate "When" %}</th>
+                <th>{% translate "Duty" %}</th>
+                <th>{% translate "Helpers" %}</th>
+                {% if not can.manage_duties %}<th>{% translate "Your unit" %}</th>{% endif %}
+                <th>{% translate "Status" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for duty in duties %}
+                <tr>
+                    <td class="small">{{ duty|period }}</td>
+                    <td>
+                        <a href="{{ duty.get_absolute_url }}">{{ duty.title }}</a>
+                        {% if duty.location %}<div class="small text-body-secondary">{{ duty.location }}</div>{% endif %}
+                    </td>
+                    <td class="text-nowrap">{% include "duties/_staffing.html" %}</td>
+                    {% if not can.manage_duties %}
+                        <td class="small">
+                            {% if duty.unit_report_count %}
+                                {% blocktranslate trimmed count counter=duty.unit_report_count %}{{ counter }} reported{% plural %}{{ counter }} reported{% endblocktranslate %}
+                            {% else %}–{% endif %}
+                        </td>
+                    {% endif %}
+                    <td>{% include "duties/_status_badge.html" %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

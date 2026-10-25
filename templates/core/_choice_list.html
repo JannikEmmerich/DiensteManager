@@ -1,0 +1,12 @@
+{% comment %}A radio or checkbox list (RadioSelect, CheckboxSelectMultiple) as Bootstrap form-checks.{% endcomment %}
+<fieldset class="mb-3">
+    <legend class="form-label fs-6 mb-1">{{ field.label }}</legend>
+    {% for choice in field %}
+        <div class="form-check">
+            {{ choice.tag }}
+            <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+        </div>
+    {% endfor %}
+    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+</fieldset>

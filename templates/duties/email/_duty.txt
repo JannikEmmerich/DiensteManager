@@ -1,0 +1,4 @@
+{% load i18n duty_tags %}{{ duty.title }}
+{% translate "When:" %} {{ duty|period }}
+{% if duty.location %}{% translate "Where:" %} {{ duty.location }}
+{% endif %}{% translate "Helpers needed:" %} {{ duty.helpers_needed }}

@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% translate "The following duty has been cancelled. The helpers reported by your unit are no longer needed." %}
+
+{% include "duties/email/_duty.txt" %}
+{% translate "Helpers reported by your unit:" %}
+{% include "duties/email/_reports.txt" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

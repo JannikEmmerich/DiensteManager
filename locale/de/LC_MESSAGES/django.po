@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 01:07+0200\n"
+"POT-Creation-Date: 2026-10-25 02:14+0200\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -33,7 +33,7 @@ msgstr "Berechtigungen"
 msgid "Important dates"
 msgstr "Wichtige Daten"
 
-#: accounts/admin.py:75
+#: accounts/admin.py:75 duties/models.py:73 duties/models.py:164
 msgid "status"
 msgstr "Status"
 
@@ -77,9 +77,37 @@ msgstr "Vorname"
 msgid "Last name"
 msgstr "Nachname"
 
-#: accounts/forms.py:91
+#: accounts/forms.py:88
+msgid "New duties for my unit"
+msgstr "Neue Dienste für meine Bereitschaft"
+
+#: accounts/forms.py:89
+msgid "Reports"
+msgstr "Meldungen"
+
+#: accounts/forms.py:97
 msgid "Automatic (browser setting)"
 msgstr "Automatisch (Browsereinstellung)"
+
+#: accounts/forms.py:104
+msgid "When units report or withdraw helpers."
+msgstr "Wenn Bereitschaften Helfer melden oder Meldungen zurückziehen."
+
+#: accounts/forms.py:107
+msgid ""
+"When reports of my unit are confirmed or declined, and when a duty with "
+"reports of my unit changes or is cancelled."
+msgstr ""
+"Wenn Meldungen meiner Bereitschaft bestätigt oder abgelehnt werden und wenn "
+"sich ein Dienst mit Meldungen meiner Bereitschaft ändert oder abgesagt wird."
+
+#: accounts/forms.py:112
+msgid ""
+"When helpers I reported are confirmed or declined, and when their duty "
+"changes or is cancelled."
+msgstr ""
+"Wenn von mir gemeldete Helfer bestätigt oder abgelehnt werden und wenn sich "
+"ihr Dienst ändert oder abgesagt wird."
 
 #: accounts/models.py:23
 msgid "Dispatcher (internal)"
@@ -93,31 +121,32 @@ msgstr "Bereitschaftsleitung"
 msgid "Unit member"
 msgstr "Mitglied einer Bereitschaft"
 
-#: accounts/models.py:37
+#: accounts/models.py:37 duties/models.py:160
 msgid "name"
 msgstr "Name"
 
-#: accounts/models.py:38 accounts/models.py:147
+#: accounts/models.py:38 accounts/models.py:150 duties/models.py:90
 msgid "created at"
 msgstr "erstellt am"
 
-#: accounts/models.py:41 accounts/models.py:58 accounts/models.py:126
+#: accounts/models.py:41 accounts/models.py:58 accounts/models.py:129
+#: duties/models.py:158
 msgid "unit"
 msgstr "Bereitschaft"
 
-#: accounts/models.py:42
+#: accounts/models.py:42 duties/models.py:76
 msgid "units"
 msgstr "Bereitschaften"
 
-#: accounts/models.py:54 accounts/models.py:122
+#: accounts/models.py:54 accounts/models.py:125
 msgid "email address"
 msgstr "E-Mail-Adresse"
 
-#: accounts/models.py:55 accounts/models.py:123
+#: accounts/models.py:55 accounts/models.py:126
 msgid "role"
 msgstr "Rolle"
 
-#: accounts/models.py:65 accounts/models.py:133
+#: accounts/models.py:65 accounts/models.py:136
 msgid "language"
 msgstr "Sprache"
 
@@ -125,67 +154,75 @@ msgstr "Sprache"
 msgid "Leave empty to follow the browser setting."
 msgstr "Leer lassen, um der Browsereinstellung zu folgen."
 
-#: accounts/models.py:79
+#: accounts/models.py:72
+msgid "new duties"
+msgstr "neue Dienste"
+
+#: accounts/models.py:73 duties/models.py:188
+msgid "reports"
+msgstr "Meldungen"
+
+#: accounts/models.py:82
 msgid "user"
 msgstr "Benutzer"
 
-#: accounts/models.py:80
+#: accounts/models.py:83
 msgid "users"
 msgstr "Benutzer"
 
-#: accounts/models.py:117
+#: accounts/models.py:120
 msgid "Pending"
 msgstr "Offen"
 
-#: accounts/models.py:118
+#: accounts/models.py:121
 msgid "Accepted"
 msgstr "Angenommen"
 
-#: accounts/models.py:119
+#: accounts/models.py:122
 msgid "Expired"
 msgstr "Abgelaufen"
 
-#: accounts/models.py:120
+#: accounts/models.py:123
 msgid "Revoked"
 msgstr "Widerrufen"
 
-#: accounts/models.py:137
+#: accounts/models.py:140
 msgid "Language of the invitation email and of the new account."
 msgstr "Sprache der Einladungs-E-Mail und des neuen Kontos."
 
-#: accounts/models.py:141
+#: accounts/models.py:144
 msgid "invited by"
 msgstr "eingeladen von"
 
-#: accounts/models.py:148
+#: accounts/models.py:151
 msgid "expires at"
 msgstr "gültig bis"
 
-#: accounts/models.py:149
+#: accounts/models.py:152
 msgid "accepted at"
 msgstr "angenommen am"
 
-#: accounts/models.py:152
+#: accounts/models.py:155
 msgid "created account"
 msgstr "angelegtes Konto"
 
-#: accounts/models.py:158
+#: accounts/models.py:161
 msgid "revoked at"
 msgstr "widerrufen am"
 
-#: accounts/models.py:163
+#: accounts/models.py:166
 msgid "invitation"
 msgstr "Einladung"
 
-#: accounts/models.py:164
+#: accounts/models.py:167
 msgid "invitations"
 msgstr "Einladungen"
 
 #: accounts/views.py:46
 #, python-format
 msgid ""
-"The invitation for %(email)s has been saved, but the email could not be sent."
-" Please use “Resend” later."
+"The invitation for %(email)s has been saved, but the email could not be "
+"sent. Please use “Resend” later."
 msgstr ""
 "Die Einladung an %(email)s ist gespeichert, aber die E-Mail konnte nicht "
 "verschickt werden. Bitte später „Erneut senden“ verwenden."
@@ -217,7 +254,7 @@ msgstr "Diese Einladung kann nicht mehr widerrufen werden."
 msgid "Unit “%(name)s” created."
 msgstr "Bereitschaft „%(name)s“ angelegt."
 
-#: accounts/views.py:207 accounts/views.py:260
+#: accounts/views.py:207 accounts/views.py:263 duties/views.py:102
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -231,21 +268,301 @@ msgstr "Zugang für %(account)s freigegeben."
 msgid "Access for %(account)s blocked."
 msgstr "Zugang für %(account)s gesperrt."
 
-#: config/settings.py:227
+#: config/settings.py:230
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:228
+#: config/settings.py:231
 msgid "English"
 msgstr "Englisch"
 
-#: config/urls.py:11 config/urls.py:13 templates/core/_navbar.html:33
+#: config/urls.py:11 config/urls.py:13 templates/core/_navbar.html:38
 msgid "Administration"
 msgstr "Verwaltung"
 
 #: core/apps.py:7
 msgid "Core"
 msgstr "Grundfunktionen"
+
+#: duties/apps.py:7
+msgid "Duties and reports"
+msgstr "Dienste und Meldungen"
+
+#: duties/forms.py:32 templates/duties/duty_detail.html:64
+msgid "Offered to"
+msgstr "Angeboten für"
+
+#: duties/forms.py:33 templates/duties/duty_detail.html:65
+msgid "All units"
+msgstr "Alle Bereitschaften"
+
+#: duties/forms.py:33
+msgid "Only the selected units"
+msgstr "Nur die ausgewählten Bereitschaften"
+
+#: duties/forms.py:39
+msgid "Selected units"
+msgstr "Ausgewählte Bereitschaften"
+
+#: duties/forms.py:43
+msgid "Only relevant if the duty is offered to selected units only."
+msgstr ""
+"Nur relevant, wenn der Dienst nur ausgewählten Bereitschaften angeboten wird."
+
+#: duties/forms.py:69
+msgid "The end must be after the start."
+msgstr "Das Ende muss nach dem Beginn liegen."
+
+#: duties/forms.py:73
+msgid "Please select at least one unit."
+msgstr "Bitte wähle mindestens eine Bereitschaft aus."
+
+#: duties/forms.py:91
+#, python-format
+msgid "These units have reported helpers and must stay selected: %(units)s"
+msgstr ""
+"Diese Bereitschaften haben Helfer gemeldet und müssen ausgewählt bleiben: "
+"%(units)s"
+
+#: duties/forms.py:100
+msgid "Name of the helper"
+msgstr "Name des Helfers"
+
+#: duties/forms.py:102
+msgid "e.g. first aider"
+msgstr "z. B. Sanitätshelfer"
+
+#: duties/forms.py:131
+msgid "This person has already been reported for this duty."
+msgstr "Diese Person wurde für diesen Dienst bereits gemeldet."
+
+#: duties/forms.py:133
+msgid "This person is listed twice."
+msgstr "Diese Person steht doppelt in der Liste."
+
+#: duties/models.py:52 templates/duties/_status_badge.html:3
+msgid "Draft"
+msgstr "Entwurf"
+
+#: duties/models.py:53
+msgid "Released"
+msgstr "Freigegeben"
+
+#: duties/models.py:54 templates/duties/_status_badge.html:5
+msgid "Cancelled"
+msgstr "Abgesagt"
+
+#: duties/models.py:57
+msgid "Entered manually"
+msgstr "Manuell erfasst"
+
+#: duties/models.py:58
+msgid "HiOrg-Server"
+msgstr "HiOrg-Server"
+
+#: duties/models.py:60
+msgid "title"
+msgstr "Bezeichnung"
+
+#: duties/models.py:61
+msgid "location"
+msgstr "Ort"
+
+#: duties/models.py:62
+msgid "start"
+msgstr "Beginn"
+
+#: duties/models.py:63
+msgid "end"
+msgstr "Ende"
+
+#: duties/models.py:65
+msgid "helpers needed"
+msgstr "benötigte Helfer"
+
+#: duties/models.py:68
+msgid "description"
+msgstr "Beschreibung"
+
+#: duties/models.py:70
+msgid "Visible to the units, e.g. meeting point, qualifications, equipment."
+msgstr ""
+"Für die Bereitschaften sichtbar, z. B. Treffpunkt, Qualifikationen, "
+"Ausrüstung."
+
+#: duties/models.py:75
+msgid "offered to all units"
+msgstr "allen Bereitschaften angeboten"
+
+#: duties/models.py:79
+msgid "source"
+msgstr "Quelle"
+
+#: duties/models.py:81
+msgid "external ID"
+msgstr "externe ID"
+
+#: duties/models.py:84
+msgid "created by"
+msgstr "angelegt von"
+
+#: duties/models.py:91
+msgid "updated at"
+msgstr "geändert am"
+
+#: duties/models.py:92
+msgid "released at"
+msgstr "freigegeben am"
+
+#: duties/models.py:93
+msgid "cancelled at"
+msgstr "abgesagt am"
+
+#: duties/models.py:98 duties/models.py:155
+msgid "duty"
+msgstr "Dienst"
+
+#: duties/models.py:99
+msgid "duties"
+msgstr "Dienste"
+
+#: duties/models.py:146
+msgid "Reported"
+msgstr "Gemeldet"
+
+#: duties/models.py:147
+msgid "Confirmed"
+msgstr "Bestätigt"
+
+#: duties/models.py:148
+msgid "Declined"
+msgstr "Abgelehnt"
+
+#: duties/models.py:149
+msgid "Withdrawn"
+msgstr "Zurückgezogen"
+
+#: duties/models.py:161
+msgid "qualification"
+msgstr "Qualifikation"
+
+#: duties/models.py:162
+msgid "note"
+msgstr "Bemerkung"
+
+#: duties/models.py:168
+msgid "reported by"
+msgstr "gemeldet von"
+
+#: duties/models.py:174
+msgid "reported at"
+msgstr "gemeldet am"
+
+#: duties/models.py:177
+msgid "decided by"
+msgstr "entschieden von"
+
+#: duties/models.py:183
+msgid "decided at"
+msgstr "entschieden am"
+
+#: duties/models.py:184
+msgid "withdrawn at"
+msgstr "zurückgezogen am"
+
+#: duties/models.py:187
+msgid "report"
+msgstr "Meldung"
+
+#: duties/notifications.py:113
+msgid ""
+"The change has been saved, but the notification emails could not be sent."
+msgstr ""
+"Die Änderung wurde gespeichert, aber die Benachrichtigungen per E-Mail "
+"konnten nicht versendet werden."
+
+#: duties/views.py:85
+msgid "Duty saved as a draft. The units will only see it once you release it."
+msgstr ""
+"Dienst als Entwurf gespeichert. Die Bereitschaften sehen ihn erst, wenn du "
+"ihn freigibst."
+
+#: duties/views.py:95
+msgid "Cancelled duties can no longer be edited."
+msgstr "Abgesagte Dienste können nicht mehr bearbeitet werden."
+
+#: duties/views.py:132
+msgid "This duty has already started and can no longer be released."
+msgstr ""
+"Dieser Dienst hat bereits begonnen und kann nicht mehr freigegeben werden."
+
+#: duties/views.py:134
+msgid "Duty released. The units have been notified."
+msgstr "Dienst freigegeben. Die Bereitschaften wurden benachrichtigt."
+
+#: duties/views.py:137
+msgid "Only drafts can be released."
+msgstr "Nur Entwürfe können freigegeben werden."
+
+#: duties/views.py:153
+msgid "Duty cancelled."
+msgstr "Dienst abgesagt."
+
+#: duties/views.py:156
+msgid "Only released duties can be cancelled."
+msgstr "Nur freigegebene Dienste können abgesagt werden."
+
+#: duties/views.py:165
+msgid "Only drafts can be deleted. Cancel released duties instead."
+msgstr ""
+"Nur Entwürfe können gelöscht werden. Freigegebene Dienste sagst du "
+"stattdessen ab."
+
+#: duties/views.py:168
+#, python-format
+msgid "Duty “%(title)s” deleted."
+msgstr "Dienst „%(title)s“ gelöscht."
+
+#: duties/views.py:180
+msgid "Helpers can no longer be reported for this duty."
+msgstr "Für diesen Dienst können keine Helfer mehr gemeldet werden."
+
+#: duties/views.py:196
+msgid "One of these people has already been reported."
+msgstr "Eine dieser Personen wurde bereits gemeldet."
+
+#: duties/views.py:200
+#, python-format
+msgid "%(count)d helper reported."
+msgid_plural "%(count)d helpers reported."
+msgstr[0] "%(count)d Helfer gemeldet."
+msgstr[1] "%(count)d Helfer gemeldet."
+
+#: duties/views.py:229
+#, python-format
+msgid "Report for %(name)s withdrawn."
+msgstr "Meldung für %(name)s zurückgezogen."
+
+#: duties/views.py:259 duties/views.py:267
+msgid "This report can no longer be changed."
+msgstr "Diese Meldung kann nicht mehr geändert werden."
+
+#: duties/views.py:269
+#, python-format
+msgid "%(name)s confirmed."
+msgstr "%(name)s bestätigt."
+
+#: duties/views.py:271
+#, python-format
+msgid "%(name)s declined."
+msgstr "%(name)s abgelehnt."
+
+#: duties/views.py:285
+#, python-format
+msgid "%(count)d report confirmed."
+msgid_plural "%(count)d reports confirmed."
+msgstr[0] "%(count)d Meldung bestätigt."
+msgstr[1] "%(count)d Meldungen bestätigt."
 
 #: templates/403.html:3 templates/403.html:5
 msgid "Access denied"
@@ -296,8 +613,8 @@ msgstr "Kein Konto gefunden"
 #: templates/account/signup_closed.html:8
 msgid "There is no account for this sign-in yet. Access is by invitation only."
 msgstr ""
-"Zu dieser Anmeldung gibt es noch kein Konto. Zugänge werden nur per Einladung"
-" vergeben."
+"Zu dieser Anmeldung gibt es noch kein Konto. Zugänge werden nur per "
+"Einladung vergeben."
 
 #: templates/account/signup_closed.html:11
 msgid "Already have an account with a password?"
@@ -343,8 +660,8 @@ msgid "Revoke"
 msgstr "Widerrufen"
 
 #: templates/accounts/_profile_nav.html:4 templates/accounts/profile.html:3
-#: templates/accounts/profile.html:5 templates/core/_navbar.html:44
-#: templates/core/home.html:41
+#: templates/accounts/profile.html:5 templates/core/_navbar.html:49
+#: templates/core/home.html:77
 msgid "My account"
 msgstr "Mein Konto"
 
@@ -355,7 +672,7 @@ msgstr "Mein Konto"
 msgid "Email address"
 msgstr "E-Mail-Adresse"
 
-#: templates/accounts/_profile_nav.html:6 templates/accounts/profile.html:33
+#: templates/accounts/_profile_nav.html:6 templates/accounts/profile.html:39
 msgid "Password"
 msgstr "Passwort"
 
@@ -363,7 +680,7 @@ msgstr "Passwort"
 msgid "HiOrg link"
 msgstr "HiOrg-Verknüpfung"
 
-#: templates/accounts/_profile_nav.html:10 templates/accounts/profile.html:66
+#: templates/accounts/_profile_nav.html:10 templates/accounts/profile.html:72
 msgid "Two-factor authentication"
 msgstr "Zwei-Faktor-Anmeldung"
 
@@ -383,8 +700,8 @@ msgid ""
 "You have been invited as <strong>%(role)s</strong> of the unit "
 "<strong>%(unit)s</strong>."
 msgstr ""
-"Du wurdest als <strong>%(role)s</strong> der Bereitschaft "
-"<strong>%(unit)s</strong> eingeladen."
+"Du wurdest als <strong>%(role)s</strong> der Bereitschaft <strong>%(unit)s</"
+"strong> eingeladen."
 
 #: templates/accounts/accept_invitation.html:12
 #, python-format
@@ -417,6 +734,7 @@ msgid "Create account"
 msgstr "Konto anlegen"
 
 #: templates/accounts/email/invitation_message.txt:1
+#: templates/duties/email/_greeting.txt:1
 msgid "Hello,"
 msgstr "Hallo,"
 
@@ -467,7 +785,7 @@ msgstr "Einladung zu %(site)s"
 #: templates/accounts/invitation_form.html:3
 #: templates/accounts/invitation_form.html:7
 #: templates/accounts/invitation_list.html:7
-#: templates/accounts/unit_detail.html:12 templates/core/home.html:34
+#: templates/accounts/unit_detail.html:12 templates/core/home.html:70
 msgid "Invite a person"
 msgstr "Person einladen"
 
@@ -494,7 +812,8 @@ msgid "Send invitation"
 msgstr "Einladung verschicken"
 
 #: templates/accounts/invitation_form.html:22
-#: templates/accounts/unit_form.html:12
+#: templates/accounts/unit_form.html:12 templates/duties/duty_form.html:49
+#: templates/duties/report_form.html:50
 msgid "Cancel"
 msgstr "Abbrechen"
 
@@ -516,7 +835,7 @@ msgstr ""
 "eingeladen hat."
 
 #: templates/accounts/invitation_list.html:3
-#: templates/accounts/invitation_list.html:6 templates/core/_navbar.html:28
+#: templates/accounts/invitation_list.html:6 templates/core/_navbar.html:33
 msgid "Invitations"
 msgstr "Einladungen"
 
@@ -527,7 +846,8 @@ msgid "Role"
 msgstr "Rolle"
 
 #: templates/accounts/invitation_list.html:16
-#: templates/accounts/unit_detail.html:75
+#: templates/accounts/unit_detail.html:75 templates/duties/_duty_table.html:10
+#: templates/duties/duty_detail.html:115
 msgid "Status"
 msgstr "Status"
 
@@ -563,70 +883,75 @@ msgstr "Abmelden und Einladung annehmen"
 msgid "Admin"
 msgstr "Admin"
 
-#: templates/accounts/profile.html:15
+#: templates/accounts/profile.html:15 templates/duties/duty_detail.html:111
 msgid "Unit"
 msgstr "Bereitschaft"
 
-#: templates/accounts/profile.html:22
+#: templates/accounts/profile.html:24
 msgid "Personal settings"
 msgstr "Persönliche Einstellungen"
 
-#: templates/accounts/profile.html:26 templates/accounts/unit_form.html:11
+#: templates/accounts/profile.html:28
+msgid "Email notifications"
+msgstr "Benachrichtigungen per E-Mail"
+
+#: templates/accounts/profile.html:32 templates/accounts/unit_form.html:11
+#: templates/duties/duty_form.html:44
 msgid "Save"
 msgstr "Speichern"
 
-#: templates/accounts/profile.html:29
+#: templates/accounts/profile.html:35
 msgid "Sign-in"
 msgstr "Anmeldung"
 
-#: templates/accounts/profile.html:36
+#: templates/accounts/profile.html:42
 msgid "Signing in with email address and password is possible."
 msgstr "Die Anmeldung mit E-Mail-Adresse und Passwort ist möglich."
 
-#: templates/accounts/profile.html:38
+#: templates/accounts/profile.html:44
 msgid "No password set yet – so far you sign in via HiOrg only."
 msgstr ""
 "Noch kein Passwort festgelegt – du meldest dich bisher nur über HiOrg an."
 
-#: templates/accounts/profile.html:43
+#: templates/accounts/profile.html:49
 msgid "Change"
 msgstr "Ändern"
 
-#: templates/accounts/profile.html:45
+#: templates/accounts/profile.html:51
 msgid "Set"
 msgstr "Festlegen"
 
-#: templates/accounts/profile.html:54
+#: templates/accounts/profile.html:60
 msgid "Linked with:"
 msgstr "Verknüpft mit:"
 
-#: templates/accounts/profile.html:57
+#: templates/accounts/profile.html:63
 msgid "Not linked. Once linked, you can also sign in with your HiOrg account."
 msgstr ""
 "Nicht verknüpft. Nach dem Verknüpfen kannst du dich auch mit deinem HiOrg-"
 "Konto anmelden."
 
-#: templates/accounts/profile.html:61 templates/accounts/profile.html:71
+#: templates/accounts/profile.html:67 templates/accounts/profile.html:77
 msgid "Manage"
 msgstr "Verwalten"
 
-#: templates/accounts/profile.html:61
+#: templates/accounts/profile.html:67
 msgid "Link"
 msgstr "Verknüpfen"
 
-#: templates/accounts/profile.html:68
+#: templates/accounts/profile.html:74
 msgid "Active (authenticator app)."
 msgstr "Aktiv (Authenticator-App)."
 
-#: templates/accounts/profile.html:68
+#: templates/accounts/profile.html:74
 msgid "Not set up."
 msgstr "Nicht eingerichtet."
 
-#: templates/accounts/profile.html:71
+#: templates/accounts/profile.html:77
 msgid "Set up"
 msgstr "Einrichten"
 
-#: templates/accounts/unit_detail.html:9
+#: templates/accounts/unit_detail.html:9 templates/duties/duty_detail.html:16
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -634,7 +959,7 @@ msgstr "Bearbeiten"
 msgid "Accounts"
 msgstr "Konten"
 
-#: templates/accounts/unit_detail.html:23
+#: templates/accounts/unit_detail.html:23 templates/duties/duty_detail.html:112
 msgid "Name"
 msgstr "Name"
 
@@ -680,7 +1005,7 @@ msgid "Add unit"
 msgstr "Bereitschaft anlegen"
 
 #: templates/accounts/unit_list.html:3 templates/accounts/unit_list.html:6
-#: templates/core/_navbar.html:19
+#: templates/core/_navbar.html:24
 msgid "Units"
 msgstr "Bereitschaften"
 
@@ -711,11 +1036,16 @@ msgstr "Navigation umschalten"
 msgid "Overview"
 msgstr "Übersicht"
 
-#: templates/core/_navbar.html:23 templates/core/home.html:39
+#: templates/core/_navbar.html:19 templates/duties/duty_list.html:3
+#: templates/duties/duty_list.html:6
+msgid "Duties"
+msgstr "Dienste"
+
+#: templates/core/_navbar.html:28 templates/core/home.html:75
 msgid "My unit"
 msgstr "Meine Bereitschaft"
 
-#: templates/core/_navbar.html:49
+#: templates/core/_navbar.html:54
 msgid "Sign out"
 msgstr "Abmelden"
 
@@ -729,26 +1059,415 @@ msgstr "Hallo %(name)s!"
 msgid ""
 "Signed in as <strong>%(role)s</strong> of the unit <strong>%(unit)s</strong>."
 msgstr ""
-"Angemeldet als <strong>%(role)s</strong> der Bereitschaft "
-"<strong>%(unit)s</strong>."
+"Angemeldet als <strong>%(role)s</strong> der Bereitschaft <strong>%(unit)s</"
+"strong>."
 
 #: templates/core/home.html:12
 #, python-format
 msgid "Signed in as <strong>%(role)s</strong>."
 msgstr "Angemeldet als <strong>%(role)s</strong>."
 
-#: templates/core/home.html:21
+#: templates/core/home.html:19
+#, python-format
+msgid "%(counter)s reported helper is awaiting your decision."
+msgid_plural "%(counter)s reported helpers are awaiting your decision."
+msgstr[0] "%(counter)s gemeldeter Helfer wartet auf deine Entscheidung."
+msgstr[1] "%(counter)s gemeldete Helfer warten auf deine Entscheidung."
+
+#: templates/core/home.html:24 templates/core/home.html:34
+msgid "Go to the duties"
+msgstr "Zu den Diensten"
+
+#: templates/core/home.html:29
+#, python-format
+msgid "%(counter)s upcoming duty has not been released yet."
+msgid_plural "%(counter)s upcoming duties have not been released yet."
+msgstr[0] "%(counter)s anstehender Dienst ist noch nicht freigegeben."
+msgstr[1] "%(counter)s anstehende Dienste sind noch nicht freigegeben."
+
+#: templates/core/home.html:41
 msgid "Duties with open staffing needs"
 msgstr "Dienste mit offenem Personalbedarf"
 
-#: templates/core/home.html:23
-msgid ""
-"Duties from HiOrg-Server that still need staff will appear here soon. Units "
-"will then be able to report people for them."
-msgstr ""
-"Hier erscheinen demnächst die Dienste aus dem HiOrg-Server, für die noch "
-"Personal gesucht wird. Bereitschaften können dort dann Personen melden."
+#: templates/core/home.html:56
+msgid "No duties with open staffing needs at the moment."
+msgstr "Zurzeit gibt es keine Dienste mit offenem Personalbedarf."
 
-#: templates/core/home.html:37
+#: templates/core/home.html:59
+msgid "All duties"
+msgstr "Alle Dienste"
+
+#: templates/core/home.html:67 templates/duties/duty_form.html:3
+#: templates/duties/duty_form.html:7 templates/duties/duty_list.html:8
+msgid "Add duty"
+msgstr "Dienst anlegen"
+
+#: templates/core/home.html:73
 msgid "Manage units"
 msgstr "Bereitschaften verwalten"
+
+#: templates/duties/_duty_table.html:6 templates/duties/duty_detail.html:57
+msgid "When"
+msgstr "Wann"
+
+#: templates/duties/_duty_table.html:7
+msgid "Duty"
+msgstr "Dienst"
+
+#: templates/duties/_duty_table.html:8
+msgid "Helpers"
+msgstr "Helfer"
+
+#: templates/duties/_duty_table.html:9
+msgid "Your unit"
+msgstr "Deine Bereitschaft"
+
+#: templates/duties/_duty_table.html:25
+#, python-format
+msgid "%(counter)s reported"
+msgid_plural "%(counter)s reported"
+msgstr[0] "%(counter)s gemeldet"
+msgstr[1] "%(counter)s gemeldet"
+
+#: templates/duties/_staffing.html:3
+msgid "confirmed / needed"
+msgstr "bestätigt / benötigt"
+
+#: templates/duties/_staffing.html:5
+#, python-format
+msgid "+%(counter)s pending"
+msgid_plural "+%(counter)s pending"
+msgstr[0] "+%(counter)s offen"
+msgstr[1] "+%(counter)s offen"
+
+#: templates/duties/_status_badge.html:7
+msgid "Open for reports"
+msgstr "Meldung möglich"
+
+#: templates/duties/_status_badge.html:9
+msgid "Reporting closed"
+msgstr "Meldeschluss"
+
+#: templates/duties/duty_detail.html:12 templates/duties/report_form.html:3
+#: templates/duties/report_form.html:5
+msgid "Report helpers"
+msgstr "Helfer melden"
+
+#: templates/duties/duty_detail.html:20
+msgid "Release this duty? All units will be notified by email."
+msgstr ""
+"Diesen Dienst freigeben? Alle Bereitschaften werden per E-Mail "
+"benachrichtigt."
+
+#: templates/duties/duty_detail.html:22
+msgid "Release this duty? The selected units will be notified by email."
+msgstr ""
+"Diesen Dienst freigeben? Die ausgewählten Bereitschaften werden per E-Mail "
+"benachrichtigt."
+
+#: templates/duties/duty_detail.html:26
+msgid "Release"
+msgstr "Freigeben"
+
+#: templates/duties/duty_detail.html:28
+msgid "Delete this draft?"
+msgstr "Diesen Entwurf löschen?"
+
+#: templates/duties/duty_detail.html:31
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/duties/duty_detail.html:34
+msgid ""
+"Cancel this duty? Units with reported helpers will be notified by email."
+msgstr ""
+"Diesen Dienst absagen? Bereitschaften mit gemeldeten Helfern werden per E-"
+"Mail benachrichtigt."
+
+#: templates/duties/duty_detail.html:37
+msgid "Cancel duty"
+msgstr "Dienst absagen"
+
+#: templates/duties/duty_detail.html:45
+msgid "This duty is a draft. The units cannot see it until you release it."
+msgstr ""
+"Dieser Dienst ist ein Entwurf. Die Bereitschaften sehen ihn erst, wenn du "
+"ihn freigibst."
+
+#: templates/duties/duty_detail.html:47
+msgid "This duty has been cancelled."
+msgstr "Dieser Dienst wurde abgesagt."
+
+#: templates/duties/duty_detail.html:49
+msgid "The duty has started. Helpers can no longer be reported or withdrawn."
+msgstr ""
+"Der Dienst hat begonnen. Helfer können nicht mehr gemeldet oder "
+"zurückgezogen werden."
+
+#: templates/duties/duty_detail.html:59
+msgid "Location"
+msgstr "Ort"
+
+#: templates/duties/duty_detail.html:61
+msgid "Helpers needed"
+msgstr "Benötigte Helfer"
+
+#: templates/duties/duty_detail.html:66
+msgid "Source"
+msgstr "Quelle"
+
+#: templates/duties/duty_detail.html:80
+msgid "Staffing"
+msgstr "Besetzung"
+
+#: templates/duties/duty_detail.html:82
+msgid "helpers confirmed"
+msgstr "Helfer bestätigt"
+
+#: templates/duties/duty_detail.html:85
+#, python-format
+msgid "%(counter)s report awaiting a decision"
+msgid_plural "%(counter)s reports awaiting a decision"
+msgstr[0] "%(counter)s Meldung wartet auf eine Entscheidung"
+msgstr[1] "%(counter)s Meldungen warten auf eine Entscheidung"
+
+#: templates/duties/duty_detail.html:98
+msgid "Reported helpers"
+msgstr "Gemeldete Helfer"
+
+#: templates/duties/duty_detail.html:98
+msgid "Helpers reported by your unit"
+msgstr "Von deiner Bereitschaft gemeldete Helfer"
+
+#: templates/duties/duty_detail.html:102
+msgid "Confirm all pending"
+msgstr "Alle offenen bestätigen"
+
+#: templates/duties/duty_detail.html:113
+msgid "Qualification"
+msgstr "Qualifikation"
+
+#: templates/duties/duty_detail.html:114
+msgid "Note"
+msgstr "Bemerkung"
+
+#: templates/duties/duty_detail.html:116
+msgid "Reported by"
+msgstr "Gemeldet von"
+
+#: templates/duties/duty_detail.html:140
+msgid "Confirm"
+msgstr "Bestätigen"
+
+#: templates/duties/duty_detail.html:146
+msgid "Decline"
+msgstr "Ablehnen"
+
+#: templates/duties/duty_detail.html:151
+#, python-format
+msgid "Withdraw the report for %(name)s?"
+msgstr "Die Meldung für %(name)s zurückziehen?"
+
+#: templates/duties/duty_detail.html:154
+msgid "Withdraw"
+msgstr "Zurückziehen"
+
+#: templates/duties/duty_detail.html:165
+msgid "No helpers reported yet."
+msgstr "Noch keine Helfer gemeldet."
+
+#: templates/duties/duty_form.html:3 templates/duties/duty_form.html:7
+msgid "Edit duty"
+msgstr "Dienst bearbeiten"
+
+#: templates/duties/duty_form.html:10
+msgid ""
+"This duty has been released. If you change its title, time or location, the "
+"units that have reported helpers are notified by email. Units you add are "
+"notified about the duty."
+msgstr ""
+"Dieser Dienst ist freigegeben. Wenn du Bezeichnung, Zeit oder Ort änderst, "
+"werden die Bereitschaften mit gemeldeten Helfern per E-Mail benachrichtigt. "
+"Neu hinzugefügte Bereitschaften werden über den Dienst informiert."
+
+#: templates/duties/duty_form.html:18
+msgid ""
+"New duties are saved as drafts. The units only see a duty once it has been "
+"released; they are then notified by email."
+msgstr ""
+"Neue Dienste werden als Entwurf gespeichert. Die Bereitschaften sehen einen "
+"Dienst erst nach der Freigabe und werden dann per E-Mail benachrichtigt."
+
+#: templates/duties/duty_form.html:46
+msgid "Save as draft"
+msgstr "Als Entwurf speichern"
+
+#: templates/duties/duty_form.html:47
+msgid "Save and release"
+msgstr "Speichern und freigeben"
+
+#: templates/duties/duty_list.html:13
+msgid "Upcoming"
+msgstr "Anstehend"
+
+#: templates/duties/duty_list.html:16
+msgid "Past"
+msgstr "Vergangen"
+
+#: templates/duties/duty_list.html:22
+msgid "Pages"
+msgstr "Seiten"
+
+#: templates/duties/duty_list.html:25
+msgid "Previous"
+msgstr "Zurück"
+
+#: templates/duties/duty_list.html:27
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Seite %(number)s von %(total)s"
+
+#: templates/duties/duty_list.html:29
+msgid "Next"
+msgstr "Weiter"
+
+#: templates/duties/duty_list.html:35
+msgid "No past duties."
+msgstr "Keine vergangenen Dienste."
+
+#: templates/duties/duty_list.html:37
+msgid "No upcoming duties."
+msgstr "Keine anstehenden Dienste."
+
+#: templates/duties/email/_duty.txt:2
+msgid "When:"
+msgstr "Wann:"
+
+#: templates/duties/email/_duty.txt:3
+msgid "Where:"
+msgstr "Wo:"
+
+#: templates/duties/email/_duty.txt:4
+msgid "Helpers needed:"
+msgstr "Benötigte Helfer:"
+
+#: templates/duties/email/_footer.txt:3
+#, python-format
+msgid ""
+"You receive this email from %(site)s because of your notification settings. "
+"You can change them under “My account”:"
+msgstr ""
+"Du erhältst diese E-Mail von %(site)s aufgrund deiner "
+"Benachrichtigungseinstellungen. Du kannst sie unter „Mein Konto“ ändern:"
+
+#: templates/duties/email/_greeting.txt:1
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "Hallo %(name)s,"
+
+#: templates/duties/email/duty_cancelled_message.txt:2
+msgid ""
+"The following duty has been cancelled. The helpers reported by your unit are "
+"no longer needed."
+msgstr ""
+"der folgende Dienst wurde abgesagt. Die von deiner Bereitschaft gemeldeten "
+"Helfer werden nicht mehr benötigt."
+
+#: templates/duties/email/duty_cancelled_message.txt:5
+#: templates/duties/email/duty_changed_message.txt:5
+msgid "Helpers reported by your unit:"
+msgstr "Von deiner Bereitschaft gemeldete Helfer:"
+
+#: templates/duties/email/duty_cancelled_subject.txt:1
+#, python-format
+msgid "Duty cancelled: %(title)s"
+msgstr "Dienst abgesagt: %(title)s"
+
+#: templates/duties/email/duty_changed_message.txt:2
+#, python-format
+msgid ""
+"A duty for which your unit has reported helpers has changed (%(changes)s). "
+"The current details:"
+msgstr ""
+"ein Dienst, für den deine Bereitschaft Helfer gemeldet hat, wurde geändert "
+"(%(changes)s). Die aktuellen Angaben:"
+
+#: templates/duties/email/duty_changed_subject.txt:1
+#, python-format
+msgid "Duty changed: %(title)s"
+msgstr "Dienst geändert: %(title)s"
+
+#: templates/duties/email/duty_released_message.txt:2
+msgid "A new duty has been released for your unit:"
+msgstr "für deine Bereitschaft wurde ein neuer Dienst freigegeben:"
+
+#: templates/duties/email/duty_released_message.txt:7
+msgid "Report helpers here:"
+msgstr "Hier kannst du Helfer melden:"
+
+#: templates/duties/email/duty_released_subject.txt:1
+#, python-format
+msgid "New duty: %(title)s (%(period)s)"
+msgstr "Neuer Dienst: %(title)s (%(period)s)"
+
+#: templates/duties/email/helpers_reported_message.txt:2
+#, python-format
+msgid "%(unit)s has reported these helpers:"
+msgstr "%(unit)s hat diese Helfer gemeldet:"
+
+#: templates/duties/email/helpers_reported_message.txt:5
+#: templates/duties/email/report_withdrawn_message.txt:4
+#: templates/duties/email/reports_decided_message.txt:5
+msgid "Duty:"
+msgstr "Dienst:"
+
+#: templates/duties/email/helpers_reported_message.txt:6
+msgid "Confirm or decline the reports here:"
+msgstr "Hier kannst du die Meldungen bestätigen oder ablehnen:"
+
+#: templates/duties/email/helpers_reported_subject.txt:1
+#, python-format
+msgid "%(unit)s reported %(counter)s helper for %(title)s"
+msgid_plural "%(unit)s reported %(counter)s helpers for %(title)s"
+msgstr[0] "%(unit)s hat %(counter)s Helfer für %(title)s gemeldet"
+msgstr[1] "%(unit)s hat %(counter)s Helfer für %(title)s gemeldet"
+
+#: templates/duties/email/report_withdrawn_message.txt:2
+#, python-format
+msgid "%(unit)s has withdrawn the report for %(name)s."
+msgstr "%(unit)s hat die Meldung für %(name)s zurückgezogen."
+
+#: templates/duties/email/report_withdrawn_subject.txt:1
+#, python-format
+msgid "%(unit)s withdrew %(name)s from %(title)s"
+msgstr "%(unit)s hat %(name)s von %(title)s abgemeldet"
+
+#: templates/duties/email/reports_decided_message.txt:2
+#, python-format
+msgid "The dispatchers have decided on helpers reported by %(unit)s:"
+msgstr ""
+"die Disposition hat über die von %(unit)s gemeldeten Helfer entschieden:"
+
+#: templates/duties/email/reports_decided_subject.txt:1
+#, python-format
+msgid "Decision on your reports for %(title)s"
+msgstr "Entscheidung über deine Meldungen für %(title)s"
+
+#: templates/duties/report_form.html:10
+#, python-format
+msgid ""
+"Enter the people of your unit <strong>%(unit)s</strong> who will help at "
+"this duty, one per row. Empty rows are ignored. The dispatchers confirm each "
+"report; you will be notified by email."
+msgstr ""
+"Trage die Personen deiner Bereitschaft <strong>%(unit)s</strong> ein, die "
+"bei diesem Dienst helfen – eine pro Zeile. Leere Zeilen werden ignoriert. "
+"Die Disposition bestätigt jede Meldung; du wirst per E-Mail benachrichtigt."
+
+#: templates/duties/report_form.html:48
+msgid "Report"
+msgstr "Melden"
+
+#: templates/duties/report_form.html:49
+msgid "Report and add more"
+msgstr "Melden und weitere hinzufügen"
