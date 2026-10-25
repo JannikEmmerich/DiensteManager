@@ -4,25 +4,32 @@ Expected German texts are looked up from the translation catalogue (never hard-c
 and every check also asserts that a real translation exists.
 """
 
+import gettext as gnu_gettext
+import re
 import shutil
 import subprocess
 from pathlib import Path
 
+import allauth
 import pytest
 from django.conf import settings
 from django.core import mail
 from django.urls import reverse
 from django.utils import translation
-from django.utils.translation import gettext
+from django.utils.translation import gettext, trans_real
 
 from accounts.models import Role
 from duties.models import Duty
 
 from .conftest import create_duty
 
-PO_FILE = Path(settings.BASE_DIR) / "locale" / "de" / "LC_MESSAGES" / "django.po"
-MO_FILE = PO_FILE.with_suffix(".mo")
+# Our texts, and allauth's texts with "du" instead of "Sie".
+PO_FILES = [
+    Path(settings.BASE_DIR) / folder / "de" / "LC_MESSAGES" / "django.po"
+    for folder in ("locale", "locale_allauth")
+]
 COOKIE = settings.LANGUAGE_COOKIE_NAME
+FORMAL = re.compile(r"\b(Sie|Ihr|Ihre|Ihren|Ihrem|Ihrer|Ihres|Ihnen)\b")
 
 
 def german(text):
@@ -33,12 +40,13 @@ def german(text):
     return translated
 
 
-def test_german_catalogue_is_complete():
+@pytest.mark.parametrize("po_file", PO_FILES, ids=lambda path: path.parts[-4])
+def test_german_catalogue_is_complete(po_file):
     msgfmt = shutil.which("msgfmt")
     if msgfmt is None:
         pytest.skip("msgfmt (GNU gettext) is not installed")
     result = subprocess.run(
-        [msgfmt, "--check", "--statistics", "--output-file=/dev/null", str(PO_FILE)],
+        [msgfmt, "--check", "--statistics", "--output-file=/dev/null", str(po_file)],
         capture_output=True,
         text=True,
         check=False,
@@ -48,10 +56,33 @@ def test_german_catalogue_is_complete():
     assert "fuzzy" not in result.stderr, result.stderr
 
 
-def test_compiled_catalogue_is_up_to_date():
+@pytest.mark.parametrize("po_file", PO_FILES, ids=lambda path: path.parts[-4])
+def test_compiled_catalogue_is_up_to_date(po_file):
     hint = "Run: python manage.py compilemessages --ignore=.venv"
-    assert MO_FILE.exists(), hint
-    assert MO_FILE.stat().st_mtime >= PO_FILE.stat().st_mtime, hint
+    mo_file = po_file.with_suffix(".mo")
+    assert mo_file.exists(), hint
+    assert mo_file.stat().st_mtime >= po_file.stat().st_mtime, hint
+
+
+def test_german_texts_say_du():
+    """Our texts and allauth's (sign-in, two-factor authentication, its emails) use "du".
+
+    allauth's own German texts say "Sie"; locale_allauth/ replaces them. If an update of
+    allauth brings new ones, add them there.
+    """
+    catalogues = [Path(allauth.__file__).parent / "locale" / "de" / "LC_MESSAGES" / "django.mo"]
+    catalogues += [po_file.with_suffix(".mo") for po_file in PO_FILES]
+    msgids = set()
+    for catalogue in catalogues:
+        with catalogue.open("rb") as file:
+            msgids.update(gnu_gettext.GNUTranslations(file)._catalog)
+    german_texts = trans_real.translation("de")._catalog
+    formal = {
+        msgid: german_texts[msgid]
+        for msgid in msgids
+        if msgid and FORMAL.search(german_texts[msgid])
+    }
+    assert formal == {}
 
 
 def test_browser_language_decides_for_visitors(client, db):

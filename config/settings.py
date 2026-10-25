@@ -277,7 +277,9 @@ LANGUAGES = [
     ("de", _("German")),
     ("en", _("English")),
 ]
-LOCALE_PATHS = [BASE_DIR / "locale"]
+# locale_allauth/ replaces allauth's German texts that say "Sie" with "du", like the rest
+# of the portal (it comes before allauth's own catalogue; makemessages leaves it alone).
+LOCALE_PATHS = [BASE_DIR / "locale", BASE_DIR / "locale_allauth"]
 LANGUAGE_COOKIE_AGE = 60 * 60 * 24 * 365
 LANGUAGE_COOKIE_HTTPONLY = True
 LANGUAGE_COOKIE_SECURE = not DEBUG

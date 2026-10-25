@@ -209,6 +209,10 @@ buttons on a duty ("Email the units") and on a unit.
   (password reset, notifications) use that account's language.
 - Invitations have a language: it is used for the invitation email and becomes the
   initial language of the new account.
+- The German texts address people with **"du"**. django-allauth's own German texts
+  (sign-in, two-factor authentication, its emails) say "Sie"; those are replaced in
+  `locale_allauth/de/LC_MESSAGES/django.po`. `tests/test_i18n.py` fails if an allauth
+  update brings new ones – add them there.
 
 After changing texts:
 
@@ -397,6 +401,7 @@ outbox/      email queue, retries, daily summary and the worker (run_worker)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
+locale_allauth/ allauth's German texts with "du" instead of "Sie"
 static/      app.css, app.js and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
 docker/      container entry point
