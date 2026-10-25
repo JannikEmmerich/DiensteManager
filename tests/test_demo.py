@@ -237,3 +237,39 @@ def test_only_invitations_of_admins_create_accounts(client, demo, admin, unit_le
     )
     assert response["Location"] == reverse("home")
     assert User.objects.filter(email="admin-invited@example.org").exists()
+
+
+# --- Managing accounts and units ---------------------------------------------------------------
+
+
+@pytest.mark.parametrize("account", ["dispatcher", "unit_lead"])
+def test_only_admins_block_and_change_roles(client, demo, request, account, member, unit):
+    client.force_login(request.getfixturevalue(account))
+    page = client.get(unit.get_absolute_url()).text
+    assert reverse("account_role", args=[member.pk]) not in page
+    assert reverse("set_account_active", args=[member.pk]) not in page
+    response = client.post(reverse("account_role", args=[member.pk]), {"role": Role.UNIT_LEAD})
+    assert response.status_code == 403
+    response = client.post(reverse("set_account_active", args=[member.pk]), {"active": "0"})
+    assert response.status_code == 403
+    member.refresh_from_db()
+    assert (member.role, member.is_active) == (Role.MEMBER, True)
+
+
+def test_admins_block_and_change_roles(client, demo, admin, member, unit):
+    client.force_login(admin)
+    page = client.get(unit.get_absolute_url()).text
+    assert reverse("account_role", args=[member.pk]) in page
+    client.post(reverse("account_role", args=[member.pk]), {"role": Role.UNIT_LEAD})
+    client.post(reverse("set_account_active", args=[member.pk]), {"active": "0"})
+    member.refresh_from_db()
+    assert (member.role, member.is_active) == (Role.UNIT_LEAD, False)
+
+
+def test_only_admins_add_units(client, demo, dispatcher, admin):
+    client.force_login(dispatcher)
+    assert reverse("unit_create") not in client.get(reverse("unit_list")).text
+    assert client.post(reverse("unit_create"), {"name": "Unit West"}).status_code == 403
+    client.force_login(admin)
+    assert reverse("unit_create") in client.get(reverse("unit_list")).text
+    assert client.get(reverse("unit_create")).status_code == 200

@@ -204,7 +204,7 @@ def unit_list(request):
 
 
 def unit_create(request):
-    if not permissions.is_dispatcher(request.user):
+    if not permissions.can_add_units(request.user):
         raise PermissionDenied
     form = UnitForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
