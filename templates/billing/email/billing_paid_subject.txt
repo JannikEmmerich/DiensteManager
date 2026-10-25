@@ -1,1 +1,0 @@
-{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with number=billing.number %}Statement {{ number }} has been paid{% endblocktranslate %}{% endautoescape %}

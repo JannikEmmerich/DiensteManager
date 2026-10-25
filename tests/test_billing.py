@@ -281,12 +281,13 @@ def test_mark_paid(client, dispatcher, unit, unit_lead, mailoutbox):
     billing = services.create_billing(
         unit, [(_confirmed(_paid_duty(), unit), Decimal(4))], "", dispatcher
     )
+    mailoutbox.clear()
     client.force_login(dispatcher)
     client.post(reverse("billing_mark_paid", args=[billing.pk]))
     billing.refresh_from_db()
     assert billing.status == Billing.Status.PAID
     assert billing.paid_at is not None
-    assert mailoutbox[-1].subject == f"[DiensteManager] Statement {billing.number} has been paid"
+    assert mailoutbox == []  # the unit leads are not told
     # Paid statements are final.
     client.post(reverse("billing_cancel", args=[billing.pk]))
     billing.refresh_from_db()
