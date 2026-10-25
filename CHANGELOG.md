@@ -33,10 +33,26 @@ All notable changes are listed here. The format follows
   images in the GitHub Container Registry, GitHub releases for version tags, weekly
   clean-up of old images and Dependabot.
 
+### Security
+
+- Content Security Policy: the pages only load scripts, styles and images from the
+  portal itself and run no inline scripts, which blocks injected code even if text
+  were ever output unescaped.
+
 ### Fixed
 
 - The "all units / only the selected units" choice no longer counts as changed when it
   was not.
+- Email subjects showed characters such as `&` and `'` in duty titles or unit names as
+  HTML entities (`&amp;`, `&#x27;`).
+- Unusual digits in addresses (e.g. `?year=²`) caused a server error on the duty pay
+  overview and the email form.
+- Retention periods: helpers in an open statement were anonymised, so after cancelling
+  the statement they could only be billed without a name. Helpers of paid statements
+  that had been deleted after the retention period counted as unbilled again, and
+  anonymised helpers became billable when duty pay was added to their duty later.
+- Confirmation questions with names containing quotes or angle brackets showed HTML
+  entities.
 
 ## [0.1.0] – 2026-10-25
 

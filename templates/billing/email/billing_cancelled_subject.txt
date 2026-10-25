@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktranslate trimmed with number=billing.number %}Statement {{ number }} has been cancelled{% endblocktranslate %}
+{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with number=billing.number %}Statement {{ number }} has been cancelled{% endblocktranslate %}{% endautoescape %}

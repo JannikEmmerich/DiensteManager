@@ -127,6 +127,13 @@ def test_unit_pay_overview(client, unit_lead, unit, other_unit):
     assert ("Mia", "upcoming", Decimal("40.00")) in upcoming_lines
 
 
+@pytest.mark.parametrize("year", ["²", "abc", "1999"])
+def test_unit_pay_with_an_unknown_year(client, unit_lead, unit, year):
+    client.force_login(unit_lead)
+    response = client.get(reverse("unit_pay", args=[unit.pk]), {"year": year})
+    assert response.context["year"] == timezone.localdate().year
+
+
 def test_overview_shows_billed_and_paid_items(client, dispatcher, unit_lead, unit):
     duty = _paid_duty()
     report = _confirmed(duty, unit)

@@ -296,4 +296,4 @@ def test_positions_table_in_german(client, dispatcher):
     dispatcher.save()
     client.force_login(dispatcher)
     page = client.get(reverse("duty_create")).text
-    assert '<th style="width: 7rem">Anzahl</th>' in page
+    assert '<th class="col-width-7">Anzahl</th>' in page

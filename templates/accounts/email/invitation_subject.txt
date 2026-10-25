@@ -1,1 +1,1 @@
-{% load i18n %}{% blocktranslate trimmed with site=SITE_NAME %}Invitation to {{ site }}{% endblocktranslate %}
+{% load i18n %}{% autoescape off %}{% blocktranslate trimmed with site=SITE_NAME %}Invitation to {{ site }}{% endblocktranslate %}{% endautoescape %}

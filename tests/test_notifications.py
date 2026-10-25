@@ -203,6 +203,14 @@ def test_cancellation_notifies_units_with_active_reports(
     assert mailoutbox[0].subject == "[DiensteManager] Duty cancelled: Marathon"
 
 
+def test_subjects_are_plain_text(client, dispatcher, unit, unit_lead, mailoutbox):
+    duty = create_duty(title="Rock'n'Roll & <Co>")
+    create_report(duty, unit, status=Report.Status.CONFIRMED)
+    client.force_login(dispatcher)
+    client.post(reverse("duty_cancel", args=[duty.pk]))
+    assert mailoutbox[0].subject == "[DiensteManager] Duty cancelled: Rock'n'Roll & <Co>"
+
+
 # --- Settings and errors --------------------------------------------------------------------
 
 

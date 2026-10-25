@@ -20,7 +20,7 @@
                 </div>
             {% endif %}
             {% translate "Send this email now?" as confirm_text %}
-            <form method="post" id="mailing-form" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+            <form method="post" id="mailing-form" data-confirm="{{ confirm_text }}">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
                     <div class="alert alert-danger">

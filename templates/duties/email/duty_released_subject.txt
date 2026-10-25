@@ -1,1 +1,1 @@
-{% load i18n duty_tags %}{% blocktranslate trimmed with title=duty.title period=duty|period %}New duty: {{ title }} ({{ period }}){% endblocktranslate %}
+{% load i18n duty_tags %}{% autoescape off %}{% blocktranslate trimmed with title=duty.title period=duty|period %}New duty: {{ title }} ({{ period }}){% endblocktranslate %}{% endautoescape %}

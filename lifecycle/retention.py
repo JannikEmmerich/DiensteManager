@@ -2,8 +2,8 @@
 
 - Reports (helper name, qualification, note) of duties that ended more than
   ``RETENTION_REPORTS_DAYS`` ago are anonymised; the counts stay for the statistics.
-  Helpers that can still be billed are kept until they are billed (the billing keeps
-  its own copy of the name).
+  Helpers that can still be billed are kept until they are billed and the billing is
+  paid (the billing keeps its own copy of the name).
 - History entries older than ``RETENTION_HISTORY_DAYS`` are deleted, those of
   anonymised reports right away.
 - Emails from dispatchers older than ``RETENTION_MAILINGS_DAYS`` are deleted.
@@ -27,7 +27,8 @@ from django.utils import timezone
 
 from accounts.models import Invitation
 from billing.models import Billing
-from duties.models import Duty, Report
+from billing.services import unbilled_reports
+from duties.models import Report
 from mailings.models import Mailing
 from outbox.models import OutgoingEmail
 
@@ -35,22 +36,19 @@ from . import history
 from .models import HistoryEntry
 
 
-def _billable():
-    """Reports that can still be billed (same rule as billing.services.billable_reports)."""
-    return (
-        Q(status=Report.Status.CONFIRMED, duty__status=Duty.Status.RELEASED)
-        & ~Q(duty__pay_type=Duty.PayType.NONE)
-        & ~Q(billing_items__billing__status__in=[Billing.Status.ISSUED, Billing.Status.PAID])
-    )
-
-
 def anonymise_reports(now):
     days = settings.RETENTION_REPORTS_DAYS
     if not days:
         return 0
-    reports = Report.objects.filter(
-        anonymized_at__isnull=True, duty__ends_at__lt=now - timedelta(days=days)
-    ).exclude(pk__in=Report.objects.filter(_billable()).values("pk"))
+    # Helpers in an open billing are billed again if it is cancelled, so they are kept too.
+    in_open_billing = Report.objects.filter(billing_items__billing__status=Billing.Status.ISSUED)
+    reports = (
+        Report.objects.filter(
+            anonymized_at__isnull=True, duty__ends_at__lt=now - timedelta(days=days)
+        )
+        .exclude(pk__in=unbilled_reports().values("pk"))
+        .exclude(pk__in=in_open_billing.values("pk"))
+    )
     ids = list(reports.values_list("pk", flat=True))
     if ids:
         HistoryEntry.objects.filter(
