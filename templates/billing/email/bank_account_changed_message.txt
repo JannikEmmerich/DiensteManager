@@ -4,6 +4,6 @@
 {% translate "Account holder:" %} {{ bank_account.account_holder }}
 {% translate "IBAN:" %} {{ iban }}
 
-{% translate "If this change was not agreed, please contact the dispatchers right away." %}
+{% if for_dispatchers %}{% translate "Please make sure the change is genuine before the next statement, e.g. by calling the unit lead." %}{% else %}{% translate "If this change was not agreed, please contact the dispatchers right away." %}{% endif %}
 {{ unit_pay_url }}
 {% include "duties/email/_footer.txt" %}{% endautoescape %}

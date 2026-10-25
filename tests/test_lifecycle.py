@@ -15,7 +15,13 @@ from lifecycle import history, retention
 from lifecycle.models import HistoryEntry
 from mailings.models import Mailing
 
-from .conftest import create_duty, create_invitation, create_report, positions_data
+from .conftest import (
+    create_account,
+    create_duty,
+    create_invitation,
+    create_report,
+    positions_data,
+)
 
 IBAN = "DE89370400440532013000"
 OTHER_IBAN = "GB82WEST12345698765432"
@@ -189,6 +195,26 @@ def test_changed_bank_details_are_reported(client, dispatcher, unit, unit_lead, 
         {"account_holder": "Someone else", "iban": OTHER_IBAN, "bank_name": "Bank"},
     )
     assert mailoutbox == []  # only the bank name changed
+
+
+def test_dispatchers_hear_about_bank_changes_by_unit_leads(
+    client, admin, dispatcher, unit, unit_lead, mailoutbox
+):
+    create_account("quiet@example.org", Role.DISPATCHER, notify_billing=False)
+    BankAccount.objects.create(unit=unit, account_holder="Unit North", iban=IBAN)
+    client.force_login(unit_lead)
+    client.post(
+        reverse("bank_account_edit", args=[unit.pk]),
+        {"account_holder": "Someone else", "iban": OTHER_IBAN},
+    )
+    assert sorted(message.to[0] for message in mailoutbox) == [
+        "admin@example.org",
+        "dispatcher@example.org",
+    ]
+    body = mailoutbox[0].body
+    assert "lead@example.org has changed the bank details of Unit North." in body
+    assert "e.g. by calling the unit lead" in body
+    assert "contact the dispatchers" not in body
 
 
 def test_billing_warns_about_recent_bank_changes(client, dispatcher, unit):
