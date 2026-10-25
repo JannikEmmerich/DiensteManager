@@ -15,6 +15,11 @@
         {% include "core/_messages.html" %}
         {% block main %}{% block content %}{% endblock content %}{% endblock main %}
     </main>
+    {% if user.is_authenticated %}
+        <footer class="container pb-3 small text-body-secondary">
+            {{ SITE_NAME }} {{ APP_VERSION }}{% if APP_REVISION %} ({{ APP_REVISION }}){% endif %}
+        </footer>
+    {% endif %}
     <script src="{% static 'vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'vendor/htmx-2.0.11/htmx.min.js' %}"></script>
     {% block extra_body %}{% endblock extra_body %}

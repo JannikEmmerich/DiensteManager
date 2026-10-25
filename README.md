@@ -213,19 +213,86 @@ cp .env.example .env
 #   DOMAIN=duties.example.org
 #   POSTGRES_PASSWORD=<letters and digits only>
 #   EMAIL_HOST=...   (otherwise emails only end up in the log)
-docker compose up -d --build
+docker compose pull                   # the released image from ghcr.io …
+docker compose up -d                  # … or build it yourself: docker compose up -d --build
 docker compose exec web python manage.py createsuperuser
 docker compose logs -f web            # logs (and emails, without SMTP)
 ```
 
+- The image is `ghcr.io/jannikemmerich/dienstemanager`; pin a version with
+  `DIENSTEMANAGER_VERSION` in `.env` (see "Versions, releases and updates"). While the
+  repository is private, the server needs `docker login ghcr.io` with a personal access
+  token that has the `read:packages` scope.
 - Migrations run automatically on start; Caddy obtains the certificate by itself.
-- **Update:** `git pull && docker compose up -d --build`.
+- **Update:** see "Versions, releases and updates" below.
 - **Backup:** `docker compose exec db pg_dump -U dienstemanager dienstemanager > backup.sql`.
 - **HSTS** is set to one year (`DJANGO_SECURE_HSTS_SECONDS`); set it to `0` for a local
   test with `DOMAIN=localhost`.
 - `manage.py check --deploy` only reports W005/W021 (HSTS for subdomains/preload). Both
   affect the whole domain and are off on purpose; enable them via
   `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS` if appropriate.
+
+## Versions, releases and updates
+
+The version follows [Semantic Versioning](https://semver.org/) and is kept in one place
+only: `version` in `pyproject.toml`. The app shows it in the page footer (with the Git
+commit for images built by CI). All changes are listed in `CHANGELOG.md`.
+
+- **MAJOR** (1.0.0 → 2.0.0): operators must act, e.g. renamed or new required settings,
+  removed features, migrations that need manual steps.
+- **MINOR** (0.2.0 → 0.3.0): new features; updating needs nothing but the new image.
+- **PATCH** (0.2.0 → 0.2.1): bug fixes only.
+
+### Development and CI
+
+`master` is always deployable; changes arrive as pull requests. The workflow
+`.github/workflows/ci.yml` runs for every pull request and push: ruff, compiling the
+translations, a check for missing migrations and the tests (Python 3.12 with SQLite,
+Python 3.14 with PostgreSQL 18). Then it builds the Docker image; pull requests only
+check that it builds.
+
+### Docker images
+
+Pushes to `master` and version tags publish the image for `linux/amd64` and
+`linux/arm64` to the GitHub Container Registry:
+
+| Tag | Points to | Kept |
+|---|---|---|
+| `latest` | the newest release (not pre-releases) | always |
+| `1.2.3`, `1.2`, `1` | that release, the newest patch of 1.2, the newest 1.x (`1` only from 1.0 on) | always |
+| `edge` | the newest commit on `master` | always |
+| `sha-abc1234` | one commit on `master` | 30 days |
+
+`.github/workflows/cleanup-images.yml` deletes the `sha-…` tags and untagged leftovers
+older than 30 days every Monday (start it by hand with "dry run" to see what it would
+do). The workflow needs the package's *Manage Actions access* to give this repository
+the *Admin* role. Dependabot (`.github/dependabot.yml`) proposes updates of the Python
+packages, the GitHub Actions and the base image weekly.
+
+### Making a release
+
+1. Pull request "Release 1.2.3": set `version = "1.2.3"` in `pyproject.toml` and rename
+   `## [Unreleased]` in `CHANGELOG.md` to `## [1.2.3] – <date>` (start a new empty
+   `## [Unreleased]` above it). Merge it.
+2. Tag the merge commit and push the tag:
+   `git tag -a v1.2.3 -m "1.2.3" && git push origin v1.2.3`
+   (or create the release with the new tag `v1.2.3` on GitHub).
+3. CI checks that the tag matches `pyproject.toml` and `CHANGELOG.md`, runs the tests,
+   publishes the image `1.2.3` (plus `1.2`, `1`, `latest`) and creates the GitHub release
+   with the changelog section as release notes. Tags like `v1.3.0-rc.1` become
+   pre-releases without `latest`.
+
+### Updating an installation
+
+1. Read the changelog between your version and the new one, especially for a new MAJOR
+   version.
+2. Back up the database (see above).
+3. Set `DIENSTEMANAGER_VERSION` in `.env` to the new version (or keep `latest`), then
+   `docker compose pull && docker compose up -d`. Migrations run on start.
+4. Going back: migrations cannot be undone automatically. Restore the backup and start
+   the previous version.
+
+Only the newest release gets fixes; there are no maintenance branches for older versions.
 
 ## Project layout
 
@@ -241,6 +308,7 @@ locale/      German translations
 static/      app.css and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
 docker/      container entry point
+.github/     CI and release workflow, image clean-up, Dependabot, release notes script
 ```
 
 ## Next steps
