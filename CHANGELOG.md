@@ -7,6 +7,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] – 2026-10-25
+
+When updating from 0.5.0 nothing needs to be done; the database is migrated when the
+container starts. Demo mode stays off unless `DEMO_MODE=True` is set.
+
 ### Added
 
 - Demo mode (`DEMO_MODE=True`): emails are not sent but shown under *Inbox* – everyone
