@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import Invitation, Role, Unit, User
-from duties.models import Duty, DutyPosition, Report
+from duties.models import Duty, DutyPosition, Qualification, Report
 
 PASSWORD = "a-secure-Password-42"
 
@@ -80,8 +80,15 @@ def create_duty(status=Duty.Status.RELEASED, units=(), starts_in=timedelta(days=
     duty = Duty.objects.create(**values)
     duty.units.set(units)
     # Like every duty created in the portal: at least one position.
-    DutyPosition.objects.create(duty=duty, count=duty.helpers_needed)
+    DutyPosition.objects.create(
+        duty=duty, qualification=default_qualification(), count=duty.helpers_needed
+    )
     return duty
+
+
+def default_qualification():
+    """The qualification of positions that tests do not care about."""
+    return Qualification.objects.get_or_create(name="Helper", defaults={"sort_order": 100})[0]
 
 
 def positions_data(*rows, duty=None):
@@ -99,6 +106,7 @@ def positions_data(*rows, duty=None):
         data[f"positions-{index}-count"] = position.count
         data[f"positions-{index}-pay_rate"] = position.pay_rate or ""
     for index, row in enumerate(rows, start=len(existing)):
+        row = {"qualification": default_qualification().pk, **row}
         for field, value in row.items():
             data[f"positions-{index}-{field}"] = value
     return data

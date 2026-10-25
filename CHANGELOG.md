@@ -23,6 +23,14 @@ All notable changes are listed here. The format follows
 
 ### Changed
 
+- Every position needs a qualification; "any qualification" is gone. Existing
+  positions without one get the qualification "Helfer" when updating.
+- Confirmed helpers fill a fixed position, and their pay follows it: the position
+  they were reported for if a place is free, otherwise the free one closest down their
+  "Also counts as" chain. Dispatchers can change it under *Assigned to* on the duty,
+  e.g. which of two reported paramedics takes the paramedic's and which the first
+  aider's place. Already confirmed helpers keep the position they were reported for.
+- A position with reported helpers can no longer get another qualification.
 - Reporting helpers is simpler: the form starts with one row, "Add another helper"
   adds more. For each helper the unit chooses one of the qualifications the duty asks
   for, with the places still open; the separate free-text qualification is gone (older

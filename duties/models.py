@@ -1,3 +1,4 @@
+from collections import Counter
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
@@ -49,6 +50,11 @@ class Qualification(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.abbreviation})" if self.abbreviation else self.name
+
+    @classmethod
+    def includes_map(cls):
+        """The ID of each qualification mapped to the ID of the one it includes."""
+        return dict(cls.objects.values_list("pk", "includes"))
 
 
 class DutyQuerySet(models.QuerySet):
@@ -254,10 +260,23 @@ class Duty(models.Model):
         duties.staffing).
         """
         positions = list(self.positions.select_related("qualification"))
-        reports = self.reports.filter(status__in=Report.ACTIVE).values_list("position", "status")
-        includes = dict(Qualification.objects.values_list("pk", "includes"))
-        staffing.count(positions, list(reports), includes)
+        reports = self.reports.filter(status__in=Report.ACTIVE).values_list(
+            "position", "assigned_position", "status"
+        )
+        staffing.count(positions, list(reports), Qualification.includes_map())
         return positions
+
+    def assign_position(self, report):
+        """The position ``report`` fills once it is confirmed (see duties.staffing)."""
+        positions = list(self.positions.select_related("qualification"))
+        filled = Counter(
+            assigned_id or position_id
+            for assigned_id, position_id in self.reports.filter(status=Report.Status.CONFIRMED)
+            .exclude(pk=report.pk)
+            .values_list("assigned_position", "position")
+        )
+        own = next((p for p in positions if p.pk == report.position_id), None)
+        return staffing.assign(own, positions, filled, Qualification.includes_map())
 
     def update_helpers_needed(self):
         """``helpers_needed`` is the sum of the positions."""
@@ -287,10 +306,7 @@ class DutyPosition(models.Model):
         Qualification,
         verbose_name=_("qualification"),
         on_delete=models.PROTECT,
-        null=True,
-        blank=True,
         related_name="positions",
-        help_text=_("Empty: any qualification."),
     )
     count = models.PositiveSmallIntegerField(_("number"), validators=[MinValueValidator(1)])
     pay_rate = models.DecimalField(
@@ -306,7 +322,7 @@ class DutyPosition(models.Model):
     class Meta:
         verbose_name = _("position")
         verbose_name_plural = _("positions")
-        ordering = [F("qualification__sort_order").asc(nulls_last=True), "pk"]
+        ordering = ["qualification__sort_order", "pk"]
         constraints = [
             models.CheckConstraint(condition=Q(count__gte=1), name="duty_position_count"),
         ]
@@ -316,13 +332,11 @@ class DutyPosition(models.Model):
 
     @property
     def label(self):
-        return str(self.qualification) if self.qualification else gettext("any qualification")
+        return str(self.qualification)
 
     @property
     def short_label(self):
-        """For narrow places such as the PDF; empty for "any qualification"."""
-        if self.qualification is None:
-            return ""
+        """For narrow places such as the PDF."""
         return self.qualification.abbreviation or self.qualification.name
 
     @property
@@ -363,6 +377,15 @@ class Report(models.Model):
         null=True,
         blank=True,
         related_name="reports",
+    )
+    # The position the helper fills once confirmed; it sets their pay (see duties.staffing).
+    assigned_position = models.ForeignKey(
+        DutyPosition,
+        verbose_name=_("assigned to"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_reports",
     )
     name = models.CharField(_("name"), max_length=150)
     # What units entered as free text before they reported helpers for a position; no
@@ -432,10 +455,16 @@ class Report(models.Model):
         return self.status in self.ACTIVE
 
     @property
+    def filled_position(self):
+        """The position the helper fills; until confirmed, the one they were reported for."""
+        return self.assigned_position if self.assigned_position_id else self.position
+
+    @property
     def pay_rate(self):
-        """The rate of the position, or else of the duty."""
-        if self.position_id and self.position.pay_rate is not None:
-            return self.position.pay_rate
+        """The rate of the position the helper fills, or else of the duty."""
+        position = self.filled_position
+        if position is not None and position.pay_rate is not None:
+            return position.pay_rate
         return self.duty.pay_rate
 
     def pay_for(self, hours=None):
@@ -443,13 +472,11 @@ class Report(models.Model):
 
     @property
     def qualification_label(self):
-        """The qualification of the position, or "any qualification".
+        """The qualification the helper was reported with.
 
         Older reports may have what the unit entered as free text instead.
         """
-        if self.position_id and (self.position.qualification_id or not self.qualification):
-            return self.position.label
-        return self.qualification
+        return self.position.label if self.position_id else self.qualification
 
     @property
     def withdrawal_requested(self):

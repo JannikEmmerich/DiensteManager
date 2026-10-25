@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from accounts.permissions import is_dispatcher
 from lifecycle import history
 
-from . import notifications, permissions
+from . import notifications, permissions, staffing
 from .forms import (
     DutyForm,
     DutyPositionFormSet,
@@ -20,7 +20,7 @@ from .forms import (
     ReportFormSet,
     WithdrawalRequestForm,
 )
-from .models import Duty, Report
+from .models import Duty, Qualification, Report
 
 DUTIES_PER_PAGE = 50
 
@@ -55,23 +55,37 @@ def duty_detail(request, pk):
         permissions.visible_duties(request.user).with_staffing(_staffing_unit_id(request.user)),
         pk=pk,
     )
-    reports = [
-        {
-            "report": report,
-            "can_withdraw": permissions.can_withdraw_report(request.user, report),
-            "can_request_withdrawal": permissions.can_request_withdrawal(request.user, report),
-            "can_decide": permissions.can_decide_report(request.user, report),
-            "can_take_back": permissions.can_take_back_report(request.user, report),
-        }
-        for report in permissions.visible_reports(request.user)
+    positions = list(duty.positions_with_staffing())
+    includes = Qualification.includes_map()
+    billed = _billed_report_ids(duty)
+    reports = []
+    for report in (
+        permissions.visible_reports(request.user)
         .filter(duty=duty)
         .select_related(
-            "duty", "unit", "reported_by", "withdrawal_requested_by", "position__qualification"
+            "duty",
+            "unit",
+            "reported_by",
+            "withdrawal_requested_by",
+            "position__qualification",
+            "assigned_position__qualification",
         )
-    ]
-    positions = list(duty.positions_with_staffing())
-    # A single position "any qualification" needs no breakdown.
-    show_positions = len(positions) > 1 or any(p.qualification_id for p in positions)
+    ):
+        can_assign = permissions.can_assign_report(request.user, report)
+        reports.append(
+            {
+                "report": report,
+                "can_withdraw": permissions.can_withdraw_report(request.user, report),
+                "can_request_withdrawal": permissions.can_request_withdrawal(request.user, report),
+                "can_decide": permissions.can_decide_report(request.user, report),
+                "can_take_back": permissions.can_take_back_report(request.user, report),
+                # The positions a confirmed helper may fill, if there is a choice.
+                "assign_to": staffing.fitting(report.position, positions, includes)
+                if can_assign and report.pk not in billed
+                else [],
+            }
+        )
+    show_positions = bool(positions)
     return render(
         request,
         "duties/duty_detail.html",
@@ -83,6 +97,7 @@ def duty_detail(request, pk):
             # Older reports may have a qualification entered as free text.
             "show_qualifications": show_positions
             or any(row["report"].qualification for row in reports),
+            "show_assignments": is_dispatcher(request.user),
             "can_report": permissions.can_report(request.user, duty),
             # The history names helpers of all units, so only dispatchers see it.
             "history": history.entries(history.scope_for_duty(duty.pk))
@@ -122,7 +137,7 @@ def duty_create(request):
                 _("Duty saved as a draft. The units will only see it once you release it."),
             )
         return redirect(duty)
-    return render(request, "duties/duty_form.html", {"form": form, "formset": formset})
+    return render(request, "duties/duty_form.html", _duty_form_context(form, formset))
 
 
 def duty_update(request, pk):
@@ -159,9 +174,17 @@ def duty_update(request, pk):
             if added_units:
                 notifications.duty_released(request, duty, added_units)
         return redirect(duty)
-    return render(
-        request, "duties/duty_form.html", {"form": form, "formset": formset, "duty": duty}
-    )
+    return render(request, "duties/duty_form.html", _duty_form_context(form, formset, duty))
+
+
+def _duty_form_context(form, formset, duty=None):
+    return {
+        "form": form,
+        "formset": formset,
+        "duty": duty,
+        # Positions need a qualification, so there must be some.
+        "has_qualifications": Qualification.objects.filter(is_active=True).exists(),
+    }
 
 
 def _change_status(duty, old_status, new_status, timestamp_field):
@@ -329,6 +352,8 @@ def _save_new_reports(request, formset, duty, unit, action, **values):
     try:
         with transaction.atomic():
             for report in reports:
+                if report.status == Report.Status.CONFIRMED:
+                    report.assigned_position = duty.assign_position(report)
                 report.save()
                 history.record(report, action, request.user, history.scope_for_duty(duty.pk))
     except IntegrityError:
@@ -482,10 +507,19 @@ def _decide(request, reports, status):
         values.update(withdrawal_requested_at=None, withdrawal_requested_by=None)
     changed = []
     for report in reports:
-        if Report.objects.filter(pk=report.pk, status__in=DECIDABLE[status]).update(**values):
+        assigned = {}
+        if status == Report.Status.CONFIRMED:
+            # Confirmed helpers fill a position, which also sets their pay.
+            assigned["assigned_position"] = report.duty.assign_position(report)
+        updated = Report.objects.filter(pk=report.pk, status__in=DECIDABLE[status]).update(
+            **values, **assigned
+        )
+        if updated:
             report.status = status
             report.decided_at = now
             report.decided_by = request.user
+            for name, value in assigned.items():
+                setattr(report, name, value)
             changed.append(report)
             history.record(
                 report,
@@ -535,3 +569,46 @@ def report_confirm_all(request, pk):
         % {"count": len(reports)},
     )
     return redirect(duty)
+
+
+@require_POST
+def report_assign(request, pk):
+    """Dispatchers choose which position a confirmed helper fills (and is paid for)."""
+    _dispatcher_only(request)
+    report = _visible_report(request, pk)
+    duty = report.duty
+    positions = list(duty.positions.select_related("qualification"))
+    fitting = staffing.fitting(report.position, positions, Qualification.includes_map())
+    chosen = next((p for p in fitting if str(p.pk) == request.POST.get("position")), None)
+    if not permissions.can_assign_report(request.user, report) or chosen is None:
+        messages.error(request, _("This helper cannot fill that position."))
+    elif report.pk in _billed_report_ids(duty):
+        messages.error(request, _("This helper has already been billed."))
+    elif chosen != report.filled_position:
+        old = report.filled_position
+        report.assigned_position = chosen
+        report.save(update_fields=["assigned_position"])
+        history.record(
+            report,
+            history.Action.CHANGED,
+            request.user,
+            history.scope_for_duty(duty.pk),
+            [history.change("assigned_position", old.label if old else None, chosen.label)],
+        )
+        messages.success(
+            request,
+            _("%(name)s now fills: %(position)s.")
+            % {"name": report.name, "position": chosen.label},
+        )
+    return redirect(duty)
+
+
+def _billed_report_ids(duty):
+    """Reports of the duty in a billing that is not cancelled; their pay is fixed."""
+    from billing.models import Billing, BillingItem
+
+    return set(
+        BillingItem.objects.filter(report__duty=duty)
+        .exclude(billing__status=Billing.Status.CANCELLED)
+        .values_list("report_id", flat=True)
+    )

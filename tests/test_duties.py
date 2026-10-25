@@ -519,7 +519,7 @@ def test_dispatcher_adds_confirmed_helpers(client, dispatcher, unit, unit_lead, 
     assert report.decided_by == dispatcher
     assert [m.to for m in mailoutbox] == [["lead@example.org"]]
     assert mailoutbox[0].subject == "[DiensteManager] Helpers of your unit entered for Marathon"
-    assert "- Erik Email – By phone" in mailoutbox[0].body
+    assert "- Erik Email (Helper) – By phone" in mailoutbox[0].body
 
 
 def test_dispatcher_adds_helpers_after_the_duty(client, dispatcher, unit):

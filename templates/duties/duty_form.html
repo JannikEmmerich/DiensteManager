@@ -21,6 +21,15 @@
                     {% endblocktranslate %}
                 </p>
             {% endif %}
+            {% if not has_qualifications %}
+                <div class="alert alert-warning">
+                    {% url 'qualification_list' as qualification_url %}
+                    {% blocktranslate trimmed %}
+                        Each position needs a qualification, but there are none yet. Add them first
+                        under <a href="{{ qualification_url }}">Manage qualifications</a>.
+                    {% endblocktranslate %}
+                </div>
+            {% endif %}
             <form method="post">
                 {% csrf_token %}
                 {% if form.non_field_errors %}

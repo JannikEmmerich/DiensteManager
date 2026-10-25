@@ -37,20 +37,26 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   end, helpers needed, description). Each duty records its source (*entered manually*,
   later *HiOrg-Server*) for the upcoming import.
 - **Helpers needed** are listed per qualification, e.g. 2 × paramedic and 4 × first
-  aider, or as a number of helpers with *any qualification*: one row per qualification,
-  more with "Add another qualification". Each of these positions can have its own rate
-  (see "Duty pay"; the rates are only shown with duty pay). Dispatchers maintain the
-  qualifications under *Duties → Qualifications* (name, abbreviation, order; new ones
-  come last); qualifications in use cannot be deleted, only deactivated, and a position
-  with reported helpers cannot be removed.
+  aider: one row per qualification, more with "Add another qualification". Every
+  position needs a qualification (there is no "any qualification"; create a plain one
+  such as "Helfer" if needed). Each position can have its own rate (see "Duty pay"; the
+  rates are only shown with duty pay). Dispatchers maintain the qualifications under
+  *Duties → Qualifications* (name, abbreviation, order; new ones come last);
+  qualifications in use cannot be deleted, only deactivated, and a position with
+  reported helpers can neither be removed nor get another qualification.
 - **Also counts as:** a qualification can count as another one, e.g. emergency
   paramedic → paramedic → first aider. Helpers then also fill the places of the lower
   qualifications down the chain, never the other way round: with 2 × first aider and
-  1 × paramedic needed, 1 first aider and 2 paramedics fill all places. The staffing
-  per position, the open places when reporting and the colours follow this; each
-  helper keeps the qualification they were reported with (and its rate). Confirmed
-  helpers are placed before pending ones; helpers who fit nowhere overstaff their own
-  position.
+  1 × paramedic needed, 1 first aider and 2 paramedics fill all places.
+- **Assignment:** when a helper is confirmed, they fill a position – their own if a
+  place is free, otherwise the free one closest down their chain (otherwise their own
+  one, which is then overstaffed). Under *Assigned to* on the duty, dispatchers can
+  change it among the positions the helper can fill, e.g. with 1 × paramedic and
+  1 × first aider needed and two paramedics reported, choose who takes which place. The
+  helper keeps the qualification they were reported with; **their pay follows the
+  position they fill**. Billed helpers keep their position. The staffing per position
+  and the colours count confirmed helpers where they are assigned; pending ones are
+  counted in the places left, which are the open places shown when reporting.
 - **Release:** new duties are drafts that only dispatchers see. Units see a duty once it
   has been released ("Save and release" or "Release" on the duty).
 - **Offered to:** all units, or only selected ones. Other units neither see the duty nor

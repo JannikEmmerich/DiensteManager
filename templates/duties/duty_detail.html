@@ -158,6 +158,7 @@
                         {% if can.manage_duties %}<th>{% translate "Unit" %}</th>{% endif %}
                         <th>{% translate "Name" %}</th>
                         {% if show_qualifications %}<th>{% translate "Qualification" %}</th>{% endif %}
+                        {% if show_assignments %}<th>{% translate "Assigned to" %}</th>{% endif %}
                         <th>{% translate "Note" %}</th>
                         <th>{% translate "Status" %}</th>
                         <th>{% translate "Reported by" %}</th>
@@ -171,6 +172,26 @@
                                 {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
                                 <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
                                 {% if show_qualifications %}<td>{{ report.qualification_label|default:"–" }}</td>{% endif %}
+                                {% if show_assignments %}
+                                    <td>
+                                        {% if row.assign_to|length > 1 %}
+                                            <form class="d-flex gap-1" method="post" action="{% url 'report_assign' report.pk %}">
+                                                {% csrf_token %}
+                                                <label class="visually-hidden" for="assign-{{ report.pk }}">{% blocktranslate with name=report.name %}Position of {{ name }}{% endblocktranslate %}</label>
+                                                <select class="form-select form-select-sm w-auto" id="assign-{{ report.pk }}" name="position">
+                                                    {% for position in row.assign_to %}
+                                                        <option value="{{ position.pk }}"{% if position.pk == report.filled_position.pk %} selected{% endif %}>{{ position.label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button class="btn btn-sm btn-outline-secondary" type="submit">{% translate "Change" %}</button>
+                                            </form>
+                                        {% elif report.status == "confirmed" %}
+                                            {{ report.filled_position.label|default:"–" }}
+                                        {% else %}
+                                            –
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
                                 <td class="small">{{ report.note|default:"–" }}</td>
                                 <td>
                                     <span class="badge {% if report.status == 'confirmed' %}text-bg-success{% elif report.status == 'reported' %}text-bg-warning{% elif report.status == 'declined' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ report.get_status_display }}</span>
