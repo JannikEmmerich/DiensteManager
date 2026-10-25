@@ -33,6 +33,9 @@ All notable changes are listed here. The format follows
   e.g. which of two reported paramedics takes the paramedic's and which the first
   aider's place. Already confirmed helpers keep the position they were reported for.
 - A position with reported helpers can no longer get another qualification.
+- Changing the helpers needed of a released duty (e.g. one fewer because you found a
+  helper yourself) no longer emails the units with reports; it is still recorded in the
+  change history. If more helpers are then confirmed than needed, a hint says so.
 - Reporting helpers is simpler: the form starts with one row, "Add another helper"
   adds more. For each helper the unit chooses one of the qualifications the duty asks
   for, with the places still open; the separate free-text qualification is gone (older

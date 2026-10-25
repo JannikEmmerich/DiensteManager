@@ -108,7 +108,7 @@ language). The person who triggered a notification never receives it.
 | Duty released, or offered to additional units | active accounts of those units with *New duties for my unit* switched on |
 | Helpers reported or withdrawn; a unit asks to withdraw a report | dispatchers and admins with *Reports* switched on |
 | Report confirmed, declined or taken back; request to withdraw refused; helpers added by a dispatcher | unit leads of the unit and whoever made the report, with *Reports* switched on |
-| Title, time, report deadline, location or duty pay of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
+| Title, time, report deadline, location or duty pay of a released duty changed (not the helpers needed); duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
 | Billing created (PDF attached) or cancelled (not when it is paid) | unit leads of the unit with *Billings* switched on |
 
 The switches are under *My account → Email notifications* and are on by default.
