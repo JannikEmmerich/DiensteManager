@@ -11,7 +11,8 @@ services:
       # CF-Connecting-IP headers, which only the proxy may set.
       - "${WEB_PORT:-127.0.0.1:8080}:8000"
     environment:
-      # The visitor's address for the sign-in rate limits, as sent by the proxy.
+      # The visitor's address for the sign-in rate limits and the access log, as sent
+      # by the proxy.
       # Cloudflare sends CF-Connecting-IP; for other proxies set it to e.g. X-Real-IP,
       # or to an empty value to use X-Forwarded-For (ALLAUTH_TRUSTED_PROXY_COUNT).
       ALLAUTH_TRUSTED_CLIENT_IP_HEADER: ${ALLAUTH_TRUSTED_CLIENT_IP_HEADER-CF-Connecting-IP}

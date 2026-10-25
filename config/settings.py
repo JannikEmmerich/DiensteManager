@@ -77,6 +77,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "core.middleware.HealthCheckMiddleware",
+    # The visitor's IP address instead of the proxy's, for everything after it and for
+    # the access log.
+    "core.middleware.ClientIpMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -225,8 +228,8 @@ if set(MFA_REQUIRED_ROLES) - {"dispatcher", "unit_lead", "member"}:
         "MFA_REQUIRED_ROLES may only contain dispatcher, unit_lead and member."
     )
 
-# Number of trusted reverse proxies in front of the app (Caddy: 1), so that allauth
-# uses the real client IP for its rate limits.
+# Number of trusted reverse proxies in front of the app (Caddy: 1), so that the rate
+# limits of allauth and the access log use the real client IP (ClientIpMiddleware).
 ALLAUTH_TRUSTED_PROXY_COUNT = env.int("ALLAUTH_TRUSTED_PROXY_COUNT", default=0)
 # Or a header in which the proxy passes the client IP, e.g. CF-Connecting-IP behind a
 # Cloudflare Tunnel (compose.tunnel.yaml); it takes precedence over the count.

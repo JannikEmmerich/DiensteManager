@@ -401,6 +401,10 @@ docker compose logs -f web worker     # logs (and emails, without SMTP)
 - Three containers run the app: `web` (gunicorn), `worker` (sends the emails and applies
   the retention periods) and `caddy`, plus the database `db`. Without Caddy, behind
   your own proxy or a Cloudflare Tunnel: see below.
+- The access log of `web` shows the visitor's IP address, not the proxy's: the one
+  Caddy passes in `X-Forwarded-For` (`ALLAUTH_TRUSTED_PROXY_COUNT=1`), behind a
+  Cloudflare Tunnel the one in `CF-Connecting-IP` (see below). The sign-in rate limits
+  count per address as well.
 
 - The image is `ghcr.io/jannikemmerich/dienstemanager`; pin a version with
   `DIENSTEMANAGER_VERSION` in `.env` (see "Versions, releases and updates"). While the
@@ -438,8 +442,9 @@ used. A Caddy container that is already running is stopped with
   `http://localhost:8080` (with `cloudflared` on the same machine). `DOMAIN` stays set:
   it is the allowed host name and the address in emails.
 - The app trusts the proxy's headers: `X-Forwarded-Proto` (HTTPS, otherwise it
-  redirects to HTTPS) and the client IP for the sign-in rate limits, by default from
-  `CF-Connecting-IP` (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER`; empty: `X-Forwarded-For`).
+  redirects to HTTPS) and the client IP for the sign-in rate limits and the access log,
+  by default from `CF-Connecting-IP` (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER`; empty:
+  `X-Forwarded-For` with `ALLAUTH_TRUSTED_PROXY_COUNT`, the number of proxies).
   Therefore only the proxy may reach the port. `WEB_PORT` changes address and port,
   e.g. `WEB_PORT=127.0.0.1:9000`; with `0.0.0.0:8080` (e.g. for `cloudflared` in a
   container), a firewall has to keep everyone else out.
