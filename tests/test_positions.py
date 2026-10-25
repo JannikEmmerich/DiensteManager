@@ -241,26 +241,65 @@ def test_without_duty_pay_positions_have_no_rate(client, dispatcher, paramedic):
     assert DutyPosition.objects.get().pay_rate is None
 
 
-def test_changed_positions_are_recorded_and_announced(
+def _update_data(duty, **data):
+    values = _duty_data(**positions_data(duty=duty))
+    values["title"] = duty.title
+    values["starts_at"] = timezone.localtime(duty.starts_at).strftime("%Y-%m-%dT%H:%M")
+    values["ends_at"] = timezone.localtime(duty.ends_at).strftime("%Y-%m-%dT%H:%M")
+    values.update(data)
+    return values
+
+
+def test_changed_positions_are_recorded_but_not_announced(
     client, dispatcher, unit, unit_lead, paramedic, first_aider, mailoutbox
 ):
     duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
     create_report(duty, unit, position=sanh)
     client.force_login(dispatcher)
-    data = _duty_data(**positions_data(duty=duty))
-    data["title"] = duty.title
-    data["starts_at"] = timezone.localtime(duty.starts_at).strftime("%Y-%m-%dT%H:%M")
-    data["ends_at"] = timezone.localtime(duty.ends_at).strftime("%Y-%m-%dT%H:%M")
-    data["positions-1-count"] = "4"
-    client.post(reverse("duty_update", args=[duty.pk]), data)
+    page = client.get(reverse("duty_update", args=[duty.pk])).text
+    assert "Changing the helpers needed sends no email." in page
+    client.post(
+        reverse("duty_update", args=[duty.pk]), _update_data(duty, **{"positions-1-count": "2"})
+    )
+    duty.refresh_from_db()
+    assert duty.helpers_needed == 4
+    assert mailoutbox == []
     (entry,) = history.entries(history.scope_for_duty(duty.pk))
     change = next(item for item in entry.changes if item["field"] == "positions")
     assert change["old"] == ["2 × Paramedic (RS)", "3 × First aider (SanH)"]
-    assert change["new"] == ["2 × Paramedic (RS)", "4 × First aider (SanH)"]
-    assert "(positions)" in mailoutbox[0].body
-    assert "4 × First aider (SanH)" in mailoutbox[0].body
+    assert change["new"] == ["2 × First aider (SanH)", "2 × Paramedic (RS)"]  # sorted
     page = client.get(duty.get_absolute_url()).text
     assert "Positions: <del>2 × Paramedic (RS), 3 × First aider (SanH)</del>" in page
+
+
+def test_other_changes_are_still_announced(
+    client, dispatcher, unit, unit_lead, paramedic, first_aider, mailoutbox
+):
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    create_report(duty, unit, position=sanh)
+    client.force_login(dispatcher)
+    client.post(
+        reverse("duty_update", args=[duty.pk]),
+        _update_data(duty, title="City marathon", **{"positions-1-count": "2"}),
+    )
+    (message,) = mailoutbox
+    assert "(title)" in message.body
+    assert "positions" not in message.body
+
+
+def test_warning_when_more_helpers_are_confirmed_than_needed(
+    client, dispatcher, unit, paramedic, first_aider
+):
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    for name in ["A", "B", "C"]:
+        create_report(duty, unit, name=name, position=sanh, status=Report.Status.CONFIRMED)
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("duty_update", args=[duty.pk]),
+        _update_data(duty, **{"positions-0-count": "1", "positions-1-count": "1"}),
+        follow=True,
+    )
+    assert "More helpers are confirmed (3) than needed (2)." in response.text
 
 
 # --- Reporting for a position ----------------------------------------------------------------

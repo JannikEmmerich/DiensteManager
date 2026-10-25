@@ -43,13 +43,11 @@ logger = logging.getLogger(__name__)
 
 
 def _field_label(duty, name):
-    field = duty._meta.get_field(name)
-    if field.is_relation and field.auto_created:  # e.g. "positions"
-        return field.related_model._meta.verbose_name_plural
-    return field.verbose_name
+    return duty._meta.get_field(name).verbose_name
 
 
-# Changes to a released duty that the units with reports are told about.
+# Changes to a released duty that the units with reports are told about. Not the helpers
+# needed (positions): changing them sends no email.
 RELEVANT_CHANGES = (
     "title",
     "starts_at",

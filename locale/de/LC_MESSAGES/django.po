@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 12:35+0000\n"
+"POT-Creation-Date: 2026-10-25 12:38+0000\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -346,7 +346,7 @@ msgid "Unit “%(name)s” created."
 msgstr "Bereitschaft „%(name)s“ angelegt."
 
 #: accounts/views.py:223 accounts/views.py:292 accounts/views.py:323
-#: duties/views.py:213 duties/views.py:305
+#: duties/views.py:214 duties/views.py:317
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -757,7 +757,7 @@ msgid "Name of the helper"
 msgstr "Name des Helfers"
 
 #: duties/forms.py:280 templates/duties/_position_row.html:10
-#: templates/duties/duty_detail.html:161 templates/duties/duty_form.html:68
+#: templates/duties/duty_detail.html:161 templates/duties/duty_form.html:69
 msgid "Qualification"
 msgstr "Qualifikation"
 
@@ -1000,7 +1000,7 @@ msgstr "anonymisiert am"
 msgid "(anonymised)"
 msgstr "(anonymisiert)"
 
-#: duties/notifications.py:160
+#: duties/notifications.py:158
 msgid ""
 "The change has been saved, but the notification emails could not be sent."
 msgstr ""
@@ -1035,111 +1035,121 @@ msgstr ""
 msgid "Cancelled duties can no longer be edited."
 msgstr "Abgesagte Dienste können nicht mehr bearbeitet werden."
 
-#: duties/views.py:244
+#: duties/views.py:220
+#, python-format
+msgid ""
+"More helpers are confirmed (%(confirmed)d) than needed (%(needed)d). Take "
+"back the reports of those you no longer need; their units are notified."
+msgstr ""
+"Es sind mehr Helfer bestätigt (%(confirmed)d) als benötigt (%(needed)d). Nimm"
+" die Meldungen derer zurück, die du nicht mehr brauchst; ihre Bereitschaften "
+"werden benachrichtigt."
+
+#: duties/views.py:256
 msgid "This duty has already started and can no longer be released."
 msgstr ""
 "Dieser Dienst hat bereits begonnen und kann nicht mehr freigegeben werden."
 
-#: duties/views.py:247
+#: duties/views.py:259
 msgid "Duty released. The units have been notified."
 msgstr "Dienst freigegeben. Die Bereitschaften wurden benachrichtigt."
 
-#: duties/views.py:250
+#: duties/views.py:262
 msgid "Only drafts can be released."
 msgstr "Nur Entwürfe können freigegeben werden."
 
-#: duties/views.py:267 templates/duties/duty_detail.html:39
+#: duties/views.py:279 templates/duties/duty_detail.html:39
 msgid "This duty has been billed and can no longer be cancelled."
 msgstr "Dieser Dienst wurde abgerechnet und kann nicht mehr abgesagt werden."
 
-#: duties/views.py:272
+#: duties/views.py:284
 msgid "Please confirm that you want to cancel a duty that has already started."
 msgstr ""
 "Bitte bestätige, dass du einen Dienst absagen willst, der schon begonnen hat."
 
-#: duties/views.py:279
+#: duties/views.py:291
 msgid "Duty cancelled."
 msgstr "Dienst abgesagt."
 
-#: duties/views.py:282
+#: duties/views.py:294
 msgid "Only released duties can be cancelled."
 msgstr "Nur freigegebene Dienste können abgesagt werden."
 
-#: duties/views.py:291
+#: duties/views.py:303
 msgid "Only drafts can be deleted. Cancel released duties instead."
 msgstr ""
 "Nur Entwürfe können gelöscht werden. Freigegebene Dienste sagst du "
 "stattdessen ab."
 
-#: duties/views.py:295
+#: duties/views.py:307
 #, python-format
 msgid "Duty “%(title)s” deleted."
 msgstr "Dienst „%(title)s“ gelöscht."
 
-#: duties/views.py:318
+#: duties/views.py:330
 msgid "Helpers can no longer be reported for this duty."
 msgstr "Für diesen Dienst können keine Helfer mehr gemeldet werden."
 
-#: duties/views.py:329
+#: duties/views.py:341
 #, python-format
 msgid "%(count)d helper reported."
 msgid_plural "%(count)d helpers reported."
 msgstr[0] "%(count)d Helfer gemeldet."
 msgstr[1] "%(count)d Helfer gemeldet."
 
-#: duties/views.py:342
+#: duties/views.py:354
 msgid "Helpers can only be added to released duties."
 msgstr "Helfer können nur zu freigegebenen Diensten hinzugefügt werden."
 
-#: duties/views.py:365
+#: duties/views.py:377
 #, python-format
 msgid "%(count)d helper added and confirmed."
 msgid_plural "%(count)d helpers added and confirmed."
 msgstr[0] "%(count)d Helfer hinzugefügt und bestätigt."
 msgstr[1] "%(count)d Helfer hinzugefügt und bestätigt."
 
-#: duties/views.py:395
+#: duties/views.py:407
 msgid "One of these people has already been reported."
 msgstr "Eine dieser Personen wurde bereits gemeldet."
 
-#: duties/views.py:425 duties/views.py:498
+#: duties/views.py:437 duties/views.py:510
 #, python-format
 msgid "Report for %(name)s withdrawn."
 msgstr "Meldung für %(name)s zurückgezogen."
 
-#: duties/views.py:432
+#: duties/views.py:444
 msgid ""
 "This report has been confirmed meanwhile; ask the dispatchers to withdraw it."
 msgstr ""
 "Diese Meldung wurde inzwischen bestätigt; bitte die Disposition, sie "
 "zurückzunehmen."
 
-#: duties/views.py:469
+#: duties/views.py:481
 #, python-format
 msgid "The dispatchers have been asked to withdraw the report for %(name)s."
 msgstr ""
 "Die Disposition wurde gebeten, die Meldung für %(name)s zurückzunehmen."
 
-#: duties/views.py:483 duties/views.py:565 duties/views.py:573
+#: duties/views.py:495 duties/views.py:577 duties/views.py:585
 msgid "This report can no longer be changed."
 msgstr "Diese Meldung kann nicht mehr geändert werden."
 
-#: duties/views.py:519
+#: duties/views.py:531
 #, python-format
 msgid "%(name)s stays on the duty; the unit has been told."
 msgstr "%(name)s bleibt eingeplant; die Bereitschaft wurde informiert."
 
-#: duties/views.py:575
+#: duties/views.py:587
 #, python-format
 msgid "%(name)s confirmed."
 msgstr "%(name)s bestätigt."
 
-#: duties/views.py:577
+#: duties/views.py:589
 #, python-format
 msgid "%(name)s declined."
 msgstr "%(name)s abgelehnt."
 
-#: duties/views.py:593
+#: duties/views.py:605
 #, python-format
 msgid "%(count)d report confirmed."
 msgid_plural "%(count)d reports confirmed."
@@ -1676,7 +1686,7 @@ msgstr "Benachrichtigungen per E-Mail"
 #: templates/accounts/account_form.html:31 templates/accounts/profile.html:32
 #: templates/accounts/unit_form.html:11
 #: templates/billing/bank_account_form.html:17
-#: templates/duties/duty_form.html:85
+#: templates/duties/duty_form.html:86
 #: templates/duties/qualification_list.html:27
 msgid "Save"
 msgstr "Speichern"
@@ -1685,7 +1695,7 @@ msgstr "Speichern"
 #: templates/accounts/invitation_form.html:22
 #: templates/accounts/unit_form.html:12
 #: templates/billing/bank_account_form.html:18
-#: templates/billing/billing_create.html:68 templates/duties/duty_form.html:90
+#: templates/billing/billing_create.html:68 templates/duties/duty_form.html:91
 #: templates/duties/report_add.html:25 templates/duties/report_form.html:22
 #: templates/duties/withdrawal_request_form.html:22
 #: templates/mailings/mailing_form.html:41
@@ -2238,7 +2248,7 @@ msgid "Remove row"
 msgstr "Zeile entfernen"
 
 #: templates/core/_formset_table.html:12 templates/duties/_position_row.html:23
-#: templates/duties/duty_form.html:70
+#: templates/duties/duty_form.html:71
 msgid "Remove"
 msgstr "Entfernen"
 
@@ -2351,7 +2361,7 @@ msgid_plural "%(counter)s reported"
 msgstr[0] "%(counter)s gemeldet"
 msgstr[1] "%(counter)s gemeldet"
 
-#: templates/duties/_position_row.html:16 templates/duties/duty_form.html:69
+#: templates/duties/_position_row.html:16 templates/duties/duty_form.html:70
 msgid "Own rate in euros"
 msgstr "Eigener Satz in Euro"
 
@@ -2486,7 +2496,7 @@ msgstr "bis zum Beginn"
 msgid "Location"
 msgstr "Ort"
 
-#: templates/duties/duty_detail.html:80 templates/duties/duty_form.html:51
+#: templates/duties/duty_detail.html:80 templates/duties/duty_form.html:52
 msgid "Helpers needed"
 msgstr "Benötigte Helfer"
 
@@ -2594,14 +2604,14 @@ msgstr "Dienst bearbeiten"
 msgid ""
 "This duty has been released. If you change its title, time, location or duty "
 "pay, the units that have reported helpers are notified by email. Units you "
-"add are notified about the duty."
+"add are notified about the duty. Changing the helpers needed sends no email."
 msgstr ""
-"Dieser Dienst ist freigegeben. Wenn du Bezeichnung, Zeit, Ort oder "
-"Dienstgeld änderst, werden die Bereitschaften mit gemeldeten Helfern per E-"
-"Mail benachrichtigt. Neu hinzugefügte Bereitschaften werden über den Dienst "
-"informiert."
+"Dieser Dienst ist freigegeben. Wenn du Bezeichnung, Zeit, Ort oder Dienstgeld"
+" änderst, werden die Bereitschaften mit gemeldeten Helfern per E-Mail "
+"benachrichtigt. Neu hinzugefügte Bereitschaften werden über den Dienst "
+"informiert. Änderungen der benötigten Helfer lösen keine E-Mail aus."
 
-#: templates/duties/duty_form.html:18
+#: templates/duties/duty_form.html:19
 #, python-format
 msgid ""
 "Copy of “%(title)s”. Please enter the date and times. The copy is saved as a "
@@ -2610,7 +2620,7 @@ msgstr ""
 "Kopie von „%(title)s“. Bitte gib Datum und Uhrzeiten ein. Die Kopie wird als "
 "Entwurf ohne Meldungen gespeichert."
 
-#: templates/duties/duty_form.html:25
+#: templates/duties/duty_form.html:26
 msgid ""
 "New duties are saved as drafts. The units only see a duty once it has been "
 "released; they are then notified by email."
@@ -2618,7 +2628,7 @@ msgstr ""
 "Neue Dienste werden als Entwurf gespeichert. Die Bereitschaften sehen einen "
 "Dienst erst nach der Freigabe und werden dann per E-Mail benachrichtigt."
 
-#: templates/duties/duty_form.html:53
+#: templates/duties/duty_form.html:54
 msgid ""
 "How many helpers with which qualification, e.g. 2 paramedics and 4 first "
 "aiders. When reporting, units choose one of these qualifications for each "
@@ -2630,26 +2640,26 @@ msgstr ""
 "dieser Qualifikationen aus. Helfer mit einer höheren Qualifikation besetzen "
 "auch Plätze der Qualifikationen, als die sie zählt."
 
-#: templates/duties/duty_form.html:59
+#: templates/duties/duty_form.html:60
 msgid "Manage qualifications"
 msgstr "Qualifikationen verwalten"
 
-#: templates/duties/duty_form.html:79
+#: templates/duties/duty_form.html:80
 #: templates/duties/qualification_list.html:25
 msgid "Add another qualification"
 msgstr "Weitere Qualifikation hinzufügen"
 
-#: templates/duties/duty_form.html:80
+#: templates/duties/duty_form.html:81
 msgid ""
 "The own rate is only used with duty pay; empty means the rate of the duty."
 msgstr ""
 "Der eigene Satz gilt nur mit Dienstgeld; leer bedeutet den Satz des Dienstes."
 
-#: templates/duties/duty_form.html:87
+#: templates/duties/duty_form.html:88
 msgid "Save as draft"
 msgstr "Als Entwurf speichern"
 
-#: templates/duties/duty_form.html:88
+#: templates/duties/duty_form.html:89
 msgid "Save and release"
 msgstr "Speichern und freigeben"
 
