@@ -57,7 +57,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: python3 .github/scripts/release_notes.py "$GITHUB_REF_NAME" > /dev/null
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
           cache: pip
