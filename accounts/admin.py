@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.forms import AdminUserCreationForm, UserChangeForm
 from django.utils.translation import gettext_lazy as _
 
-from .models import Invitation, Unit, User
+from .models import CalendarFeed, Invitation, Unit, User
 
 
 class UserCreationAdminForm(AdminUserCreationForm):
@@ -78,4 +78,15 @@ class InvitationAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         # Invitations are created in the portal; only there the link is sent by email.
+        return False
+
+
+@admin.register(CalendarFeed)
+class CalendarFeedAdmin(admin.ModelAdmin):
+    list_display = ["user", "only_own_reports", "include_drafts", "created_at"]
+    search_fields = ["user__email"]
+    # The address only exists for its account; deleting it here ends the subscription.
+    readonly_fields = ["user", "token", "created_at"]
+
+    def has_add_permission(self, request):
         return False

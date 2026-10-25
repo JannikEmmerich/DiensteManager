@@ -106,6 +106,39 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
 
+class CalendarFeed(models.Model):
+    """The personal calendar address (iCal) of an account, see duties/calendar.py.
+
+    Calendar apps cannot sign in, so the random token in the address is all that protects
+    the feed. It only shows title, time and place of duties, and stops working when the
+    account is blocked; a new address replaces the old one.
+    """
+
+    user = models.OneToOneField(
+        User, verbose_name=_("account"), on_delete=models.CASCADE, related_name="calendar_feed"
+    )
+    token = models.CharField(_("token"), max_length=64, unique=True)
+    only_own_reports = models.BooleanField(
+        _("only duties with reports of my unit"),
+        default=False,
+        help_text=_("Otherwise all duties offered to your unit."),
+    )
+    include_drafts = models.BooleanField(
+        _("drafts too"), default=False, help_text=_("Otherwise only released duties.")
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("calendar subscription")
+        verbose_name_plural = _("calendar subscriptions")
+
+    def __str__(self):
+        return str(self.user)
+
+    def new_token(self):
+        self.token = secrets.token_urlsafe(32)
+
+
 def _hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 

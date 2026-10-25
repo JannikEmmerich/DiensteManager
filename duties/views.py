@@ -1,18 +1,23 @@
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_not_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
+from accounts.models import CalendarFeed
 from accounts.permissions import is_dispatcher
 from lifecycle import history
 
-from . import notifications, permissions, staffing
+from . import calendar, notifications, permissions, staffing
 from .forms import (
+    CalendarFeedForm,
     DutyForm,
     DutyPositionFormSet,
     HelperUnitForm,
@@ -679,3 +684,66 @@ def _billed_report_ids(duty):
         .exclude(billing__status=Billing.Status.CANCELLED)
         .values_list("report_id", flat=True)
     )
+
+
+# --- Calendar subscription ------------------------------------------------------------------
+
+
+def calendar_settings(request):
+    """Create, configure, renew or end the personal calendar address."""
+    if not (is_dispatcher(request.user) or permissions.is_unit_account(request.user)):
+        raise PermissionDenied
+    feed = CalendarFeed.objects.filter(user=request.user).first()
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "create" and feed is None:
+            feed = CalendarFeed(user=request.user)
+            feed.new_token()
+            feed.save()
+            messages.success(request, _("Your calendar address is ready."))
+        elif action == "renew" and feed:
+            feed.new_token()
+            feed.save(update_fields=["token"])
+            messages.success(
+                request, _("New calendar address created; the old one no longer works.")
+            )
+        elif action == "delete" and feed:
+            feed.delete()
+            messages.success(
+                request, _("Calendar subscription ended; the address no longer works.")
+            )
+        elif action == "save" and feed:
+            form = CalendarFeedForm(request.POST, instance=feed, user=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, _("Saved."))
+        return redirect("calendar_settings")
+    url = calendar.feed_url(request, feed) if feed else ""
+    return render(
+        request,
+        "duties/calendar_settings.html",
+        {
+            "feed": feed,
+            "form": CalendarFeedForm(instance=feed, user=request.user) if feed else None,
+            "url": url,
+            # Opens the calendar app to subscribe.
+            "webcal_url": "webcal://" + url.split("://", 1)[1] if url else "",
+        },
+    )
+
+
+@login_not_required
+def calendar_feed(request, token):
+    """The calendar of an account, for calendar apps (no sign-in, the token is the key)."""
+    feed = (
+        CalendarFeed.objects.select_related("user")
+        .filter(token=token, user__is_active=True)
+        .first()
+    )
+    if feed is None:
+        raise Http404
+    with translation.override(feed.user.language or settings.LANGUAGE_CODE):
+        body = calendar.render(request, calendar.duties_for(feed))
+    response = HttpResponse(body, content_type="text/calendar; charset=utf-8")
+    response["Content-Disposition"] = 'inline; filename="duties.ics"'
+    return response

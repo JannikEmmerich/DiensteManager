@@ -4,7 +4,8 @@ from django.db.models import Max, Q
 from django.utils.translation import gettext_lazy as _
 
 from accounts.forms import clean_unit_selection, unit_selection_fields
-from accounts.models import Unit
+from accounts.models import CalendarFeed, Unit
+from accounts.permissions import is_dispatcher
 
 from . import staffing
 from .models import Duty, DutyPosition, Qualification, Report
@@ -379,3 +380,15 @@ class WithdrawalRequestForm(forms.ModelForm):
         help_texts = {
             "withdrawal_note": _("For the dispatchers, e.g. who could step in instead."),
         }
+
+
+class CalendarFeedForm(forms.ModelForm):
+    """What the calendar subscription lists, depending on the role."""
+
+    class Meta:
+        model = CalendarFeed
+        fields = ["only_own_reports", "include_drafts"]
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields["only_own_reports" if is_dispatcher(user) else "include_drafts"]
