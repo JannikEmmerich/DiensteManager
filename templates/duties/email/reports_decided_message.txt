@@ -1,5 +1,5 @@
 {% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
-{% blocktranslate trimmed with unit=unit.name %}The dispatchers have decided on helpers reported by {{ unit }}:{% endblocktranslate %}
+{% blocktranslate trimmed with unit=unit.name %}The {{ DISPATCH_NAME }} has decided on helpers reported by {{ unit }}:{% endblocktranslate %}
 
 {% include "duties/email/_reports.txt" with with_status=True %}
 {% translate "Duty:" %} {% include "duties/email/_duty.txt" %}

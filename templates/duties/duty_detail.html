@@ -61,9 +61,9 @@
     {% elif duty.status == "cancelled" %}
         <div class="alert alert-danger">{% translate "This duty has been cancelled." %}</div>
     {% elif duty.has_started and not can.manage_duties %}
-        <div class="alert alert-info">{% translate "The duty has started. Helpers can no longer be reported; ask the dispatchers to withdraw a report." %}</div>
+        <div class="alert alert-info">{% blocktranslate %}The duty has started. Helpers can no longer be reported; ask the {{ DISPATCH_NAME }} to withdraw a report.{% endblocktranslate %}</div>
     {% elif duty.report_deadline_passed and not can.manage_duties %}
-        <div class="alert alert-info">{% translate "The report deadline is over. Helpers can no longer be reported; ask the dispatchers to withdraw a report." %}</div>
+        <div class="alert alert-info">{% blocktranslate %}The report deadline is over. Helpers can no longer be reported; ask the {{ DISPATCH_NAME }} to withdraw a report.{% endblocktranslate %}</div>
     {% endif %}
 
     <div class="row g-4 mb-4">

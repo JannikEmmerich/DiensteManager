@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import CalendarFeed
 from accounts.permissions import is_dispatcher
+from core.names import dispatch_text
 from lifecycle import history
 
 from . import calendar, notifications, permissions, staffing
@@ -467,7 +468,12 @@ def report_withdraw(request, pk):
         if report.status == Report.Status.CONFIRMED:
             messages.error(
                 request,
-                _("This report has been confirmed meanwhile; ask the dispatchers to withdraw it."),
+                dispatch_text(
+                    _(
+                        "This report has been confirmed meanwhile; ask the %(DISPATCH_NAME)s to "
+                        "withdraw it."
+                    )
+                ),
             )
     return redirect(report.duty)
 
@@ -504,8 +510,10 @@ def report_request_withdrawal(request, pk):
             )
             messages.success(
                 request,
-                _("The dispatchers have been asked to withdraw the report for %(name)s.")
-                % {"name": report.name},
+                dispatch_text(
+                    _("The %(DISPATCH_NAME)s has been asked to withdraw the report for %(name)s."),
+                    name=report.name,
+                ),
             )
             notifications.withdrawal_requested(request, report)
         return redirect(report.duty)

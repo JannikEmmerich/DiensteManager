@@ -218,7 +218,7 @@ def test_dispatchers_hear_about_bank_changes_by_unit_leads(
     body = mailoutbox[0].body
     assert "lead@example.org has changed the bank details of Unit North." in body
     assert "e.g. by calling the unit lead" in body
-    assert "contact the dispatchers" not in body
+    assert "please contact the Disposition" not in body
 
 
 def test_billing_warns_about_recent_bank_changes(client, dispatcher, unit):

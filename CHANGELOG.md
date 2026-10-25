@@ -7,6 +7,19 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The name of the dispatchers can be set with `DISPATCH_NAME` in `.env` (default
+  "Disposition"), e.g. `DISPATCH_NAME=Einsatzleitung`. It is used as is in German and
+  English, in the UI, the role name and the emails; a feminine noun in the singular fits
+  the German texts.
+
+### Changed
+
+- The English texts call the dispatchers "the Disposition" (or the configured name)
+  instead of "the dispatchers". In the change history, helpers entered by the
+  dispatchers read "entered for the unit".
+
 ## [0.4.0] – 2026-10-25
 
 When updating from 0.3.0:

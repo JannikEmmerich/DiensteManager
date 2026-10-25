@@ -5,6 +5,8 @@ from django.contrib.auth.forms import SetPasswordMixin
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
+from core.names import dispatch_text
+
 from . import permissions
 from .models import LANGUAGE_CHOICES, Invitation, Role, Unit, User
 
@@ -165,11 +167,14 @@ class ProfileForm(forms.ModelForm):
             # Members receive neither billings nor bank details.
             del self.fields["notify_billing"]
         if settings.EMAIL_QUEUE:
-            self.fields["email_delivery"].help_text = _(
-                "The summary comes every day at %(hour)d:00. Changed and cancelled duties, "
-                "billings, changed bank details and emails from dispatchers always come "
-                "immediately."
-            ) % {"hour": settings.EMAIL_DIGEST_HOUR}
+            self.fields["email_delivery"].help_text = dispatch_text(
+                _(
+                    "The summary comes every day at %(hour)d:00. Changed and cancelled duties, "
+                    "billings, changed bank details and emails from the %(DISPATCH_NAME)s "
+                    "always come immediately."
+                ),
+                hour=settings.EMAIL_DIGEST_HOUR,
+            )
         else:
             # Without the email queue there is nobody to send a summary.
             del self.fields["email_delivery"]

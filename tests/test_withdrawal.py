@@ -208,7 +208,7 @@ def test_dispatcher_withdraws_as_requested(client, dispatcher, unit, unit_lead, 
     assert report.status == Report.Status.WITHDRAWN
     assert _recipients(mailoutbox) == ["lead@example.org", "member@example.org"]
     assert mailoutbox[0].subject == "[DiensteManager] Mia withdrawn from Marathon"
-    assert "As requested, the dispatchers have withdrawn the report for Mia." in mailoutbox[0].body
+    assert "As requested, the Disposition has withdrawn the report for Mia." in mailoutbox[0].body
     # Settled: a withdrawn report is no longer "requested".
     assert report.withdrawal_requested is False
 

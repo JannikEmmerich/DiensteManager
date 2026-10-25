@@ -19,7 +19,7 @@ class HistoryEntry(models.Model):
         RELEASED = "released", _("released")
         CANCELLED = "cancelled", _("cancelled")
         REPORTED = "reported", _("reported")
-        ADDED = "added", _("entered by the dispatchers")
+        ADDED = "added", _("entered for the unit")
         CONFIRMED = "confirmed", _("confirmed")
         DECLINED = "declined", _("declined")
         WITHDRAWN = "withdrawn", _("withdrawn")

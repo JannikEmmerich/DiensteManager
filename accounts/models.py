@@ -11,6 +11,8 @@ from django.utils import timezone
 from django.utils.translation import get_language_info
 from django.utils.translation import gettext_lazy as _
 
+from core.names import dispatch_text
+
 from .managers import UserManager
 
 # Each language is listed in its own name ("Deutsch", "English"), whatever the UI language.
@@ -20,9 +22,14 @@ LANGUAGE_CHOICES = [
 
 
 class Role(models.TextChoices):
-    DISPATCHER = "dispatcher", _("Dispatcher (internal)")
+    DISPATCHER = "dispatcher", dispatch_text(_("%(DISPATCH_NAME)s (internal)"))
     UNIT_LEAD = "unit_lead", _("Unit lead")
     MEMBER = "member", _("Unit member")
+
+
+def role_choices():
+    # A callable, so that migrations do not store the name of the dispatchers.
+    return Role.choices
 
 
 # Internal accounts belong to no unit, external accounts to exactly one.
@@ -56,7 +63,7 @@ class User(AbstractUser):
 
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    role = models.CharField(_("role"), max_length=20, choices=Role.choices)
+    role = models.CharField(_("role"), max_length=20, choices=role_choices)
     unit = models.ForeignKey(
         Unit,
         verbose_name=_("unit"),
@@ -168,7 +175,7 @@ class Invitation(models.Model):
         REVOKED = "revoked", _("Revoked")
 
     email = models.EmailField(_("email address"))
-    role = models.CharField(_("role"), max_length=20, choices=Role.choices)
+    role = models.CharField(_("role"), max_length=20, choices=role_choices)
     unit = models.ForeignKey(
         Unit,
         verbose_name=_("unit"),
