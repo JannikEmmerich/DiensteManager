@@ -25,6 +25,11 @@ All notable changes are listed here. The format follows
   instead of "the dispatchers". In the change history, helpers entered by the
   dispatchers read "entered for the unit".
 
+### Fixed
+
+- The confirmation when marking a statement as paid no longer says that the unit leads
+  are notified (they are not since 0.4.0).
+
 ## [0.4.0] – 2026-10-25
 
 When updating from 0.3.0:

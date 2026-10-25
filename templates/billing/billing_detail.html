@@ -10,7 +10,7 @@
         <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-primary" href="{% url 'billing_pdf' billing.pk %}">{% translate "Download PDF" %}</a>
             {% if can.manage_billing and billing.status == "issued" %}
-                {% translate "Mark this statement as paid? The unit leads are notified." as confirm_paid %}
+                {% translate "Mark this statement as paid?" as confirm_paid %}
                 <form method="post" action="{% url 'billing_mark_paid' billing.pk %}" data-confirm="{{ confirm_paid }}">
                     {% csrf_token %}
                     <button class="btn btn-outline-success" type="submit">{% translate "Mark as paid" %}</button>

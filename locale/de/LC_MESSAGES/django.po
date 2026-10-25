@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 14:23+0000\n"
+"POT-Creation-Date: 2026-10-25 14:28+0000\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -561,65 +561,65 @@ msgstr "bezahlt am"
 msgid "cancelled at"
 msgstr "abgesagt am"
 
-#: billing/models.py:92 billing/models.py:133
+#: billing/models.py:92 billing/models.py:136
 msgid "billing"
 msgstr "Abrechnung"
 
-#: billing/models.py:128 duties/models.py:109
+#: billing/models.py:131 duties/models.py:109
 msgid "Per helper hour"
 msgstr "Pro Helferstunde"
 
-#: billing/models.py:129 duties/models.py:110
+#: billing/models.py:132 duties/models.py:110
 msgid "Flat rate per helper"
 msgstr "Pauschal pro Helfer"
 
-#: billing/models.py:130
+#: billing/models.py:133
 msgid "Other item"
 msgstr "Sonstige Position"
 
-#: billing/models.py:138 duties/models.py:435
+#: billing/models.py:141 duties/models.py:435
 msgid "report"
 msgstr "Meldung"
 
-#: billing/models.py:144 billing/models.py:146 duties/models.py:172
+#: billing/models.py:147 billing/models.py:149 duties/models.py:172
 #: duties/models.py:303 duties/models.py:368 mailings/models.py:33
 msgid "duty"
 msgstr "Dienst"
 
-#: billing/models.py:147
+#: billing/models.py:150
 msgid "date"
 msgstr "Datum"
 
-#: billing/models.py:148
+#: billing/models.py:151
 msgid "helper"
 msgstr "Helfer"
 
-#: billing/models.py:150 duties/models.py:47 duties/models.py:307
+#: billing/models.py:153 duties/models.py:47 duties/models.py:307
 #: duties/models.py:393
 msgid "qualification"
 msgstr "Qualifikation"
 
-#: billing/models.py:151 duties/models.py:135
+#: billing/models.py:154 duties/models.py:135
 msgid "duty pay"
 msgstr "Dienstgeld"
 
-#: billing/models.py:152 duties/models.py:138
+#: billing/models.py:155 duties/models.py:138
 msgid "rate in euros"
 msgstr "Satz in Euro"
 
-#: billing/models.py:154
+#: billing/models.py:157
 msgid "hours"
 msgstr "Stunden"
 
-#: billing/models.py:155
+#: billing/models.py:158
 msgid "amount"
 msgstr "Betrag"
 
-#: billing/models.py:158
+#: billing/models.py:161
 msgid "billing item"
 msgstr "Abrechnungsposten"
 
-#: billing/models.py:159
+#: billing/models.py:162
 msgid "billing items"
 msgstr "Abrechnungsposten"
 
@@ -2167,10 +2167,8 @@ msgid "Download PDF"
 msgstr "PDF herunterladen"
 
 #: templates/billing/billing_detail.html:13
-msgid "Mark this statement as paid? The unit leads are notified."
-msgstr ""
-"Diese Abrechnung als bezahlt markieren? Die Bereitschaftsleitungen werden "
-"benachrichtigt."
+msgid "Mark this statement as paid?"
+msgstr "Diese Abrechnung als bezahlt markieren?"
 
 #: templates/billing/billing_detail.html:16
 msgid "Mark as paid"

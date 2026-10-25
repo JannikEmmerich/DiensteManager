@@ -283,6 +283,8 @@ def test_mark_paid(client, dispatcher, unit, unit_lead, mailoutbox):
     )
     mailoutbox.clear()
     client.force_login(dispatcher)
+    page = client.get(billing.get_absolute_url()).text
+    assert 'data-confirm="Mark this statement as paid?"' in page  # nobody is notified
     client.post(reverse("billing_mark_paid", args=[billing.pk]))
     billing.refresh_from_db()
     assert billing.status == Billing.Status.PAID
