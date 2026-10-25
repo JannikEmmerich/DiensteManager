@@ -8,7 +8,6 @@ from accounts.models import Unit
 
 from .models import Duty, DutyPosition, Qualification, Report
 
-
 # Upper limit of helpers per position and per duty (the database fields are small integers).
 MAX_HELPERS = 10000
 
