@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n form_tags duty_tags %}
+{% block head_title %}{% translate "Create statement" %} · {{ unit.name }}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-1">{% translate "Create statement" %}</h1>
+    <p class="text-body-secondary">{{ unit.name }}</p>
+    {% if not bank_account %}
+        <div class="alert alert-warning">
+            {% translate "This unit has not entered any bank details yet. You can still create the statement; the PDF then has no bank account." %}
+            <a class="alert-link" href="{% url 'bank_account_edit' unit.pk %}">{% translate "Enter bank details" %}</a>
+        </div>
+    {% endif %}
+    {% if form.reports %}
+        <p>
+            {% blocktranslate trimmed %}
+                Confirmed helpers of finished duties with duty pay that have not been billed yet.
+                Untick helpers who did not come and correct the hours for hourly pay.
+            {% endblocktranslate %}
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+            {% endif %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>{% translate "Bill" %}</th>
+                            <th>{% translate "Date" %}</th>
+                            <th>{% translate "Duty" %}</th>
+                            <th>{% translate "Helper" %}</th>
+                            <th>{% translate "Rate" %}</th>
+                            <th style="width: 9rem">{% translate "Hours" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report, include, hours in form.lines %}
+                            <tr>
+                                <td>{{ include|bs_widget }}<label class="visually-hidden" for="{{ include.id_for_label }}">{{ include.label }}</label></td>
+                                <td class="small text-nowrap">{{ report.duty.starts_at|date:"SHORT_DATE_FORMAT" }}</td>
+                                <td><a href="{{ report.duty.get_absolute_url }}">{{ report.duty.title }}</a></td>
+                                <td>{{ report.name }}</td>
+                                <td class="small">{{ report.duty|pay }}</td>
+                                <td>
+                                    {% if hours %}
+                                        <label class="visually-hidden" for="{{ hours.id_for_label }}">{{ hours.label }}</label>
+                                        {{ hours|bs_widget }}
+                                        {% for error in hours.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                                    {% else %}–{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% include "core/_field.html" with field=form.note %}
+            {% translate "Create the statement now? The unit leads receive it by email." as confirm_text %}
+            <button class="btn btn-primary" type="submit" onclick="return confirm('{{ confirm_text|escapejs }}')">{% translate "Create statement" %}</button>
+            <a class="btn btn-link" href="{% url 'billing_list' %}">{% translate "Cancel" %}</a>
+        </form>
+    {% else %}
+        <p class="text-body-secondary">{% translate "There is nothing to bill for this unit." %}</p>
+        <a class="btn btn-link px-0" href="{% url 'billing_list' %}">{% translate "Back" %}</a>
+    {% endif %}
+{% endblock content %}

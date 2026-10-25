@@ -42,11 +42,15 @@ class DutyForm(forms.ModelForm):
             "ends_at",
             "helpers_needed",
             "description",
+            "pay_type",
+            "pay_rate",
             "all_units",
             "units",
         ]
         field_classes = {"starts_at": MinuteDateTimeField, "ends_at": MinuteDateTimeField}
         widgets = {
+            "pay_type": forms.RadioSelect(attrs={"class": "form-check-input"}),
+            "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
             "helpers_needed": forms.NumberInput(attrs={"min": 1}),
             "description": forms.Textarea(attrs={"rows": 4}),
         }
@@ -57,6 +61,10 @@ class DutyForm(forms.ModelForm):
         ends_at = cleaned_data.get("ends_at")
         if starts_at and ends_at and ends_at <= starts_at:
             self.add_error("ends_at", _("The end must be after the start."))
+        if cleaned_data.get("pay_type") == Duty.PayType.NONE:
+            cleaned_data["pay_rate"] = None
+        elif "pay_rate" in cleaned_data and cleaned_data["pay_rate"] is None:
+            self.add_error("pay_rate", _("Please enter the rate."))
         if clean_unit_selection(self, cleaned_data) and not cleaned_data.get("all_units"):
             self._check_units_with_reports(cleaned_data)
         return cleaned_data
@@ -77,6 +85,16 @@ class DutyForm(forms.ModelForm):
                 _("These units have reported helpers and must stay selected: %(units)s")
                 % {"units": ", ".join(unit.name for unit in dropped)},
             )
+
+
+class HelperUnitForm(forms.Form):
+    """The unit whose helpers a dispatcher enters."""
+
+    unit = forms.ModelChoiceField(label=_("Unit"), queryset=Unit.objects.none())
+
+    def __init__(self, *args, duty, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["unit"].queryset = Unit.objects.all() if duty.all_units else duty.units.all()
 
 
 class ReportForm(forms.ModelForm):

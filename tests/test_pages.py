@@ -1,9 +1,14 @@
 """Smoke test: every page renders without template errors."""
 
+from datetime import timedelta
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
 
-from duties.models import Duty
+from billing import services
+from billing.models import BankAccount
+from duties.models import Duty, Report
 from mailings.models import Mailing
 
 from .conftest import create_duty, create_report
@@ -34,6 +39,7 @@ def test_public_pages_render(client, db, name):
         "duty_create",
         "mailing_list",
         "mailing_create",
+        "billing_list",
     ],
 )
 def test_pages_for_dispatchers_render(client, dispatcher, name):
@@ -101,3 +107,28 @@ def test_home_shows_role(client, unit_lead):
 def test_unknown_page_renders_404(client, member):
     client.force_login(member)
     assert client.get("/does-not-exist/").status_code == 404
+
+
+def test_billing_pages_render(client, dispatcher, unit_lead, unit):
+    duty = create_duty(
+        starts_in=timedelta(days=-2), pay_type=Duty.PayType.HOURLY, pay_rate=Decimal("12")
+    )
+    report = create_report(duty, unit, status=Report.Status.CONFIRMED)
+    BankAccount.objects.create(unit=unit, account_holder="Holder", iban="DE89370400440532013000")
+    client.force_login(dispatcher)
+    for url in [
+        reverse("billing_list"),
+        reverse("billing_create", args=[unit.pk]),
+        reverse("report_add", args=[duty.pk]),
+    ]:
+        assert client.get(url).status_code == 200, url
+    billing = services.create_billing(unit, [(report, Decimal(4))], "", dispatcher)
+    for user in (dispatcher, unit_lead):
+        client.force_login(user)
+        for url in [
+            reverse("unit_pay", args=[unit.pk]),
+            reverse("bank_account_edit", args=[unit.pk]),
+            billing.get_absolute_url(),
+            reverse("home"),
+        ]:
+            assert client.get(url).status_code == 200, (user, url)

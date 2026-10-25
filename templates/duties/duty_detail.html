@@ -63,6 +63,8 @@
                         <dd class="col-sm-8">{{ duty.location|default:"–" }}</dd>
                         <dt class="col-sm-4">{% translate "Helpers needed" %}</dt>
                         <dd class="col-sm-8">{{ duty.helpers_needed }}</dd>
+                        <dt class="col-sm-4">{% translate "Duty pay" %}</dt>
+                        <dd class="col-sm-8">{% if duty.has_pay %}{{ duty|pay }}{% else %}{% translate "none" %}{% endif %}</dd>
                         {% if can.manage_duties %}
                             <dt class="col-sm-4">{% translate "Offered to" %}</dt>
                             <dd class="col-sm-8">{% if duty.all_units %}{% translate "All units" %}{% else %}{{ offered_units|join:", " }}{% endif %}</dd>
@@ -99,11 +101,16 @@
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
         <h2 class="h5 mb-0">{% if can.manage_duties %}{% translate "Reported helpers" %}{% else %}{% translate "Helpers reported by your unit" %}{% endif %}</h2>
-        {% if can.manage_duties and duty.pending_count and duty.status == "released" %}
-            <form method="post" action="{% url 'report_confirm_all' duty.pk %}">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-outline-success" type="submit">{% translate "Confirm all pending" %}</button>
-            </form>
+        {% if can.manage_duties and duty.status == "released" %}
+            <div class="d-flex gap-2">
+                {% if duty.pending_count %}
+                    <form method="post" action="{% url 'report_confirm_all' duty.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-success" type="submit">{% translate "Confirm all pending" %}</button>
+                    </form>
+                {% endif %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'report_add' duty.pk %}">{% translate "Add helpers" %}</a>
+            </div>
         {% endif %}
     </div>
     {% if reports %}

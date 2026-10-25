@@ -3,6 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
@@ -11,7 +12,7 @@ from django.views.decorators.http import require_POST
 from accounts.permissions import is_dispatcher
 
 from . import notifications, permissions
-from .forms import DutyForm, ReportFormSet
+from .forms import DutyForm, HelperUnitForm, ReportFormSet
 from .models import Duty, Report
 
 DUTIES_PER_PAGE = 50
@@ -182,19 +183,8 @@ def report_create(request, pk):
     unit = request.user.unit
     formset = ReportFormSet(request.POST or None, duty=duty, unit=unit)
     if request.method == "POST" and formset.is_valid():
-        reports = formset.new_reports()
-        for report in reports:
-            report.duty = duty
-            report.unit = unit
-            report.reported_by = request.user
-        try:
-            with transaction.atomic():
-                for report in reports:
-                    report.save()
-        except IntegrityError:
-            # Someone else reported the same person in the meantime.
-            messages.error(request, _("One of these people has already been reported."))
-        else:
+        reports = _save_new_reports(request, formset, duty, unit, reported_by=request.user)
+        if reports is not None:
             messages.success(
                 request,
                 ngettext("%(count)d helper reported.", "%(count)d helpers reported.", len(reports))
@@ -205,6 +195,69 @@ def report_create(request, pk):
                 return redirect("report_create", pk=duty.pk)
             return redirect(duty)
     return render(request, "duties/report_form.html", {"duty": duty, "formset": formset})
+
+
+def report_add(request, pk):
+    """Dispatchers enter helpers of a unit themselves (e.g. after an email); confirmed at once."""
+    _dispatcher_only(request)
+    duty = get_object_or_404(Duty, pk=pk)
+    if duty.status != Duty.Status.RELEASED:
+        messages.error(request, _("Helpers can only be added to released duties."))
+        return redirect(duty)
+    unit_form = HelperUnitForm(
+        request.POST or None, duty=duty, initial={"unit": request.GET.get("unit")}
+    )
+    unit = unit_form.cleaned_data["unit"] if unit_form.is_valid() else None
+    formset = ReportFormSet(request.POST or None, duty=duty, unit=unit)
+    if request.method == "POST" and unit is not None and formset.is_valid():
+        reports = _save_new_reports(
+            request,
+            formset,
+            duty,
+            unit,
+            status=Report.Status.CONFIRMED,
+            reported_by=request.user,
+            decided_by=request.user,
+            decided_at=timezone.now(),
+        )
+        if reports is not None:
+            messages.success(
+                request,
+                ngettext(
+                    "%(count)d helper added and confirmed.",
+                    "%(count)d helpers added and confirmed.",
+                    len(reports),
+                )
+                % {"count": len(reports)},
+            )
+            notifications.helpers_added(request, duty, unit, reports)
+            if "another" in request.POST:
+                return redirect(f"{reverse('report_add', args=[duty.pk])}?unit={unit.pk}")
+            return redirect(duty)
+    return render(
+        request,
+        "duties/report_add.html",
+        {"duty": duty, "unit_form": unit_form, "formset": formset},
+    )
+
+
+def _save_new_reports(request, formset, duty, unit, **values):
+    """Saves the filled-in rows; returns the reports, or None if a name was taken meanwhile."""
+    reports = formset.new_reports()
+    for report in reports:
+        report.duty = duty
+        report.unit = unit
+        for name, value in values.items():
+            setattr(report, name, value)
+    try:
+        with transaction.atomic():
+            for report in reports:
+                report.save()
+    except IntegrityError:
+        # Someone else reported the same person in the meantime.
+        messages.error(request, _("One of these people has already been reported."))
+        return None
+    return reports
 
 
 def _visible_report(request, pk):

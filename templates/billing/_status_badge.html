@@ -1,0 +1,1 @@
+{% load i18n %}<span class="badge {% if billing.status == 'paid' %}text-bg-success{% elif billing.status == 'issued' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">{{ billing.get_status_display }}</span>

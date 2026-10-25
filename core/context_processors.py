@@ -17,5 +17,6 @@ def site(request):
             "view_duties": permissions.is_dispatcher(user) or is_unit_account(user),
             "manage_duties": permissions.is_dispatcher(user),
             "send_emails": permissions.is_dispatcher(user),
+            "manage_billing": permissions.is_dispatcher(user),
         },
     }

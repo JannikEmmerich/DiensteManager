@@ -10,6 +10,7 @@ dependencies = [
     "django-htmx>=1.29",
     "gunicorn>=26",
     "psycopg[binary]>=3.3",
+    "reportlab>=5.1",
     "whitenoise>=6.12",
 ]
 

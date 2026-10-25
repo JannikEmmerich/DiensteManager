@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{% translate "Add helpers" %}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-1">{% translate "Add helpers" %}</h1>
+    <p class="text-body-secondary">
+        <a href="{{ duty.get_absolute_url }}">{{ duty.title }}</a> · {{ duty|period }}{% if duty.location %} · {{ duty.location }}{% endif %}
+    </p>
+    <p>
+        {% blocktranslate trimmed %}
+            For helpers who have registered with you directly, e.g. by email or phone. They are
+            confirmed right away; the unit leads of the unit are notified by email.
+        {% endblocktranslate %}
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">{% include "core/_field.html" with field=unit_form.unit %}</div>
+        </div>
+        {% include "duties/_report_rows.html" %}
+        <button class="btn btn-primary" type="submit">{% translate "Add and confirm" %}</button>
+        <button class="btn btn-outline-primary" type="submit" name="another" value="1">{% translate "Add and enter more" %}</button>
+        <a class="btn btn-link" href="{{ duty.get_absolute_url }}">{% translate "Cancel" %}</a>
+    </form>
+{% endblock content %}

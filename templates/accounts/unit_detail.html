@@ -5,6 +5,9 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
         <h1 class="h3 mb-0">{{ unit.name }}</h1>
         <div class="d-flex gap-2">
+            {% if can.manage_billing or can.view_own_unit %}
+                <a class="btn btn-outline-secondary" href="{% url 'unit_pay' unit.pk %}">{% translate "Duty pay overview" %}</a>
+            {% endif %}
             {% if can.send_emails %}
                 <a class="btn btn-outline-secondary" href="{% url 'mailing_create' %}?unit={{ unit.pk }}">{% translate "Write an email" %}</a>
             {% endif %}

@@ -76,6 +76,7 @@
                     <a class="list-group-item list-group-item-action" href="{% url 'unit_list' %}">{% translate "Manage units" %}</a>
                 {% elif can.view_own_unit %}
                     <a class="list-group-item list-group-item-action" href="{% url 'unit_detail' user.unit_id %}">{% translate "My unit" %}</a>
+                    <a class="list-group-item list-group-item-action" href="{% url 'unit_pay' user.unit_id %}">{% translate "Duty pay overview" %}</a>
                 {% endif %}
                 <a class="list-group-item list-group-item-action" href="{% url 'profile' %}">{% translate "My account" %}</a>
             </div>

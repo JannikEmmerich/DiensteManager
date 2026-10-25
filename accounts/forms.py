@@ -112,14 +112,22 @@ class AcceptInvitationForm(SetPasswordMixin, forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
-    NOTIFICATION_FIELDS = ["notify_new_duties", "notify_reports"]
+    NOTIFICATION_FIELDS = ["notify_new_duties", "notify_reports", "notify_billing"]
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "language", "notify_new_duties", "notify_reports"]
+        fields = [
+            "first_name",
+            "last_name",
+            "language",
+            "notify_new_duties",
+            "notify_reports",
+            "notify_billing",
+        ]
         labels = {
             "notify_new_duties": _("New duties for my unit"),
             "notify_reports": _("Reports"),
+            "notify_billing": _("Billings"),
         }
 
     def __init__(self, *args, **kwargs):
@@ -131,6 +139,14 @@ class ProfileForm(forms.ModelForm):
             *LANGUAGE_CHOICES,
         ]
         user = self.instance
+        if permissions.is_unit_lead(user):
+            self.fields["notify_billing"].help_text = _(
+                "When a statement of the duty pay of my unit is created (with the PDF), "
+                "paid or cancelled."
+            )
+        else:
+            # Only unit leads receive billings.
+            del self.fields["notify_billing"]
         if permissions.is_dispatcher(user):
             # Dispatchers release the duties themselves.
             del self.fields["notify_new_duties"]

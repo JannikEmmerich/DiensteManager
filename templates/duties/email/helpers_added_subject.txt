@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktranslate trimmed with title=duty.title %}Helpers of your unit entered for {{ title }}{% endblocktranslate %}

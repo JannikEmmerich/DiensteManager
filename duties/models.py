@@ -1,3 +1,5 @@
+from decimal import ROUND_HALF_UP, Decimal
+
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -8,6 +10,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
+
+CENT = Decimal("0.01")
 
 
 class DutyQuerySet(models.QuerySet):
@@ -57,6 +61,11 @@ class Duty(models.Model):
         MANUAL = "manual", _("Entered manually")
         HIORG = "hiorg", _("HiOrg-Server")
 
+    class PayType(models.TextChoices):
+        NONE = "none", _("No duty pay")
+        HOURLY = "hourly", _("Per helper hour")
+        FLAT = "flat", _("Flat rate per helper")
+
     title = models.CharField(_("title"), max_length=200)
     location = models.CharField(_("location"), max_length=200, blank=True)
     starts_at = models.DateTimeField(_("start"))
@@ -68,6 +77,19 @@ class Duty(models.Model):
         _("description"),
         blank=True,
         help_text=_("Visible to the units, e.g. meeting point, qualifications, equipment."),
+    )
+    # Duty pay ("Dienstgeld") that the units get for each confirmed helper.
+    pay_type = models.CharField(
+        _("duty pay"), max_length=10, choices=PayType.choices, default=PayType.NONE
+    )
+    pay_rate = models.DecimalField(
+        _("rate in euros"),
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        help_text=_("Per helper hour, or per helper for the whole duty."),
     )
     status = models.CharField(
         _("status"), max_length=20, choices=Status.choices, default=Status.DRAFT
@@ -103,6 +125,11 @@ class Duty(models.Model):
                 condition=Q(ends_at__gt=F("starts_at")), name="duty_ends_after_start"
             ),
             models.CheckConstraint(condition=Q(helpers_needed__gte=1), name="duty_needs_helpers"),
+            models.CheckConstraint(
+                condition=Q(pay_type="none", pay_rate__isnull=True)
+                | (~Q(pay_type="none") & Q(pay_rate__gt=0)),
+                name="duty_pay_rate_matches_type",
+            ),
             models.UniqueConstraint(
                 fields=["source", "external_id"],
                 condition=~Q(external_id=""),
@@ -127,6 +154,25 @@ class Duty(models.Model):
     @property
     def is_open_for_reports(self):
         return self.status == self.Status.RELEASED and not self.has_started
+
+    @property
+    def duration_hours(self):
+        """Length of the duty in hours, to two decimals."""
+        hours = Decimal((self.ends_at - self.starts_at).total_seconds()) / 3600
+        return hours.quantize(CENT, ROUND_HALF_UP)
+
+    @property
+    def has_pay(self):
+        return self.pay_type != self.PayType.NONE
+
+    def pay_for(self, hours=None):
+        """Duty pay for one helper; hourly pay for ``hours`` (default: the whole duty)."""
+        if self.pay_type == self.PayType.HOURLY:
+            hours = self.duration_hours if hours is None else hours
+            return (self.pay_rate * hours).quantize(CENT, ROUND_HALF_UP)
+        if self.pay_type == self.PayType.FLAT:
+            return self.pay_rate
+        return Decimal(0)
 
     def offered_unit_ids(self):
         if self.all_units:

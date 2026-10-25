@@ -1,0 +1,10 @@
+{% load i18n duty_tags %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with unit=billing.unit.name %}The dispatchers have created a statement of the duty pay for {{ unit }}:{% endblocktranslate %}
+
+{% translate "Number:" %} {{ billing.number }}
+{% translate "Total:" %} {{ billing.total|money }}
+{% if billing.iban %}{% translate "Bank account:" %} {{ billing.account_holder }}, {{ billing.iban_display }}{% else %}{% translate "Your unit has not entered any bank details yet. Please add them in the portal." %}{% endif %}
+
+{% translate "The statement is attached as a PDF. You can also find it here:" %}
+{{ billing_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

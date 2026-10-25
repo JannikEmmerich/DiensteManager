@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 
 import pytest
 from django.urls import reverse
@@ -19,6 +20,7 @@ def _duty_data(**data):
         "ends_at": (starts_at + timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M"),
         "helpers_needed": 4,
         "description": "Meet at the main entrance.",
+        "pay_type": "none",
         "all_units": "True",
     }
     values.update(data)
@@ -439,3 +441,113 @@ def test_decisions_never_overwrite_a_withdrawal(rf, dispatcher, unit):
     assert _decide(request, [stale], Report.Status.CONFIRMED) == []
     report.refresh_from_db()
     assert report.status == Report.Status.WITHDRAWN
+
+
+# --- Duty pay ---------------------------------------------------------------------------------
+
+
+def test_duty_with_hourly_pay(client, dispatcher, member):
+    client.force_login(dispatcher)
+    client.post(reverse("duty_create"), _duty_data(pay_type="hourly", pay_rate="12.50"))
+    duty = Duty.objects.get()
+    assert duty.pay_type == Duty.PayType.HOURLY
+    assert duty.pay_rate == Decimal("12.50")
+    assert duty.duration_hours == Decimal("6.00")
+    assert duty.pay_for() == Decimal("75.00")
+    assert duty.pay_for(Decimal("2.5")) == Decimal("31.25")
+
+
+def test_flat_pay_is_per_helper(db):
+    duty = create_duty(pay_type=Duty.PayType.FLAT, pay_rate=Decimal("40"))
+    assert duty.pay_for() == Decimal("40")
+    assert duty.pay_for(Decimal("1")) == Decimal("40")
+
+
+def test_pay_needs_a_rate(client, dispatcher):
+    client.force_login(dispatcher)
+    response = client.post(reverse("duty_create"), _duty_data(pay_type="flat"))
+    assert "Please enter the rate." in response.text
+    assert not Duty.objects.exists()
+
+
+def test_no_pay_drops_the_rate(client, dispatcher):
+    client.force_login(dispatcher)
+    client.post(reverse("duty_create"), _duty_data(pay_type="none", pay_rate="10"))
+    assert Duty.objects.get().pay_rate is None
+
+
+def test_units_see_the_duty_pay(client, member):
+    duty = create_duty(pay_type=Duty.PayType.HOURLY, pay_rate=Decimal("12.5"))
+    client.force_login(member)
+    assert "12.50 € per helper hour" in client.get(duty.get_absolute_url()).text
+    assert "12.50 € per helper hour" in client.get(reverse("duty_list")).text
+
+
+# --- Dispatchers add helpers --------------------------------------------------------------------
+
+
+def _add_data(unit, *rows):
+    return {"unit": unit.pk, **_report_data(*rows)}
+
+
+def test_dispatcher_adds_confirmed_helpers(client, dispatcher, unit, unit_lead, mailoutbox):
+    duty = create_duty(title="Marathon")
+    client.force_login(dispatcher)
+    assert client.get(reverse("report_add", args=[duty.pk])).status_code == 200
+    response = client.post(
+        reverse("report_add", args=[duty.pk]),
+        _add_data(unit, {"name": "Erik Email", "qualification": "Paramedic"}),
+    )
+    assert response["Location"] == duty.get_absolute_url()
+    report = Report.objects.get()
+    assert (report.unit, report.status) == (unit, Report.Status.CONFIRMED)
+    assert report.reported_by == dispatcher
+    assert report.decided_by == dispatcher
+    assert [m.to for m in mailoutbox] == [["lead@example.org"]]
+    assert mailoutbox[0].subject == "[DiensteManager] Helpers of your unit entered for Marathon"
+    assert "- Erik Email (Paramedic)" in mailoutbox[0].body
+
+
+def test_dispatcher_adds_helpers_after_the_duty(client, dispatcher, unit):
+    duty = create_duty(starts_in=timedelta(days=-2))
+    client.force_login(dispatcher)
+    client.post(reverse("report_add", args=[duty.pk]), _add_data(unit, {"name": "Late"}))
+    assert Report.objects.filter(status=Report.Status.CONFIRMED).count() == 1
+
+
+def test_only_offered_units_can_be_chosen(client, dispatcher, unit, other_unit):
+    duty = create_duty(units=[unit])
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("report_add", args=[duty.pk]), _add_data(other_unit, {"name": "Someone"})
+    )
+    assert response.status_code == 200
+    assert not Report.objects.exists()
+
+
+def test_added_helpers_are_checked_for_duplicates(client, dispatcher, unit):
+    duty = create_duty()
+    create_report(duty, unit, name="Hanna Helper")
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("report_add", args=[duty.pk]), _add_data(unit, {"name": "Hanna Helper"})
+    )
+    assert "This person has already been reported for this duty." in response.text
+
+
+@pytest.mark.parametrize("status", [Duty.Status.DRAFT, Duty.Status.CANCELLED])
+def test_helpers_only_for_released_duties(client, dispatcher, unit, status):
+    duty = create_duty(status=status)
+    client.force_login(dispatcher)
+    response = client.post(reverse("report_add", args=[duty.pk]), _add_data(unit, {"name": "X"}))
+    assert response.status_code == 302
+    assert not Report.objects.exists()
+
+
+@pytest.mark.parametrize("user", ["unit_lead", "member"])
+def test_units_cannot_add_confirmed_helpers(client, request, user, unit):
+    client.force_login(request.getfixturevalue(user))
+    duty = create_duty()
+    response = client.post(reverse("report_add", args=[duty.pk]), _add_data(unit, {"name": "X"}))
+    assert response.status_code == 403
+    assert not Report.objects.exists()

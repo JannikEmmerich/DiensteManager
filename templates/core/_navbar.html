@@ -33,6 +33,15 @@
                             <a class="nav-link{% if page and page|slice:':8' == 'mailing_' %} active{% endif %}" href="{% url 'mailing_list' %}">{% translate "Emails" %}</a>
                         </li>
                     {% endif %}
+                    {% if can.manage_billing %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page and page|slice:':8' == 'billing_' or page == 'unit_pay' %} active{% endif %}" href="{% url 'billing_list' %}">{% translate "Billing" %}</a>
+                        </li>
+                    {% elif can.view_own_unit %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page and page|slice:':8' == 'billing_' or page == 'unit_pay' or page == 'bank_account_edit' %} active{% endif %}" href="{% url 'unit_pay' user.unit_id %}">{% translate "Duty pay overview" %}</a>
+                        </li>
+                    {% endif %}
                     {% if can.invite %}
                         <li class="nav-item">
                             <a class="nav-link{% if page == 'invitation_list' %} active{% endif %}" href="{% url 'invitation_list' %}">{% translate "Invitations" %}</a>

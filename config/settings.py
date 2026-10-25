@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "accounts",
     "duties",
     "mailings",
+    "billing",
 ]
 
 MIDDLEWARE = [

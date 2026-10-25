@@ -1,5 +1,7 @@
 from django import template
+from django.template.defaultfilters import floatformat
 from django.utils import formats, timezone
+from django.utils.translation import gettext as _
 
 register = template.Library()
 
@@ -18,3 +20,29 @@ def period(duty):
     if start.date() == end.date():
         return f"{_date(start)}, {start_time} – {end_time}"
     return f"{_date(start)}, {start_time} – {_date(end)}, {end_time}"
+
+
+@register.filter
+def money(value):
+    """An amount in euros in the current language, e.g. "1,234.50 €" or "1.234,50 €"."""
+    if value is None or value == "":
+        return ""
+    return f"{formats.number_format(value, 2, force_grouping=True)} €"
+
+
+@register.filter
+def hours(value):
+    """Hours with up to two decimals, e.g. "8" or "7.5"."""
+    if value is None or value == "":
+        return ""
+    return floatformat(value, -2)
+
+
+@register.filter
+def pay(duty):
+    """The duty pay of a duty, e.g. "12.00 € per helper hour"; empty without pay."""
+    if duty.pay_type == duty.PayType.HOURLY:
+        return _("%(amount)s per helper hour") % {"amount": money(duty.pay_rate)}
+    if duty.pay_type == duty.PayType.FLAT:
+        return _("%(amount)s flat rate per helper") % {"amount": money(duty.pay_rate)}
+    return ""

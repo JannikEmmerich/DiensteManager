@@ -6,8 +6,9 @@ a language get the default language). Who receives what:
 - duty released, or offered to additional units: the active accounts of those units
   with "new duties" switched on;
 - helpers reported or withdrawn: the dispatchers with "reports" switched on;
-- reports confirmed or declined, duty changed or cancelled: the unit leads of the unit
-  concerned and whoever reported the helpers, if they have "reports" switched on.
+- reports confirmed or declined, helpers entered by a dispatcher, duty changed or
+  cancelled: the unit leads of the unit concerned and whoever reported the helpers, if
+  they have "reports" switched on.
 
 The person who triggered a notification never receives it. Sending errors are logged
 and shown as a warning; they never undo the change itself.
@@ -34,7 +35,7 @@ from .models import Report
 logger = logging.getLogger(__name__)
 
 # Changes to a released duty that the units with reports are told about.
-RELEVANT_CHANGES = ("title", "starts_at", "ends_at", "location")
+RELEVANT_CHANGES = ("title", "starts_at", "ends_at", "location", "pay_type", "pay_rate")
 
 
 # --- Recipients ----------------------------------------------------------------------
@@ -77,7 +78,7 @@ def _active_reports_by_unit(duty):
 # --- Rendering and sending -----------------------------------------------------------------
 
 
-def _message(request, recipient, template, context):
+def _message(request, recipient, template, context, attach=None):
     context = {
         **context,
         "recipient": recipient,
@@ -87,21 +88,28 @@ def _message(request, recipient, template, context):
     if "duty" in context:
         context["duty_url"] = request.build_absolute_uri(context["duty"].get_absolute_url())
     with translation.override(recipient.language or settings.LANGUAGE_CODE):
-        subject = render_to_string(f"duties/email/{template}_subject.txt", context)
-        body = render_to_string(f"duties/email/{template}_message.txt", context)
+        subject = render_to_string(f"{template}_subject.txt", context)
+        body = render_to_string(f"{template}_message.txt", context)
+        attachments = [attach()] if attach else []
     return mail.EmailMessage(
         subject=settings.EMAIL_SUBJECT_PREFIX + " ".join(subject.split()),
         body=body,
         to=[recipient.email],
+        attachments=attachments,
     )
 
 
-def _send(request, recipients, template, context):
-    """Sends one email per recipient (except the person who triggered it)."""
+def send(request, recipients, template, context, attach=None):
+    """Sends one email per recipient (except the person who triggered it).
+
+    ``template`` is the path of the ``_subject.txt`` and ``_message.txt`` templates
+    without that ending. ``attach`` optionally returns an attachment as
+    ``(filename, content, mimetype)``; it is called in the recipient's language.
+    """
     recipients = list(recipients.exclude(pk=request.user.pk))
     if not recipients:
         return
-    emails = [_message(request, recipient, template, context) for recipient in recipients]
+    emails = [_message(request, recipient, template, context, attach) for recipient in recipients]
     try:
         mail.mailers.default.send_messages(emails)
     except (SMTPException, OSError):
@@ -112,6 +120,10 @@ def _send(request, recipients, template, context):
                 request,
                 _("The change has been saved, but the notification emails could not be sent."),
             )
+
+
+def _send(request, recipients, template, context):
+    send(request, recipients, f"duties/email/{template}", context)
 
 
 # --- Notifications -----------------------------------------------------------------------
@@ -129,6 +141,16 @@ def helpers_reported(request, duty, unit, reports):
         request,
         _dispatchers(),
         "helpers_reported",
+        {"duty": duty, "unit": unit, "reports": reports},
+    )
+
+
+def helpers_added(request, duty, unit, reports):
+    """A dispatcher has entered (and confirmed) helpers of a unit."""
+    _send(
+        request,
+        _unit_contacts(unit.pk, reports),
+        "helpers_added",
         {"duty": duty, "unit": unit, "reports": reports},
     )
 

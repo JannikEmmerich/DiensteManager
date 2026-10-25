@@ -11,6 +11,7 @@ urlpatterns = [
     path("<int:pk>/cancel/", views.duty_cancel, name="duty_cancel"),
     path("<int:pk>/delete/", views.duty_delete, name="duty_delete"),
     path("<int:pk>/report/", views.report_create, name="report_create"),
+    path("<int:pk>/add-helpers/", views.report_add, name="report_add"),
     path("<int:pk>/confirm-all/", views.report_confirm_all, name="report_confirm_all"),
     path(
         "reports/<int:pk>/confirm/",
