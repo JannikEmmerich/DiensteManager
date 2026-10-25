@@ -45,13 +45,18 @@ class DutyForm(forms.ModelForm):
             "location",
             "starts_at",
             "ends_at",
+            "report_deadline",
             "description",
             "pay_type",
             "pay_rate",
             "all_units",
             "units",
         ]
-        field_classes = {"starts_at": MinuteDateTimeField, "ends_at": MinuteDateTimeField}
+        field_classes = {
+            "starts_at": MinuteDateTimeField,
+            "ends_at": MinuteDateTimeField,
+            "report_deadline": MinuteDateTimeField,
+        }
         widgets = {
             "pay_type": forms.RadioSelect(attrs={"class": "form-check-input"}),
             "pay_rate": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
@@ -70,6 +75,9 @@ class DutyForm(forms.ModelForm):
         ends_at = cleaned_data.get("ends_at")
         if starts_at and ends_at and ends_at <= starts_at:
             self.add_error("ends_at", _("The end must be after the start."))
+        report_deadline = cleaned_data.get("report_deadline")
+        if starts_at and report_deadline and report_deadline >= starts_at:
+            self.add_error("report_deadline", _("The report deadline must be before the start."))
         if cleaned_data.get("pay_type") == Duty.PayType.NONE:
             cleaned_data["pay_rate"] = None
         elif "pay_rate" in cleaned_data and cleaned_data["pay_rate"] is None:
@@ -262,3 +270,15 @@ class BaseReportFormSet(forms.BaseFormSet):
 ReportFormSet = forms.formset_factory(
     ReportForm, formset=BaseReportFormSet, extra=2, min_num=1, validate_min=True
 )
+
+
+class WithdrawalRequestForm(forms.ModelForm):
+    """A unit asks the dispatchers to withdraw a report."""
+
+    class Meta:
+        model = Report
+        fields = ["withdrawal_note"]
+        labels = {"withdrawal_note": _("Reason (optional)")}
+        help_texts = {
+            "withdrawal_note": _("For the dispatchers, e.g. who could step in instead."),
+        }

@@ -34,6 +34,7 @@
                     <div class="col-sm-6">{% include "core/_field.html" with field=form.starts_at %}</div>
                     <div class="col-sm-6">{% include "core/_field.html" with field=form.ends_at %}</div>
                 </div>
+                {% include "core/_field.html" with field=form.report_deadline %}
                 {% include "core/_field.html" with field=form.description %}
                 <div class="row">
                     <div class="col-sm-6">{% include "core/_choice_list.html" with field=form.pay_type %}</div>

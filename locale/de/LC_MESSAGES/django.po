@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 10:38+0100\n"
+"POT-Creation-Date: 2026-10-25 11:53+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -33,8 +33,8 @@ msgstr "Berechtigungen"
 msgid "Important dates"
 msgstr "Wichtige Daten"
 
-#: accounts/admin.py:75 billing/models.py:70 duties/models.py:119
-#: duties/models.py:306 outbox/models.py:43
+#: accounts/admin.py:75 billing/models.py:70 duties/models.py:128
+#: duties/models.py:327 outbox/models.py:43
 msgid "status"
 msgstr "Status"
 
@@ -42,7 +42,7 @@ msgstr "Status"
 msgid "Users and units"
 msgstr "Benutzer und Bereitschaften"
 
-#: accounts/forms.py:18 templates/duties/duty_detail.html:79
+#: accounts/forms.py:18 templates/duties/duty_detail.html:83
 #: templates/mailings/_audience.html:1
 msgid "All units"
 msgstr "Alle Bereitschaften"
@@ -180,21 +180,21 @@ msgstr "Bereitschaftsleitung"
 msgid "Unit member"
 msgstr "Mitglied einer Bereitschaft"
 
-#: accounts/models.py:37 duties/models.py:21 duties/models.py:302
+#: accounts/models.py:37 duties/models.py:21 duties/models.py:323
 msgid "name"
 msgstr "Name"
 
 #: accounts/models.py:38 accounts/models.py:162 billing/models.py:85
-#: duties/models.py:136 outbox/models.py:47
+#: duties/models.py:145 outbox/models.py:47
 msgid "created at"
 msgstr "erstellt am"
 
 #: accounts/models.py:41 accounts/models.py:62 accounts/models.py:141
-#: billing/models.py:18 billing/models.py:65 duties/models.py:292
+#: billing/models.py:18 billing/models.py:65 duties/models.py:313
 msgid "unit"
 msgstr "Bereitschaft"
 
-#: accounts/models.py:42 duties/models.py:122 mailings/models.py:29
+#: accounts/models.py:42 duties/models.py:131 mailings/models.py:29
 msgid "units"
 msgstr "Bereitschaften"
 
@@ -226,7 +226,7 @@ msgstr "Leer lassen, um der Browsereinstellung zu folgen."
 msgid "new duties"
 msgstr "neue Dienste"
 
-#: accounts/models.py:77 duties/models.py:332
+#: accounts/models.py:77 duties/models.py:367
 msgid "reports"
 msgstr "Meldungen"
 
@@ -238,7 +238,7 @@ msgstr "Abrechnungen"
 msgid "delivery"
 msgstr "Zustellung"
 
-#: accounts/models.py:94 lifecycle/models.py:39
+#: accounts/models.py:94 lifecycle/models.py:41
 msgid "user"
 msgstr "Benutzer"
 
@@ -330,8 +330,8 @@ msgstr "Diese Einladung kann nicht mehr widerrufen werden."
 msgid "Unit “%(name)s” created."
 msgstr "Bereitschaft „%(name)s“ angelegt."
 
-#: accounts/views.py:207 accounts/views.py:263 duties/views.py:152
-#: duties/views.py:234
+#: accounts/views.py:207 accounts/views.py:263 duties/views.py:157
+#: duties/views.py:239
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -355,7 +355,7 @@ msgstr "Für Konten im SEPA-Raum optional."
 
 #: billing/forms.py:29 billing/pdf.py:190
 #: templates/billing/billing_detail.html:66
-#: templates/duties/duty_detail.html:147
+#: templates/duties/duty_detail.html:151
 msgid "Note"
 msgstr "Bemerkung"
 
@@ -395,7 +395,7 @@ msgstr "BIC"
 msgid "bank"
 msgstr "Bank"
 
-#: billing/models.py:24 duties/models.py:137
+#: billing/models.py:24 duties/models.py:146
 msgid "updated at"
 msgstr "geändert am"
 
@@ -432,7 +432,7 @@ msgstr "Jahr"
 msgid "sequence number"
 msgstr "laufende Nummer"
 
-#: billing/models.py:72 duties/models.py:304
+#: billing/models.py:72 duties/models.py:325
 msgid "note"
 msgstr "Bemerkung"
 
@@ -440,7 +440,7 @@ msgstr "Bemerkung"
 msgid "total"
 msgstr "Summe"
 
-#: billing/models.py:80 duties/models.py:130
+#: billing/models.py:80 duties/models.py:139
 msgid "created by"
 msgstr "angelegt von"
 
@@ -448,7 +448,7 @@ msgstr "angelegt von"
 msgid "paid at"
 msgstr "bezahlt am"
 
-#: billing/models.py:87 duties/models.py:139
+#: billing/models.py:87 duties/models.py:148
 msgid "cancelled at"
 msgstr "abgesagt am"
 
@@ -456,12 +456,12 @@ msgstr "abgesagt am"
 msgid "billing"
 msgstr "Abrechnung"
 
-#: billing/models.py:129 duties/models.py:331
+#: billing/models.py:129 duties/models.py:366
 msgid "report"
 msgstr "Meldung"
 
-#: billing/models.py:135 billing/models.py:137 duties/models.py:144
-#: duties/models.py:227 duties/models.py:289 mailings/models.py:33
+#: billing/models.py:135 billing/models.py:137 duties/models.py:153
+#: duties/models.py:248 duties/models.py:310 mailings/models.py:33
 msgid "duty"
 msgstr "Dienst"
 
@@ -473,16 +473,16 @@ msgstr "Datum"
 msgid "helper"
 msgstr "Helfer"
 
-#: billing/models.py:141 duties/models.py:33 duties/models.py:231
-#: duties/models.py:303
+#: billing/models.py:141 duties/models.py:33 duties/models.py:252
+#: duties/models.py:324
 msgid "qualification"
 msgstr "Qualifikation"
 
-#: billing/models.py:142 duties/models.py:107
+#: billing/models.py:142 duties/models.py:116
 msgid "duty pay"
 msgstr "Dienstgeld"
 
-#: billing/models.py:143 duties/models.py:110
+#: billing/models.py:143 duties/models.py:119
 msgid "rate in euros"
 msgstr "Satz in Euro"
 
@@ -517,9 +517,9 @@ msgstr "%(amount)s pauschal"
 msgid "Statement of duty pay %(number)s"
 msgstr "Abrechnung Dienstgelder %(number)s"
 
-#: billing/pdf.py:122 duties/forms.py:181 templates/accounts/profile.html:15
+#: billing/pdf.py:122 duties/forms.py:198 templates/accounts/profile.html:15
 #: templates/billing/billing_list.html:13
-#: templates/billing/billing_list.html:48 templates/duties/duty_detail.html:143
+#: templates/billing/billing_list.html:48 templates/duties/duty_detail.html:147
 #: templates/mailings/mailing_detail.html:34
 msgid "Unit"
 msgstr "Bereitschaft"
@@ -645,11 +645,11 @@ msgstr ""
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
-#: config/settings.py:277
+#: config/settings.py:282
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:278
+#: config/settings.py:283
 msgid "English"
 msgstr "Englisch"
 
@@ -665,16 +665,16 @@ msgstr "Grundfunktionen"
 msgid "Duties and reports"
 msgstr "Dienste und Meldungen"
 
-#: duties/forms.py:34 templates/duties/duty_detail.html:78
+#: duties/forms.py:38 templates/duties/duty_detail.html:82
 msgid "Offered to"
 msgstr "Angeboten für"
 
-#: duties/forms.py:34
+#: duties/forms.py:38
 msgid "Only relevant if the duty is offered to selected units only."
 msgstr ""
 "Nur relevant, wenn der Dienst nur ausgewählten Bereitschaften angeboten wird."
 
-#: duties/forms.py:58
+#: duties/forms.py:67
 msgid ""
 "Per helper hour, or per helper for the whole duty. Positions can have their "
 "own rate."
@@ -682,60 +682,72 @@ msgstr ""
 "Pro Helferstunde oder pro Helfer für den ganzen Dienst. Positionen können "
 "einen eigenen Satz haben."
 
-#: duties/forms.py:68
+#: duties/forms.py:77
 msgid "The end must be after the start."
 msgstr "Das Ende muss nach dem Beginn liegen."
 
-#: duties/forms.py:72
+#: duties/forms.py:80
+msgid "The report deadline must be before the start."
+msgstr "Der Meldeschluss muss vor dem Beginn liegen."
+
+#: duties/forms.py:84
 msgid "Please enter the rate."
 msgstr "Bitte gib den Satz an."
 
-#: duties/forms.py:90
+#: duties/forms.py:102
 #, python-format
 msgid "These units have reported helpers and must stay selected: %(units)s"
 msgstr ""
 "Diese Bereitschaften haben Helfer gemeldet und müssen ausgewählt bleiben: "
 "%(units)s"
 
-#: duties/forms.py:107
+#: duties/forms.py:120
 msgid "Any qualification"
 msgstr "Beliebige Qualifikation"
 
-#: duties/forms.py:132
+#: duties/forms.py:145
 #, python-format
 msgid ""
 "Helpers have been reported for these positions; keep them: %(positions)s"
 msgstr ""
 "Für diese Positionen wurden Helfer gemeldet; behalte sie: %(positions)s"
 
-#: duties/forms.py:141
+#: duties/forms.py:154
 msgid "This qualification is listed twice."
 msgstr "Diese Qualifikation steht doppelt in der Liste."
 
-#: duties/forms.py
+#: duties/forms.py:158
 #, python-format
 msgid "A duty can have at most %(max)d helpers in total."
 msgstr "Ein Dienst kann insgesamt höchstens %(max)d Helfer haben."
 
-#: duties/forms.py:193
+#: duties/forms.py:210
 msgid "Name of the helper"
 msgstr "Name des Helfers"
 
-#: duties/forms.py:194
+#: duties/forms.py:211
 msgid "Qualification of the helper"
 msgstr "Qualifikation des Helfers"
 
-#: duties/forms.py:197
+#: duties/forms.py:214
 msgid "e.g. first aider"
 msgstr "z. B. Sanitätshelfer"
 
-#: duties/forms.py:243
+#: duties/forms.py:260
 msgid "This person has already been reported for this duty."
 msgstr "Diese Person wurde für diesen Dienst bereits gemeldet."
 
-#: duties/forms.py:245
+#: duties/forms.py:262
 msgid "This person is listed twice."
 msgstr "Diese Person steht doppelt in der Liste."
+
+#: duties/forms.py:281
+msgid "Reason (optional)"
+msgstr "Grund (optional)"
+
+#: duties/forms.py:283
+msgid "For the dispatchers, e.g. who could step in instead."
+msgstr "Für die Disposition, z. B. wer stattdessen einspringen könnte."
 
 #: duties/models.py:22
 msgid "abbreviation"
@@ -808,116 +820,141 @@ msgid "end"
 msgstr "Ende"
 
 #: duties/models.py:98
+msgid "report deadline"
+msgstr "Meldeschluss"
+
+#: duties/models.py:102
+msgid ""
+"Optional. Afterwards, units can no longer report helpers or withdraw reports "
+"themselves; they can ask you to withdraw them. Without it: until the start."
+msgstr ""
+"Optional. Danach können Bereitschaften keine Helfer mehr melden und Meldungen"
+" nicht mehr selbst zurückziehen; sie können dich darum bitten. Ohne "
+"Meldeschluss: bis zum Beginn."
+
+#: duties/models.py:107
 msgid "helpers needed"
 msgstr "benötigte Helfer"
 
-#: duties/models.py:101
+#: duties/models.py:110
 msgid "description"
 msgstr "Beschreibung"
 
-#: duties/models.py:103
+#: duties/models.py:112
 msgid "Visible to the units, e.g. meeting point, qualifications, equipment."
 msgstr ""
 "Für die Bereitschaften sichtbar, z. B. Treffpunkt, Qualifikationen, "
 "Ausrüstung."
 
-#: duties/models.py:116
+#: duties/models.py:125
 msgid "Per helper hour, or per helper for the whole duty."
 msgstr "Pro Helferstunde oder pro Helfer für den ganzen Dienst."
 
-#: duties/models.py:121
+#: duties/models.py:130
 msgid "offered to all units"
 msgstr "allen Bereitschaften angeboten"
 
-#: duties/models.py:125
+#: duties/models.py:134
 msgid "source"
 msgstr "Quelle"
 
-#: duties/models.py:127
+#: duties/models.py:136
 msgid "external ID"
 msgstr "externe ID"
 
-#: duties/models.py:138
+#: duties/models.py:147
 msgid "released at"
 msgstr "freigegeben am"
 
-#: duties/models.py:145
+#: duties/models.py:154
 msgid "duties"
 msgstr "Dienste"
 
-#: duties/models.py:236
+#: duties/models.py:257
 msgid "Empty: any qualification."
 msgstr "Leer: beliebige Qualifikation."
 
-#: duties/models.py:238
+#: duties/models.py:259
 msgid "number"
 msgstr "Anzahl"
 
-#: duties/models.py:240
+#: duties/models.py:261
 msgid "own rate in euros"
 msgstr "eigener Satz in Euro"
 
-#: duties/models.py:246
+#: duties/models.py:267
 msgid "Empty: the rate of the duty."
 msgstr "Leer: der Satz des Dienstes."
 
-#: duties/models.py:250 duties/models.py:296
+#: duties/models.py:271 duties/models.py:317
 msgid "position"
 msgstr "Position"
 
-#: duties/models.py:251
+#: duties/models.py:272
 msgid "positions"
 msgstr "Positionen"
 
-#: duties/models.py:262
+#: duties/models.py:283
 msgid "any qualification"
 msgstr "beliebige Qualifikation"
 
-#: duties/models.py:280
+#: duties/models.py:301
 msgid "Reported"
 msgstr "Gemeldet"
 
-#: duties/models.py:281
+#: duties/models.py:302
 msgid "Confirmed"
 msgstr "Bestätigt"
 
-#: duties/models.py:282
+#: duties/models.py:303
 msgid "Declined"
 msgstr "Abgelehnt"
 
-#: duties/models.py:283
+#: duties/models.py:304
 msgid "Withdrawn"
 msgstr "Zurückgezogen"
 
-#: duties/models.py:310
+#: duties/models.py:331
 msgid "reported by"
 msgstr "gemeldet von"
 
-#: duties/models.py:316
+#: duties/models.py:337
 msgid "reported at"
 msgstr "gemeldet am"
 
-#: duties/models.py:319
+#: duties/models.py:340
 msgid "decided by"
 msgstr "entschieden von"
 
-#: duties/models.py:325
+#: duties/models.py:346
 msgid "decided at"
 msgstr "entschieden am"
 
-#: duties/models.py:326
+#: duties/models.py:347
 msgid "withdrawn at"
 msgstr "zurückgezogen am"
 
-#: duties/models.py:328
+#: duties/models.py:351
+msgid "withdrawal requested at"
+msgstr "Rücknahme angefragt am"
+
+#: duties/models.py:355
+msgid "withdrawal requested by"
+msgstr "Rücknahme angefragt von"
+
+#: duties/models.py:361
+msgid "reason for the withdrawal"
+msgstr "Grund für die Rücknahme"
+
+#: duties/models.py:363
 msgid "anonymised at"
 msgstr "anonymisiert am"
 
-#: duties/models.py:347 templates/duties/duty_detail.html:157
+#: duties/models.py:382 templates/duties/duty_detail.html:162
 msgid "(anonymised)"
 msgstr "(anonymisiert)"
 
-#: duties/notifications.py:147
+#: duties/notifications.py:158
 msgid ""
 "The change has been saved, but the notification emails could not be sent."
 msgstr ""
@@ -934,94 +971,112 @@ msgstr "%(amount)s pro Helferstunde"
 msgid "%(amount)s flat rate per helper"
 msgstr "%(amount)s pauschal pro Helfer"
 
-#: duties/views.py:120
+#: duties/views.py:125
 msgid "Duty saved as a draft. The units will only see it once you release it."
 msgstr ""
 "Dienst als Entwurf gespeichert. Die Bereitschaften sehen ihn erst, wenn du "
 "ihn freigibst."
 
-#: duties/views.py:130
+#: duties/views.py:135
 msgid "Cancelled duties can no longer be edited."
 msgstr "Abgesagte Dienste können nicht mehr bearbeitet werden."
 
-#: duties/views.py:183
+#: duties/views.py:188
 msgid "This duty has already started and can no longer be released."
 msgstr ""
 "Dieser Dienst hat bereits begonnen und kann nicht mehr freigegeben werden."
 
-#: duties/views.py:186
+#: duties/views.py:191
 msgid "Duty released. The units have been notified."
 msgstr "Dienst freigegeben. Die Bereitschaften wurden benachrichtigt."
 
-#: duties/views.py:189
+#: duties/views.py:194
 msgid "Only drafts can be released."
 msgstr "Nur Entwürfe können freigegeben werden."
 
-#: duties/views.py:208
+#: duties/views.py:213
 msgid "Duty cancelled."
 msgstr "Dienst abgesagt."
 
-#: duties/views.py:211
+#: duties/views.py:216
 msgid "Only released duties can be cancelled."
 msgstr "Nur freigegebene Dienste können abgesagt werden."
 
-#: duties/views.py:220
+#: duties/views.py:225
 msgid "Only drafts can be deleted. Cancel released duties instead."
 msgstr ""
 "Nur Entwürfe können gelöscht werden. Freigegebene Dienste sagst du "
 "stattdessen ab."
 
-#: duties/views.py:224
+#: duties/views.py:229
 #, python-format
 msgid "Duty “%(title)s” deleted."
 msgstr "Dienst „%(title)s“ gelöscht."
 
-#: duties/views.py:247
+#: duties/views.py:252
 msgid "Helpers can no longer be reported for this duty."
 msgstr "Für diesen Dienst können keine Helfer mehr gemeldet werden."
 
-#: duties/views.py:258
+#: duties/views.py:263
 #, python-format
 msgid "%(count)d helper reported."
 msgid_plural "%(count)d helpers reported."
 msgstr[0] "%(count)d Helfer gemeldet."
 msgstr[1] "%(count)d Helfer gemeldet."
 
-#: duties/views.py:273
+#: duties/views.py:278
 msgid "Helpers can only be added to released duties."
 msgstr "Helfer können nur zu freigegebenen Diensten hinzugefügt werden."
 
-#: duties/views.py:296
+#: duties/views.py:301
 #, python-format
 msgid "%(count)d helper added and confirmed."
 msgid_plural "%(count)d helpers added and confirmed."
 msgstr[0] "%(count)d Helfer hinzugefügt und bestätigt."
 msgstr[1] "%(count)d Helfer hinzugefügt und bestätigt."
 
-#: duties/views.py:328
+#: duties/views.py:333
 msgid "One of these people has already been reported."
 msgstr "Eine dieser Personen wurde bereits gemeldet."
 
-#: duties/views.py:358
+#: duties/views.py:363 duties/views.py:436
 #, python-format
 msgid "Report for %(name)s withdrawn."
 msgstr "Meldung für %(name)s zurückgezogen."
 
-#: duties/views.py:396 duties/views.py:404
+#: duties/views.py:370
+msgid ""
+"This report has been confirmed meanwhile; ask the dispatchers to withdraw it."
+msgstr ""
+"Diese Meldung wurde inzwischen bestätigt; bitte die Disposition, sie "
+"zurückzunehmen."
+
+#: duties/views.py:407
+#, python-format
+msgid "The dispatchers have been asked to withdraw the report for %(name)s."
+msgstr ""
+"Die Disposition wurde gebeten, die Meldung für %(name)s zurückzunehmen."
+
+#: duties/views.py:421 duties/views.py:503 duties/views.py:511
 msgid "This report can no longer be changed."
 msgstr "Diese Meldung kann nicht mehr geändert werden."
 
-#: duties/views.py:406
+#: duties/views.py:457
+#, python-format
+msgid "%(name)s stays on the duty; the unit has been told."
+msgstr "%(name)s bleibt eingeplant; die Bereitschaft wurde informiert."
+
+#: duties/views.py:513
 #, python-format
 msgid "%(name)s confirmed."
 msgstr "%(name)s bestätigt."
 
-#: duties/views.py:408
+#: duties/views.py:515
 #, python-format
 msgid "%(name)s declined."
 msgstr "%(name)s abgelehnt."
 
-#: duties/views.py:422
+#: duties/views.py:529
 #, python-format
 msgid "%(count)d report confirmed."
 msgid_plural "%(count)d reports confirmed."
@@ -1073,50 +1128,58 @@ msgid "withdrawn"
 msgstr "zurückgezogen"
 
 #: lifecycle/models.py:26
+msgid "withdrawal requested"
+msgstr "Rücknahme angefragt"
+
+#: lifecycle/models.py:27
+msgid "withdrawal refused"
+msgstr "Rücknahme abgelehnt"
+
+#: lifecycle/models.py:28
 msgid "marked as paid"
 msgstr "als bezahlt markiert"
 
-#: lifecycle/models.py:27
+#: lifecycle/models.py:29
 msgid "voided"
 msgstr "storniert"
 
-#: lifecycle/models.py:29
+#: lifecycle/models.py:31
 msgid "scope"
 msgstr "Bereich"
 
-#: lifecycle/models.py:31 outbox/models.py:70
+#: lifecycle/models.py:33 outbox/models.py:70
 msgid "type"
 msgstr "Typ"
 
-#: lifecycle/models.py:33
+#: lifecycle/models.py:35
 msgid "object ID"
 msgstr "Objekt-ID"
 
-#: lifecycle/models.py:34
+#: lifecycle/models.py:36
 msgid "object"
 msgstr "Objekt"
 
-#: lifecycle/models.py:35
+#: lifecycle/models.py:37
 msgid "action"
 msgstr "Aktion"
 
-#: lifecycle/models.py:36
+#: lifecycle/models.py:38
 msgid "changes"
 msgstr "Änderungen"
 
-#: lifecycle/models.py:46
+#: lifecycle/models.py:48
 msgid "by"
 msgstr "von"
 
-#: lifecycle/models.py:47
+#: lifecycle/models.py:49
 msgid "time"
 msgstr "Zeitpunkt"
 
-#: lifecycle/models.py:50
+#: lifecycle/models.py:52
 msgid "history entry"
 msgstr "Verlaufseintrag"
 
-#: lifecycle/models.py:51
+#: lifecycle/models.py:53
 msgid "history entries"
 msgstr "Verlaufseinträge"
 
@@ -1307,7 +1370,7 @@ msgstr "Anhang"
 msgid "attachments"
 msgstr "Anhänge"
 
-#: outbox/worker.py:120
+#: outbox/worker.py:130
 #, python-format
 msgid "Summary: %(count)d notification"
 msgid_plural "Summary: %(count)d notifications"
@@ -1411,7 +1474,7 @@ msgstr "Widerrufen"
 
 #: templates/accounts/_profile_nav.html:4 templates/accounts/profile.html:3
 #: templates/accounts/profile.html:5 templates/core/_navbar.html:63
-#: templates/core/home.html:81
+#: templates/core/home.html:91
 msgid "My account"
 msgstr "Mein Konto"
 
@@ -1536,7 +1599,7 @@ msgstr "Einladung zu %(site)s"
 #: templates/accounts/invitation_form.html:3
 #: templates/accounts/invitation_form.html:7
 #: templates/accounts/invitation_list.html:7
-#: templates/accounts/unit_detail.html:18 templates/core/home.html:73
+#: templates/accounts/unit_detail.html:18 templates/core/home.html:83
 msgid "Invite a person"
 msgstr "Person einladen"
 
@@ -1565,8 +1628,9 @@ msgstr "Einladung verschicken"
 #: templates/accounts/invitation_form.html:22
 #: templates/accounts/unit_form.html:12
 #: templates/billing/bank_account_form.html:18
-#: templates/billing/billing_create.html:68 templates/duties/duty_form.html:102
+#: templates/billing/billing_create.html:68 templates/duties/duty_form.html:103
 #: templates/duties/report_add.html:23 templates/duties/report_form.html:21
+#: templates/duties/withdrawal_request_form.html:22
 #: templates/mailings/mailing_form.html:41
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -1603,7 +1667,7 @@ msgstr "Rolle"
 #: templates/accounts/invitation_list.html:16
 #: templates/accounts/unit_detail.html:81
 #: templates/billing/billing_list.html:50 templates/billing/unit_pay.html:67
-#: templates/duties/_duty_table.html:10 templates/duties/duty_detail.html:148
+#: templates/duties/_duty_table.html:10 templates/duties/duty_detail.html:152
 msgid "Status"
 msgstr "Status"
 
@@ -1649,7 +1713,7 @@ msgstr "Benachrichtigungen per E-Mail"
 
 #: templates/accounts/profile.html:32 templates/accounts/unit_form.html:11
 #: templates/billing/bank_account_form.html:17
-#: templates/duties/duty_form.html:97
+#: templates/duties/duty_form.html:98
 #: templates/duties/qualification_list.html:42
 msgid "Save"
 msgstr "Speichern"
@@ -1707,11 +1771,11 @@ msgstr "Einrichten"
 
 #: templates/accounts/unit_detail.html:9 templates/billing/unit_pay.html:3
 #: templates/billing/unit_pay.html:6 templates/core/_navbar.html:42
-#: templates/core/home.html:79
+#: templates/core/home.html:89
 msgid "Duty pay overview"
 msgstr "Dienstgelder"
 
-#: templates/accounts/unit_detail.html:12 templates/core/home.html:70
+#: templates/accounts/unit_detail.html:12 templates/core/home.html:80
 #: templates/mailings/mailing_form.html:3
 #: templates/mailings/mailing_form.html:7
 #: templates/mailings/mailing_list.html:7
@@ -1726,7 +1790,7 @@ msgstr "Bearbeiten"
 msgid "Accounts"
 msgstr "Konten"
 
-#: templates/accounts/unit_detail.html:29 templates/duties/duty_detail.html:144
+#: templates/accounts/unit_detail.html:29 templates/duties/duty_detail.html:148
 #: templates/mailings/mailing_detail.html:32
 msgid "Name"
 msgstr "Name"
@@ -1888,7 +1952,7 @@ msgid "Paid on %(date)s."
 msgstr "Bezahlt am %(date)s."
 
 #: templates/billing/billing_detail.html:69
-#: templates/duties/duty_detail.html:204
+#: templates/duties/duty_detail.html:235
 msgid "Change history"
 msgstr "Änderungsverlauf"
 
@@ -2111,7 +2175,7 @@ msgstr "Navigation umschalten"
 msgid "Overview"
 msgstr "Übersicht"
 
-#: templates/core/_navbar.html:28 templates/core/home.html:78
+#: templates/core/_navbar.html:28 templates/core/home.html:88
 msgid "My unit"
 msgstr "Meine Bereitschaft"
 
@@ -2145,38 +2209,46 @@ msgstr[0] "%(counter)s gemeldeter Helfer wartet auf deine Entscheidung."
 msgstr[1] "%(counter)s gemeldete Helfer warten auf deine Entscheidung."
 
 #: templates/core/home.html:24 templates/core/home.html:34
+#: templates/core/home.html:44
 msgid "Go to the duties"
 msgstr "Zu den Diensten"
 
 #: templates/core/home.html:29
+#, python-format
+msgid "%(counter)s unit asks you to withdraw a report."
+msgid_plural "Units ask you to withdraw %(counter)s reports."
+msgstr[0] "%(counter)s Bereitschaft bittet dich, eine Meldung zurückzunehmen."
+msgstr[1] "Bereitschaften bitten dich, %(counter)s Meldungen zurückzunehmen."
+
+#: templates/core/home.html:39
 #, python-format
 msgid "%(counter)s upcoming duty has not been released yet."
 msgid_plural "%(counter)s upcoming duties have not been released yet."
 msgstr[0] "%(counter)s anstehender Dienst ist noch nicht freigegeben."
 msgstr[1] "%(counter)s anstehende Dienste sind noch nicht freigegeben."
 
-#: templates/core/home.html:41
+#: templates/core/home.html:51
 msgid "Duties with open staffing needs"
 msgstr "Dienste mit offenem Personalbedarf"
 
-#: templates/core/home.html:56
+#: templates/core/home.html:66
 msgid "No duties with open staffing needs at the moment."
 msgstr "Zurzeit gibt es keine Dienste mit offenem Personalbedarf."
 
-#: templates/core/home.html:59
+#: templates/core/home.html:69
 msgid "All duties"
 msgstr "Alle Dienste"
 
-#: templates/core/home.html:67 templates/duties/duty_form.html:3
+#: templates/core/home.html:77 templates/duties/duty_form.html:3
 #: templates/duties/duty_form.html:7 templates/duties/duty_list.html:10
 msgid "Add duty"
 msgstr "Dienst anlegen"
 
-#: templates/core/home.html:76
+#: templates/core/home.html:86
 msgid "Manage units"
 msgstr "Bereitschaften verwalten"
 
-#: templates/duties/_duty_table.html:6 templates/duties/duty_detail.html:60
+#: templates/duties/_duty_table.html:6 templates/duties/duty_detail.html:62
 msgid "When"
 msgstr "Wann"
 
@@ -2184,7 +2256,12 @@ msgstr "Wann"
 msgid "Your unit"
 msgstr "Deine Bereitschaft"
 
-#: templates/duties/_duty_table.html:27
+#: templates/duties/_duty_table.html:18
+#, python-format
+msgid "Report deadline: %(deadline)s"
+msgstr "Meldeschluss: %(deadline)s"
+
+#: templates/duties/_duty_table.html:30
 #, python-format
 msgid "%(counter)s reported"
 msgid_plural "%(counter)s reported"
@@ -2265,94 +2342,139 @@ msgid "This duty has been cancelled."
 msgstr "Dieser Dienst wurde abgesagt."
 
 #: templates/duties/duty_detail.html:52
-msgid "The duty has started. Helpers can no longer be reported or withdrawn."
+msgid ""
+"The duty has started. Helpers can no longer be reported; ask the dispatchers "
+"to withdraw a report."
 msgstr ""
-"Der Dienst hat begonnen. Helfer können nicht mehr gemeldet oder zurückgezogen"
-" werden."
+"Der Dienst hat begonnen. Helfer können nicht mehr gemeldet werden; um eine "
+"Meldung zurückzuziehen, frag bei der Disposition an."
 
-#: templates/duties/duty_detail.html:62
+#: templates/duties/duty_detail.html:54
+msgid ""
+"The report deadline is over. Helpers can no longer be reported; ask the "
+"dispatchers to withdraw a report."
+msgstr ""
+"Der Meldeschluss ist vorbei. Helfer können nicht mehr gemeldet werden; um "
+"eine Meldung zurückzuziehen, frag bei der Disposition an."
+
+#: templates/duties/duty_detail.html:64
+msgid "Report deadline"
+msgstr "Meldeschluss"
+
+#: templates/duties/duty_detail.html:65
+msgid "until the start"
+msgstr "bis zum Beginn"
+
+#: templates/duties/duty_detail.html:66
 msgid "Location"
 msgstr "Ort"
 
-#: templates/duties/duty_detail.html:64 templates/duties/duty_form.html:43
+#: templates/duties/duty_detail.html:68 templates/duties/duty_form.html:44
 msgid "Helpers needed"
 msgstr "Benötigte Helfer"
 
-#: templates/duties/duty_detail.html:75
+#: templates/duties/duty_detail.html:79
 msgid "Duty pay"
 msgstr "Dienstgeld"
 
-#: templates/duties/duty_detail.html:76
+#: templates/duties/duty_detail.html:80
 msgid "none"
 msgstr "keins"
 
-#: templates/duties/duty_detail.html:80
+#: templates/duties/duty_detail.html:84
 msgid "Source"
 msgstr "Quelle"
 
-#: templates/duties/duty_detail.html:94
+#: templates/duties/duty_detail.html:98
 msgid "Staffing"
 msgstr "Besetzung"
 
-#: templates/duties/duty_detail.html:96
+#: templates/duties/duty_detail.html:100
 msgid "helpers confirmed"
 msgstr "Helfer bestätigt"
 
-#: templates/duties/duty_detail.html:99
+#: templates/duties/duty_detail.html:103
 #, python-format
 msgid "%(counter)s report awaiting a decision"
 msgid_plural "%(counter)s reports awaiting a decision"
 msgstr[0] "%(counter)s Meldung wartet auf eine Entscheidung"
 msgstr[1] "%(counter)s Meldungen warten auf eine Entscheidung"
 
-#: templates/duties/duty_detail.html:125
+#: templates/duties/duty_detail.html:129
 msgid "Reported helpers"
 msgstr "Gemeldete Helfer"
 
-#: templates/duties/duty_detail.html:125
+#: templates/duties/duty_detail.html:129
 msgid "Helpers reported by your unit"
 msgstr "Von deiner Bereitschaft gemeldete Helfer"
 
-#: templates/duties/duty_detail.html:131
+#: templates/duties/duty_detail.html:135
 msgid "Confirm all pending"
 msgstr "Alle offenen bestätigen"
 
-#: templates/duties/duty_detail.html:134 templates/duties/report_add.html:3
+#: templates/duties/duty_detail.html:138 templates/duties/report_add.html:3
 #: templates/duties/report_add.html:5
 msgid "Add helpers"
 msgstr "Helfer eintragen"
 
-#: templates/duties/duty_detail.html:145
+#: templates/duties/duty_detail.html:149
 msgid "Position"
 msgstr "Position"
 
-#: templates/duties/duty_detail.html:146 templates/duties/duty_form.html:58
-#: templates/duties/duty_form.html:69
+#: templates/duties/duty_detail.html:150 templates/duties/duty_form.html:59
+#: templates/duties/duty_form.html:70
 msgid "Qualification"
 msgstr "Qualifikation"
 
-#: templates/duties/duty_detail.html:149
+#: templates/duties/duty_detail.html:153
 msgid "Reported by"
 msgstr "Gemeldet von"
 
-#: templates/duties/duty_detail.html:174
+#: templates/duties/duty_detail.html:170
+msgid "Withdrawal requested"
+msgstr "Rücknahme angefragt"
+
+#: templates/duties/duty_detail.html:185
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: templates/duties/duty_detail.html:180
+#: templates/duties/duty_detail.html:190
 msgid "Decline"
 msgstr "Ablehnen"
 
-#: templates/duties/duty_detail.html:185
+#: templates/duties/duty_detail.html:198
+msgid "Take back as requested"
+msgstr "Wie angefragt zurücknehmen"
+
+#: templates/duties/duty_detail.html:202
+msgid "Keep"
+msgstr "Behalten"
+
+#: templates/duties/duty_detail.html:205
+#, python-format
+msgid "Take back the report for %(name)s? The unit is told by email."
+msgstr ""
+"Die Meldung für %(name)s zurücknehmen? Die Bereitschaft wird per E-Mail "
+"informiert."
+
+#: templates/duties/duty_detail.html:208
+msgid "Take back"
+msgstr "Zurücknehmen"
+
+#: templates/duties/duty_detail.html:213
 #, python-format
 msgid "Withdraw the report for %(name)s?"
 msgstr "Die Meldung für %(name)s zurückziehen?"
 
-#: templates/duties/duty_detail.html:188
+#: templates/duties/duty_detail.html:216
 msgid "Withdraw"
 msgstr "Zurückziehen"
 
-#: templates/duties/duty_detail.html:199
+#: templates/duties/duty_detail.html:219
+msgid "Ask to withdraw"
+msgstr "Rücknahme anfragen"
+
+#: templates/duties/duty_detail.html:230
 msgid "No helpers reported yet."
 msgstr "Noch keine Helfer gemeldet."
 
@@ -2379,7 +2501,7 @@ msgstr ""
 "Neue Dienste werden als Entwurf gespeichert. Die Bereitschaften sehen einen "
 "Dienst erst nach der Freigabe und werden dann per E-Mail benachrichtigt."
 
-#: templates/duties/duty_form.html:45
+#: templates/duties/duty_form.html:46
 msgid ""
 "One row per qualification; units report each helper for one of these "
 "positions. Empty rows are ignored; after saving there is always one more."
@@ -2388,29 +2510,29 @@ msgstr ""
 "dieser Positionen. Leere Zeilen werden ignoriert; nach dem Speichern gibt es "
 "immer eine weitere."
 
-#: templates/duties/duty_form.html:50
+#: templates/duties/duty_form.html:51
 msgid "Manage qualifications"
 msgstr "Qualifikationen verwalten"
 
-#: templates/duties/duty_form.html:60 templates/duties/duty_form.html:80
+#: templates/duties/duty_form.html:61 templates/duties/duty_form.html:81
 msgid "Own rate in euros"
 msgstr "Eigener Satz in Euro"
 
-#: templates/duties/duty_form.html:61 templates/duties/duty_form.html:85
+#: templates/duties/duty_form.html:62 templates/duties/duty_form.html:86
 msgid "Remove"
 msgstr "Entfernen"
 
-#: templates/duties/duty_form.html:92
+#: templates/duties/duty_form.html:93
 msgid ""
 "The own rate is only used with duty pay; empty means the rate of the duty."
 msgstr ""
 "Der eigene Satz gilt nur mit Dienstgeld; leer bedeutet den Satz des Dienstes."
 
-#: templates/duties/duty_form.html:99
+#: templates/duties/duty_form.html:100
 msgid "Save as draft"
 msgstr "Als Entwurf speichern"
 
-#: templates/duties/duty_form.html:100
+#: templates/duties/duty_form.html:101
 msgid "Save and release"
 msgstr "Speichern und freigeben"
 
@@ -2453,14 +2575,18 @@ msgid "When:"
 msgstr "Wann:"
 
 #: templates/duties/email/_duty.txt:3
+msgid "Report deadline:"
+msgstr "Meldeschluss:"
+
+#: templates/duties/email/_duty.txt:4
 msgid "Where:"
 msgstr "Wo:"
 
-#: templates/duties/email/_duty.txt:4
+#: templates/duties/email/_duty.txt:5
 msgid "Helpers needed:"
 msgstr "Benötigte Helfer:"
 
-#: templates/duties/email/_duty.txt:6
+#: templates/duties/email/_duty.txt:7
 msgid "Duty pay:"
 msgstr "Dienstgeld:"
 
@@ -2531,8 +2657,11 @@ msgstr ""
 
 #: templates/duties/email/helpers_added_message.txt:5
 #: templates/duties/email/helpers_reported_message.txt:5
+#: templates/duties/email/report_taken_back_message.txt:4
 #: templates/duties/email/report_withdrawn_message.txt:4
 #: templates/duties/email/reports_decided_message.txt:5
+#: templates/duties/email/withdrawal_rejected_message.txt:4
+#: templates/duties/email/withdrawal_requested_message.txt:8
 #: templates/mailings/email/mailing_message.txt:5
 msgid "Duty:"
 msgstr "Dienst:"
@@ -2558,6 +2687,26 @@ msgid_plural "%(unit)s reported %(counter)s helpers for %(title)s"
 msgstr[0] "%(unit)s hat %(counter)s Helfer für %(title)s gemeldet"
 msgstr[1] "%(unit)s hat %(counter)s Helfer für %(title)s gemeldet"
 
+#: templates/duties/email/report_taken_back_message.txt:2
+#, python-format
+msgid "As requested, the dispatchers have withdrawn the report for %(name)s."
+msgstr ""
+"wie angefragt hat die Disposition die Meldung für %(name)s zurückgenommen."
+
+#: templates/duties/email/report_taken_back_message.txt:2
+#, python-format
+msgid ""
+"The dispatchers have withdrawn the report for %(name)s. %(name)s is no longer"
+" planned for this duty."
+msgstr ""
+"die Disposition hat die Meldung für %(name)s zurückgenommen. %(name)s ist für"
+" diesen Dienst nicht mehr eingeplant."
+
+#: templates/duties/email/report_taken_back_subject.txt:1
+#, python-format
+msgid "%(name)s withdrawn from %(title)s"
+msgstr "%(name)s von %(title)s zurückgenommen"
+
 #: templates/duties/email/report_withdrawn_message.txt:2
 #, python-format
 msgid "%(unit)s has withdrawn the report for %(name)s."
@@ -2578,6 +2727,47 @@ msgstr ""
 #, python-format
 msgid "Decision on your reports for %(title)s"
 msgstr "Entscheidung über deine Meldungen für %(title)s"
+
+#: templates/duties/email/withdrawal_rejected_message.txt:2
+#, python-format
+msgid ""
+"The dispatchers have not withdrawn the report for %(name)s: %(name)s stays "
+"planned for this duty. Please contact the dispatchers if this is a problem."
+msgstr ""
+"die Disposition hat die Meldung für %(name)s nicht zurückgenommen: %(name)s "
+"bleibt für diesen Dienst eingeplant. Wenn das ein Problem ist, melde dich "
+"bitte bei der Disposition."
+
+#: templates/duties/email/withdrawal_rejected_subject.txt:1
+#, python-format
+msgid "%(name)s stays on %(title)s"
+msgstr "%(name)s bleibt bei %(title)s eingeplant"
+
+#: templates/duties/email/withdrawal_requested_message.txt:2
+#, python-format
+msgid ""
+"%(requester)s (%(unit)s) asks you to withdraw the report for %(name)s "
+"(status: %(status)s)."
+msgstr ""
+"%(requester)s (%(unit)s) bittet dich, die Meldung für %(name)s zurückzunehmen"
+" (Status: %(status)s)."
+
+#: templates/duties/email/withdrawal_requested_message.txt:4
+msgid "Reason:"
+msgstr "Grund:"
+
+#: templates/duties/email/withdrawal_requested_message.txt:6
+msgid ""
+"On the page of the duty you can withdraw the report or keep it; the unit is "
+"told either way."
+msgstr ""
+"Auf der Seite des Dienstes kannst du die Meldung zurücknehmen oder behalten; "
+"die Bereitschaft wird in beiden Fällen informiert."
+
+#: templates/duties/email/withdrawal_requested_subject.txt:1
+#, python-format
+msgid "%(unit)s asks to withdraw %(name)s from %(title)s"
+msgstr "%(unit)s bittet um Rücknahme von %(name)s bei %(title)s"
 
 #: templates/duties/qualification_list.html:9
 msgid ""
@@ -2626,6 +2816,27 @@ msgstr "Melden"
 #: templates/duties/report_form.html:20
 msgid "Report and add more"
 msgstr "Melden und weitere hinzufügen"
+
+#: templates/duties/withdrawal_request_form.html:3
+#: templates/duties/withdrawal_request_form.html:7
+msgid "Ask to withdraw a report"
+msgstr "Rücknahme einer Meldung anfragen"
+
+#: templates/duties/withdrawal_request_form.html:12
+#, python-format
+msgid ""
+"The report for <strong>%(name)s</strong> (%(status)s) can only be withdrawn "
+"by the dispatchers now. They are told by email and either withdraw it or keep"
+" it; you will be notified either way. Until then, %(name)s stays planned."
+msgstr ""
+"Die Meldung für <strong>%(name)s</strong> (%(status)s) kann jetzt nur noch "
+"die Disposition zurücknehmen. Die Disposition bekommt eine E-Mail und nimmt "
+"die Meldung zurück oder behält sie; du bekommst in beiden Fällen Bescheid. "
+"Bis dahin bleibt %(name)s eingeplant."
+
+#: templates/duties/withdrawal_request_form.html:21
+msgid "Ask the dispatchers"
+msgstr "Bei der Disposition anfragen"
 
 #: templates/lifecycle/_history.html:22
 msgid "No changes recorded yet."

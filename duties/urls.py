@@ -27,4 +27,11 @@ urlpatterns = [
         name="report_decline",
     ),
     path("reports/<int:pk>/withdraw/", views.report_withdraw, name="report_withdraw"),
+    path(
+        "reports/<int:pk>/request-withdrawal/",
+        views.report_request_withdrawal,
+        name="report_request_withdrawal",
+    ),
+    path("reports/<int:pk>/take-back/", views.report_take_back, name="report_take_back"),
+    path("reports/<int:pk>/keep/", views.report_reject_withdrawal, name="report_reject_withdrawal"),
 ]

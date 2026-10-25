@@ -7,6 +7,26 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Running without Caddy behind your own reverse proxy or a Cloudflare Tunnel:
+  `COMPOSE_FILE=compose.yaml:compose.tunnel.yaml` in `.env` serves the app on
+  `127.0.0.1:8080`; the client IP for the sign-in rate limits comes from
+  `CF-Connecting-IP` (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER`).
+
+### Added
+
+- Optional report deadline per duty: afterwards units can no longer report helpers or
+  withdraw reports themselves (#24).
+- Requests to withdraw: units ask the dispatchers to withdraw a confirmed report (or any
+  report after the deadline), with an optional reason; the dispatchers get an email and
+  take the report back or keep it, and the unit is told either way.
+
+### Changed
+
+- Units can only withdraw reports themselves until they are confirmed; afterwards only
+  the dispatchers can. Dispatchers take back confirmed reports instead of declining them.
+
 ## [0.2.0] – 2026-10-25
 
 When updating from 0.1.0: admins and dispatchers have to set up two-factor

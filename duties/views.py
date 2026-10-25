@@ -20,6 +20,7 @@ from .forms import (
     HelperUnitForm,
     QualificationFormSet,
     ReportFormSet,
+    WithdrawalRequestForm,
 )
 from .models import Duty, Report
 
@@ -57,14 +58,18 @@ def duty_detail(request, pk):
         pk=pk,
     )
     reports = [
-        (
-            report,
-            permissions.can_withdraw_report(request.user, report),
-            permissions.can_decide_report(request.user, report),
-        )
+        {
+            "report": report,
+            "can_withdraw": permissions.can_withdraw_report(request.user, report),
+            "can_request_withdrawal": permissions.can_request_withdrawal(request.user, report),
+            "can_decide": permissions.can_decide_report(request.user, report),
+            "can_take_back": permissions.can_take_back_report(request.user, report),
+        }
         for report in permissions.visible_reports(request.user)
         .filter(duty=duty)
-        .select_related("duty", "unit", "reported_by", "position__qualification")
+        .select_related(
+            "duty", "unit", "reported_by", "withdrawal_requested_by", "position__qualification"
+        )
     ]
     positions = list(
         duty.positions.select_related("qualification").annotate(
@@ -342,9 +347,9 @@ def report_withdraw(request, pk):
     if not permissions.can_withdraw_report(request.user, report):
         raise PermissionDenied
     now = timezone.now()
-    # Only if still active: a decision may have been made in the meantime, which is fine,
-    # but a second click must not notify twice.
-    if Report.objects.filter(pk=report.pk, status__in=Report.ACTIVE).update(
+    # Only if still not confirmed: a second click must not notify twice, and a report
+    # confirmed in the meantime can only be withdrawn by the dispatchers.
+    if Report.objects.filter(pk=report.pk, status=Report.Status.REPORTED).update(
         status=Report.Status.WITHDRAWN, withdrawn_at=now
     ):
         report.status = Report.Status.WITHDRAWN
@@ -357,22 +362,124 @@ def report_withdraw(request, pk):
         )
         messages.success(request, _("Report for %(name)s withdrawn.") % {"name": report.name})
         notifications.report_withdrawn(request, report)
+    else:
+        report.refresh_from_db(fields=["status"])
+        if report.status == Report.Status.CONFIRMED:
+            messages.error(
+                request,
+                _("This report has been confirmed meanwhile; ask the dispatchers to withdraw it."),
+            )
     return redirect(report.duty)
+
+
+def report_request_withdrawal(request, pk):
+    """Units ask the dispatchers to withdraw a confirmed report (or one after the deadline)."""
+    report = _visible_report(request, pk)
+    if not permissions.can_request_withdrawal(request.user, report):
+        raise PermissionDenied
+    # The reason is optional, so the form may arrive empty.
+    form = WithdrawalRequestForm(
+        request.POST if request.method == "POST" else None, instance=report
+    )
+    if request.method == "POST" and form.is_valid():
+        now = timezone.now()
+        note = form.cleaned_data["withdrawal_note"]
+        # Only once, and only while the report is still active.
+        if Report.objects.filter(
+            pk=report.pk, status__in=Report.ACTIVE, withdrawal_requested_at=None
+        ).update(
+            withdrawal_requested_at=now,
+            withdrawal_requested_by=request.user,
+            withdrawal_note=note,
+        ):
+            report.withdrawal_requested_at = now
+            report.withdrawal_requested_by = request.user
+            report.withdrawal_note = note
+            history.record(
+                report,
+                history.Action.WITHDRAWAL_REQUESTED,
+                request.user,
+                history.scope_for_duty(report.duty_id),
+                [history.change("withdrawal_note", "", note)] if note else [],
+            )
+            messages.success(
+                request,
+                _("The dispatchers have been asked to withdraw the report for %(name)s.")
+                % {"name": report.name},
+            )
+            notifications.withdrawal_requested(request, report)
+        return redirect(report.duty)
+    return render(request, "duties/withdrawal_request_form.html", {"report": report, "form": form})
+
+
+@require_POST
+def report_take_back(request, pk):
+    """Dispatchers withdraw a report: a confirmed one, or one the unit asked to withdraw."""
+    _dispatcher_only(request)
+    report = _visible_report(request, pk)
+    if not permissions.can_take_back_report(request.user, report):
+        messages.error(request, _("This report can no longer be changed."))
+        return redirect(report.duty)
+    requested = report.withdrawal_requested
+    now = timezone.now()
+    if Report.objects.filter(pk=report.pk, status__in=Report.ACTIVE).update(
+        status=Report.Status.WITHDRAWN, withdrawn_at=now
+    ):
+        report.status = Report.Status.WITHDRAWN
+        report.withdrawn_at = now
+        history.record(
+            report,
+            history.Action.WITHDRAWN,
+            request.user,
+            history.scope_for_duty(report.duty_id),
+        )
+        messages.success(request, _("Report for %(name)s withdrawn.") % {"name": report.name})
+        notifications.report_taken_back(request, report, requested)
+    return redirect(report.duty)
+
+
+@require_POST
+def report_reject_withdrawal(request, pk):
+    """Dispatchers keep a report that the unit asked to withdraw."""
+    _dispatcher_only(request)
+    report = _visible_report(request, pk)
+    if Report.objects.filter(
+        pk=report.pk, status__in=Report.ACTIVE, withdrawal_requested_at__isnull=False
+    ).update(withdrawal_requested_at=None, withdrawal_requested_by=None, withdrawal_note=""):
+        history.record(
+            report,
+            history.Action.WITHDRAWAL_REJECTED,
+            request.user,
+            history.scope_for_duty(report.duty_id),
+        )
+        messages.success(
+            request,
+            _("%(name)s stays on the duty; the unit has been told.") % {"name": report.name},
+        )
+        notifications.withdrawal_rejected(request, report)
+    return redirect(report.duty)
+
+
+# A decision changes these statuses; confirmed reports are taken back instead of declined.
+DECIDABLE = {
+    Report.Status.CONFIRMED: [Report.Status.REPORTED, Report.Status.DECLINED],
+    Report.Status.DECLINED: [Report.Status.REPORTED],
+}
 
 
 def _decide(request, reports, status):
     """Confirms or declines the reports; returns those that actually changed.
 
-    Reports withdrawn in the meantime stay withdrawn.
+    Reports withdrawn or confirmed in the meantime stay so.
     """
     now = timezone.now()
+    values = {"status": status, "decided_at": now, "decided_by": request.user}
+    if status == Report.Status.DECLINED:
+        # A request to withdraw a declined report is settled.
+        values.update(withdrawal_requested_at=None, withdrawal_requested_by=None)
     changed = []
     for report in reports:
-        if (
-            Report.objects.filter(pk=report.pk)
-            .exclude(status__in=[status, Report.Status.WITHDRAWN])
-            .update(status=status, decided_at=now, decided_by=request.user)
-        ):
+        if Report.objects.filter(pk=report.pk, status__in=DECIDABLE[status]).update(**values):
             report.status = status
             report.decided_at = now
             report.decided_by = request.user

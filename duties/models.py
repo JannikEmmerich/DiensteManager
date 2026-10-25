@@ -94,6 +94,15 @@ class Duty(models.Model):
     location = models.CharField(_("location"), max_length=200, blank=True)
     starts_at = models.DateTimeField(_("start"))
     ends_at = models.DateTimeField(_("end"))
+    report_deadline = models.DateTimeField(
+        _("report deadline"),
+        null=True,
+        blank=True,
+        help_text=_(
+            "Optional. Afterwards, units can no longer report helpers or withdraw reports "
+            "themselves; they can ask you to withdraw them. Without it: until the start."
+        ),
+    )
     helpers_needed = models.PositiveSmallIntegerField(
         _("helpers needed"), validators=[MinValueValidator(1)]
     )
@@ -176,8 +185,20 @@ class Duty(models.Model):
         return self.ends_at < timezone.now()
 
     @property
+    def reports_close_at(self):
+        """Until when units report helpers and withdraw reports: the deadline or the start."""
+        if self.report_deadline and self.report_deadline < self.starts_at:
+            return self.report_deadline
+        return self.starts_at
+
+    @property
+    def report_deadline_passed(self):
+        """The deadline is over, but the duty has not started yet."""
+        return self.reports_close_at <= timezone.now() < self.starts_at
+
+    @property
     def is_open_for_reports(self):
-        return self.status == self.Status.RELEASED and not self.has_started
+        return self.status == self.Status.RELEASED and timezone.now() < self.reports_close_at
 
     @property
     def duration_hours(self):
@@ -324,7 +345,21 @@ class Report(models.Model):
     )
     decided_at = models.DateTimeField(_("decided at"), null=True, blank=True)
     withdrawn_at = models.DateTimeField(_("withdrawn at"), null=True, blank=True)
-    # Data lifecycle: name, qualification and note are erased after the retention period.
+    # Once a report is confirmed (or the report deadline is over), the unit can only ask
+    # the dispatchers to withdraw it.
+    withdrawal_requested_at = models.DateTimeField(
+        _("withdrawal requested at"), null=True, blank=True
+    )
+    withdrawal_requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("withdrawal requested by"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    withdrawal_note = models.CharField(_("reason for the withdrawal"), max_length=300, blank=True)
+    # Data lifecycle: name, qualification and notes are erased after the retention period.
     anonymized_at = models.DateTimeField(_("anonymised at"), null=True, blank=True)
 
     class Meta:
@@ -361,9 +396,36 @@ class Report(models.Model):
         return self.duty.pay_for(hours, self.pay_rate)
 
     @property
+    def withdrawal_requested(self):
+        return self.is_active and self.withdrawal_requested_at is not None
+
+    @property
     def can_be_withdrawn(self):
-        return self.is_active and self.duty.is_open_for_reports
+        """By the unit itself: until it is confirmed, and while reports are open."""
+        return self.status == self.Status.REPORTED and self.duty.is_open_for_reports
+
+    @property
+    def can_request_withdrawal(self):
+        """Afterwards the unit asks the dispatchers, until the duty has ended."""
+        return (
+            self.is_active
+            and not self.can_be_withdrawn
+            and self.withdrawal_requested_at is None
+            and self.duty.status == Duty.Status.RELEASED
+            and not self.duty.is_past
+        )
 
     @property
     def can_be_decided(self):
-        return self.status != self.Status.WITHDRAWN and self.duty.status == Duty.Status.RELEASED
+        """Confirm or decline: reports that are not confirmed (nor withdrawn) yet."""
+        return (
+            self.status in (self.Status.REPORTED, self.Status.DECLINED)
+            and self.duty.status == Duty.Status.RELEASED
+        )
+
+    @property
+    def can_be_taken_back(self):
+        """By the dispatchers: confirmed reports, and those the unit asked to withdraw."""
+        return self.duty.status == Duty.Status.RELEASED and (
+            self.status == self.Status.CONFIRMED or self.withdrawal_requested
+        )

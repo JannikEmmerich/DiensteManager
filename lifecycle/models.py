@@ -23,6 +23,8 @@ class HistoryEntry(models.Model):
         CONFIRMED = "confirmed", _("confirmed")
         DECLINED = "declined", _("declined")
         WITHDRAWN = "withdrawn", _("withdrawn")
+        WITHDRAWAL_REQUESTED = "withdrawal_requested", _("withdrawal requested")
+        WITHDRAWAL_REJECTED = "withdrawal_rejected", _("withdrawal refused")
         PAID = "paid", _("marked as paid")
         VOIDED = "voided", _("voided")  # a billing was cancelled
 
