@@ -49,7 +49,9 @@
     {% elif duty.status == "cancelled" %}
         <div class="alert alert-danger">{% translate "This duty has been cancelled." %}</div>
     {% elif duty.has_started and not can.manage_duties %}
-        <div class="alert alert-info">{% translate "The duty has started. Helpers can no longer be reported or withdrawn." %}</div>
+        <div class="alert alert-info">{% translate "The duty has started. Helpers can no longer be reported; ask the dispatchers to withdraw a report." %}</div>
+    {% elif duty.report_deadline_passed and not can.manage_duties %}
+        <div class="alert alert-info">{% translate "The report deadline is over. Helpers can no longer be reported; ask the dispatchers to withdraw a report." %}</div>
     {% endif %}
 
     <div class="row g-4 mb-4">
@@ -59,6 +61,8 @@
                     <dl class="row mb-0">
                         <dt class="col-sm-4">{% translate "When" %}</dt>
                         <dd class="col-sm-8">{{ duty|period }}</dd>
+                        <dt class="col-sm-4">{% translate "Report deadline" %}</dt>
+                        <dd class="col-sm-8">{% if duty.report_deadline %}{{ duty.report_deadline|date:"SHORT_DATETIME_FORMAT" }}{% else %}{% translate "until the start" %}{% endif %}</dd>
                         <dt class="col-sm-4">{% translate "Location" %}</dt>
                         <dd class="col-sm-8">{{ duty.location|default:"–" }}</dd>
                         <dt class="col-sm-4">{% translate "Helpers needed" %}</dt>
@@ -151,46 +155,73 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for report, can_withdraw, can_decide in reports %}
-                        <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
-                            {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
-                            <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
-                            {% if show_positions %}<td class="small">{{ report.position.label|default:"–" }}</td>{% endif %}
-                            <td>{{ report.qualification|default:"–" }}</td>
-                            <td class="small">{{ report.note|default:"–" }}</td>
-                            <td>
-                                <span class="badge {% if report.status == 'confirmed' %}text-bg-success{% elif report.status == 'reported' %}text-bg-warning{% elif report.status == 'declined' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ report.get_status_display }}</span>
-                            </td>
-                            <td class="small">
-                                {{ report.reported_by|default:"–" }}
-                                <div class="text-body-secondary">{{ report.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex gap-1">
-                                    {% if can_decide %}
-                                        {% if report.status != "confirmed" %}
+                    {% for row in reports %}
+                        {% with report=row.report %}
+                            <tr{% if not report.is_active %} class="text-body-secondary"{% endif %}>
+                                {% if can.manage_duties %}<td>{{ report.unit }}</td>{% endif %}
+                                <td>{% if report.anonymized_at %}<em>{% translate "(anonymised)" %}</em>{% else %}{{ report.name }}{% endif %}</td>
+                                {% if show_positions %}<td class="small">{{ report.position.label|default:"–" }}</td>{% endif %}
+                                <td>{{ report.qualification|default:"–" }}</td>
+                                <td class="small">{{ report.note|default:"–" }}</td>
+                                <td>
+                                    <span class="badge {% if report.status == 'confirmed' %}text-bg-success{% elif report.status == 'reported' %}text-bg-warning{% elif report.status == 'declined' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ report.get_status_display }}</span>
+                                    {% if report.withdrawal_requested %}
+                                        <div class="small mt-1">
+                                            <span class="badge text-bg-warning">{% translate "Withdrawal requested" %}</span>
+                                            <div class="text-body-secondary">{{ report.withdrawal_requested_by|default:"–" }}, {{ report.withdrawal_requested_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+                                            {% if report.withdrawal_note %}<div>{{ report.withdrawal_note }}</div>{% endif %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="small">
+                                    {{ report.reported_by|default:"–" }}
+                                    <div class="text-body-secondary">{{ report.created_at|date:"SHORT_DATETIME_FORMAT" }}</div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex flex-wrap justify-content-end gap-1">
+                                        {% if row.can_decide %}
                                             <form method="post" action="{% url 'report_confirm' report.pk %}">
                                                 {% csrf_token %}
                                                 <button class="btn btn-sm btn-outline-success" type="submit">{% translate "Confirm" %}</button>
                                             </form>
+                                            {% if report.status == "reported" %}
+                                                <form method="post" action="{% url 'report_decline' report.pk %}">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Decline" %}</button>
+                                                </form>
+                                            {% endif %}
                                         {% endif %}
-                                        {% if report.status != "declined" %}
-                                            <form method="post" action="{% url 'report_decline' report.pk %}">
+                                        {% if row.can_take_back %}
+                                            {% if report.withdrawal_requested %}
+                                                <form method="post" action="{% url 'report_take_back' report.pk %}">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Take back as requested" %}</button>
+                                                </form>
+                                                <form method="post" action="{% url 'report_reject_withdrawal' report.pk %}">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-sm btn-outline-secondary" type="submit">{% translate "Keep" %}</button>
+                                                </form>
+                                            {% else %}
+                                                {% blocktranslate trimmed with name=report.name asvar confirm_text %}Take back the report for {{ name }}? The unit is told by email.{% endblocktranslate %}
+                                                <form method="post" action="{% url 'report_take_back' report.pk %}" data-confirm="{{ confirm_text }}">
+                                                    {% csrf_token %}
+                                                    <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Take back" %}</button>
+                                                </form>
+                                            {% endif %}
+                                        {% endif %}
+                                        {% if row.can_withdraw %}
+                                            {% blocktranslate trimmed with name=report.name asvar confirm_text %}Withdraw the report for {{ name }}?{% endblocktranslate %}
+                                            <form method="post" action="{% url 'report_withdraw' report.pk %}" data-confirm="{{ confirm_text }}">
                                                 {% csrf_token %}
-                                                <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Decline" %}</button>
+                                                <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Withdraw" %}</button>
                                             </form>
+                                        {% elif row.can_request_withdrawal %}
+                                            <a class="btn btn-sm btn-outline-danger" href="{% url 'report_request_withdrawal' report.pk %}">{% translate "Ask to withdraw" %}</a>
                                         {% endif %}
-                                    {% endif %}
-                                    {% if can_withdraw %}
-                                        {% blocktranslate trimmed with name=report.name asvar confirm_text %}Withdraw the report for {{ name }}?{% endblocktranslate %}
-                                        <form method="post" action="{% url 'report_withdraw' report.pk %}" data-confirm="{{ confirm_text }}">
-                                            {% csrf_token %}
-                                            <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Withdraw" %}</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endwith %}
                     {% endfor %}
                 </tbody>
             </table>

@@ -24,6 +24,16 @@
             <a class="alert-link" href="{% url 'duty_list' %}">{% translate "Go to the duties" %}</a>
         </div>
     {% endif %}
+    {% if withdrawal_request_count %}
+        <div class="alert alert-warning">
+            {% blocktranslate trimmed count counter=withdrawal_request_count %}
+                {{ counter }} unit asks you to withdraw a report.
+            {% plural %}
+                Units ask you to withdraw {{ counter }} reports.
+            {% endblocktranslate %}
+            <a class="alert-link" href="{% url 'duty_list' %}">{% translate "Go to the duties" %}</a>
+        </div>
+    {% endif %}
     {% if draft_count %}
         <div class="alert alert-secondary">
             {% blocktranslate trimmed count counter=draft_count %}

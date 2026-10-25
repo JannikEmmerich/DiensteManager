@@ -105,14 +105,18 @@ def test_history_of_reports(client, dispatcher, member, unit):
         },
     )
     client.force_login(member)
-    client.post(reverse("report_withdraw", args=[report.pk]))
+    client.post(reverse("report_request_withdrawal", args=[report.pk]), {"withdrawal_note": "Ill"})
+    client.force_login(dispatcher)
+    client.post(reverse("report_take_back", args=[report.pk]))
     entries = _entries(history.scope_for_duty(duty.pk))
     assert [(e.object_repr, e.action, e.user_repr) for e in entries] == [
         ("Mia", "reported", str(member)),
         ("Mia", "confirmed", str(dispatcher)),
         ("Erik", "added", str(dispatcher)),
-        ("Mia", "withdrawn", str(member)),
+        ("Mia", "withdrawal_requested", str(member)),
+        ("Mia", "withdrawn", str(dispatcher)),
     ]
+    assert entries[3].changes == [{"field": "withdrawal_note", "old": "", "new": "Ill"}]
 
 
 def test_duty_history_is_for_dispatchers_only(client, dispatcher, member):

@@ -26,5 +26,11 @@ def home(request):
             duty__status=Duty.Status.RELEASED,
             duty__ends_at__gte=timezone.now(),
         ).count()
+        context["withdrawal_request_count"] = Report.objects.filter(
+            status__in=Report.ACTIVE,
+            withdrawal_requested_at__isnull=False,
+            duty__status=Duty.Status.RELEASED,
+            duty__ends_at__gte=timezone.now(),
+        ).count()
         context["draft_count"] = Duty.objects.filter(status=Duty.Status.DRAFT).upcoming().count()
     return render(request, "core/home.html", context)
