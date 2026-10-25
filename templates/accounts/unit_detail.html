@@ -16,6 +16,8 @@
             {% endif %}
             {% if can_invite_here %}
                 <a class="btn btn-primary" href="{% url 'invitation_create' %}?unit={{ unit.pk }}&amp;next={{ request.path|urlencode }}">{% translate "Invite a person" %}</a>
+            {% elif can.add_accounts %}
+                <a class="btn btn-primary" href="{% url 'account_create' %}?unit={{ unit.pk }}">{% translate "Add account" %}</a>
             {% endif %}
         </div>
     </div>
@@ -27,6 +29,7 @@
         <p class="text-body-secondary mb-4">{% translate "No accounts yet." %}</p>
     {% endif %}
 
+    {% if not DEMO_MODE %}
     <h2 class="h5">{% translate "Open invitations" %}</h2>
     {% if invitations %}
         <div class="table-responsive">
@@ -49,5 +52,6 @@
         </div>
     {% else %}
         <p class="text-body-secondary">{% translate "No open invitations." %}</p>
+    {% endif %}
     {% endif %}
 {% endblock content %}

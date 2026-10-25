@@ -81,6 +81,8 @@
                 {% endif %}
                 {% if can.invite %}
                     <a class="list-group-item list-group-item-action" href="{% url 'invitation_create' %}">{% translate "Invite a person" %}</a>
+                {% elif can.add_accounts %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'account_create' %}">{% translate "Add account" %}</a>
                 {% endif %}
                 {% if can.manage_units %}
                     <a class="list-group-item list-group-item-action" href="{% url 'unit_list' %}">{% translate "Manage units" %}</a>

@@ -21,13 +21,14 @@ from django.views.i18n import set_language as django_set_language
 from . import invitations, permissions
 from .forms import (
     AcceptInvitationForm,
+    AccountCreateForm,
     AccountForm,
     InvitationForm,
     ProfileForm,
     RoleForm,
     UnitForm,
 )
-from .models import Unit, User
+from .models import Role, Unit, User
 
 logger = logging.getLogger(__name__)
 
@@ -241,9 +242,8 @@ def unit_detail(request, pk):
             "accounts": accounts,
             "role_choices": RoleForm.base_fields["role"].choices,
             "invitations": pending,
-            "can_invite_here": permissions.invitable_units(request.user)
-            .filter(pk=unit.pk)
-            .exists(),
+            "can_invite_here": permissions.can_invite(request.user)
+            and permissions.invitable_units(request.user).filter(pk=unit.pk).exists(),
         },
     )
 
@@ -292,6 +292,20 @@ def account_edit(request, pk):
         messages.success(request, _("Saved."))
         return redirect(account.unit or "unit_list")
     return render(request, "accounts/account_form.html", {"form": form, "account": target})
+
+
+def account_create(request):
+    """Admins add an account with a password in demo mode, where no emails are sent."""
+    if not permissions.can_add_accounts(request.user):
+        raise PermissionDenied
+    unit_id = request.GET.get("unit", "")
+    unit = Unit.objects.filter(pk=unit_id).first() if unit_id.isdigit() else None
+    form = AccountCreateForm(request.POST or None, initial={"unit": unit, "role": Role.MEMBER})
+    if request.method == "POST" and form.is_valid():
+        account = form.save()
+        messages.success(request, _("Account for %(email)s added.") % {"email": account.email})
+        return redirect(account.unit or "unit_list")
+    return render(request, "accounts/account_create.html", {"form": form, "unit": unit})
 
 
 @require_POST

@@ -7,6 +7,18 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Demo mode: admins add accounts directly with a password ("Add account" on a unit's
+  page, under *Units* and on the overview) instead of inviting; nobody invites in demo
+  mode. The strip under the navigation links to the inbox.
+
+### Fixed
+
+- The navigation of dispatchers and admins no longer runs off the screen on medium-sized
+  screens (e.g. tablets, small laptops), where the inbox or the account menu could end up
+  out of sight; its items wrap onto a second line instead.
+
 ## [0.6.0] – 2026-10-25
 
 When updating from 0.5.0 nothing needs to be done; the database is migrated when the

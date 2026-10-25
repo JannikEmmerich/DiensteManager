@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 16:02+0100\n"
+"POT-Creation-Date: 2026-10-25 16:39+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -162,7 +162,7 @@ msgstr ""
 
 #: accounts/forms.py:216 templates/accounts/_account_table.html:9
 #: templates/accounts/invitation_list.html:15
-#: templates/accounts/profile.html:12 templates/accounts/unit_detail.html:37
+#: templates/accounts/profile.html:12 templates/accounts/unit_detail.html:40
 #: templates/mailings/mailing_detail.html:35
 msgid "Role"
 msgstr "Rolle"
@@ -346,7 +346,7 @@ msgstr "Einladung"
 msgid "invitations"
 msgstr "Einladungen"
 
-#: accounts/views.py:53
+#: accounts/views.py:54
 #, python-format
 msgid ""
 "The invitation for %(email)s has been saved, but the email could not be "
@@ -355,34 +355,34 @@ msgstr ""
 "Die Einladung an %(email)s ist gespeichert, aber die E-Mail konnte nicht "
 "verschickt werden. Bitte später „Erneut senden“ verwenden."
 
-#: accounts/views.py:59
+#: accounts/views.py:60
 #, python-format
 msgid "Invitation sent to %(email)s."
 msgstr "Einladung an %(email)s verschickt."
 
-#: accounts/views.py:104
+#: accounts/views.py:105
 msgid "Welcome! Your account is ready."
 msgstr "Willkommen! Dein Konto ist eingerichtet."
 
-#: accounts/views.py:168
+#: accounts/views.py:169
 msgid "This invitation can no longer be resent."
 msgstr "Diese Einladung kann nicht mehr erneut gesendet werden."
 
-#: accounts/views.py:179
+#: accounts/views.py:180
 #, python-format
 msgid "Invitation for %(email)s revoked."
 msgstr "Einladung an %(email)s widerrufen."
 
-#: accounts/views.py:182
+#: accounts/views.py:183
 msgid "This invitation can no longer be revoked."
 msgstr "Diese Einladung kann nicht mehr widerrufen werden."
 
-#: accounts/views.py:211
+#: accounts/views.py:212
 #, python-format
 msgid "Unit “%(name)s” created."
 msgstr "Bereitschaft „%(name)s“ angelegt."
 
-#: accounts/views.py:223 accounts/views.py:292 accounts/views.py:323
+#: accounts/views.py:224 accounts/views.py:292 accounts/views.py:338
 #: duties/views.py:232 duties/views.py:343 duties/views.py:730
 msgid "Saved."
 msgstr "Gespeichert."
@@ -396,12 +396,17 @@ msgstr "Bitte eine Rolle auswählen."
 msgid "%(account)s is now: %(role)s."
 msgstr "%(account)s ist jetzt: %(role)s."
 
-#: accounts/views.py:306
+#: accounts/views.py:307
+#, python-format
+msgid "Account for %(email)s added."
+msgstr "Konto für %(email)s angelegt."
+
+#: accounts/views.py:321
 #, python-format
 msgid "Access for %(account)s unblocked."
 msgstr "Zugang für %(account)s freigegeben."
 
-#: accounts/views.py:308
+#: accounts/views.py:323
 #, python-format
 msgid "Access for %(account)s blocked."
 msgstr "Zugang für %(account)s gesperrt."
@@ -1681,7 +1686,7 @@ msgstr "Name"
 #: templates/accounts/_account_table.html:8
 #: templates/accounts/_profile_nav.html:6
 #: templates/accounts/invitation_list.html:14
-#: templates/accounts/profile.html:10 templates/accounts/unit_detail.html:36
+#: templates/accounts/profile.html:10 templates/accounts/unit_detail.html:39
 #: templates/mailings/mailing_detail.html:33
 msgid "Email address"
 msgstr "E-Mail-Adresse"
@@ -1746,7 +1751,7 @@ msgstr "Widerrufen"
 
 #: templates/accounts/_profile_nav.html:4 templates/accounts/profile.html:3
 #: templates/accounts/profile.html:5 templates/core/_navbar.html:68
-#: templates/core/home.html:91
+#: templates/core/home.html:93
 msgid "My account"
 msgstr "Mein Konto"
 
@@ -1817,6 +1822,39 @@ msgstr "oder mit eigenem Passwort"
 msgid "Create account"
 msgstr "Konto anlegen"
 
+#: templates/accounts/account_create.html:3
+#: templates/accounts/account_create.html:7
+#: templates/accounts/account_create.html:31
+#: templates/accounts/unit_detail.html:20 templates/accounts/unit_list.html:32
+#: templates/core/home.html:85
+msgid "Add account"
+msgstr "Konto anlegen"
+
+#: templates/accounts/account_create.html:9
+msgid ""
+"In the demo no invitations are sent: the account can sign in with this email "
+"address and password right away."
+msgstr ""
+"In der Demo werden keine Einladungen verschickt: Das Konto kann sich sofort "
+"mit dieser E-Mail-Adresse und diesem Passwort anmelden."
+
+#: templates/accounts/account_create.html:27
+#: templates/accounts/account_form.html:27 templates/accounts/profile.html:28
+msgid "Email notifications"
+msgstr "Benachrichtigungen per E-Mail"
+
+#: templates/accounts/account_create.html:32
+#: templates/accounts/account_form.html:32
+#: templates/accounts/invitation_form.html:22
+#: templates/accounts/unit_form.html:12
+#: templates/billing/bank_account_form.html:18
+#: templates/billing/billing_create.html:94 templates/duties/duty_form.html:100
+#: templates/duties/report_add.html:25 templates/duties/report_form.html:22
+#: templates/duties/withdrawal_request_form.html:22
+#: templates/mailings/mailing_form.html:41
+msgid "Cancel"
+msgstr "Abbrechen"
+
 #: templates/accounts/account_form.html:3
 #: templates/accounts/account_form.html:7
 msgid "Edit account"
@@ -1830,10 +1868,6 @@ msgstr ""
 "Als Admin kannst du alle Daten dieses Kontos ändern. Eine neue E-Mail-Adresse"
 " gilt als bestätigt; die Person meldet sich ab sofort damit an."
 
-#: templates/accounts/account_form.html:27 templates/accounts/profile.html:28
-msgid "Email notifications"
-msgstr "Benachrichtigungen per E-Mail"
-
 #: templates/accounts/account_form.html:31 templates/accounts/profile.html:32
 #: templates/accounts/unit_form.html:11
 #: templates/billing/bank_account_form.html:17
@@ -1842,17 +1876,6 @@ msgstr "Benachrichtigungen per E-Mail"
 #: templates/duties/qualification_list.html:27
 msgid "Save"
 msgstr "Speichern"
-
-#: templates/accounts/account_form.html:32
-#: templates/accounts/invitation_form.html:22
-#: templates/accounts/unit_form.html:12
-#: templates/billing/bank_account_form.html:18
-#: templates/billing/billing_create.html:94 templates/duties/duty_form.html:100
-#: templates/duties/report_add.html:25 templates/duties/report_form.html:22
-#: templates/duties/withdrawal_request_form.html:22
-#: templates/mailings/mailing_form.html:41
-msgid "Cancel"
-msgstr "Abbrechen"
 
 #: templates/accounts/email/invitation_message.txt:1
 #: templates/duties/email/_greeting.txt:1
@@ -1955,14 +1978,14 @@ msgid "Invitations"
 msgstr "Einladungen"
 
 #: templates/accounts/invitation_list.html:16
-#: templates/accounts/unit_detail.html:38
+#: templates/accounts/unit_detail.html:41
 #: templates/billing/billing_list.html:50 templates/billing/unit_pay.html:67
 #: templates/duties/_duty_table.html:10 templates/duties/duty_detail.html:164
 msgid "Status"
 msgstr "Status"
 
 #: templates/accounts/invitation_list.html:17
-#: templates/accounts/unit_detail.html:39
+#: templates/accounts/unit_detail.html:42
 msgid "Invited by"
 msgstr "Eingeladen von"
 
@@ -2050,7 +2073,7 @@ msgstr "Einrichten"
 
 #: templates/accounts/unit_detail.html:9 templates/billing/unit_pay.html:3
 #: templates/billing/unit_pay.html:6 templates/core/_navbar.html:42
-#: templates/core/home.html:89
+#: templates/core/home.html:91
 msgid "Duty pay overview"
 msgstr "Dienstgelder"
 
@@ -2061,19 +2084,19 @@ msgstr "Dienstgelder"
 msgid "Write an email"
 msgstr "E-Mail schreiben"
 
-#: templates/accounts/unit_detail.html:23
+#: templates/accounts/unit_detail.html:25
 msgid "Accounts"
 msgstr "Konten"
 
-#: templates/accounts/unit_detail.html:27
+#: templates/accounts/unit_detail.html:29
 msgid "No accounts yet."
 msgstr "Noch keine Konten."
 
-#: templates/accounts/unit_detail.html:30
+#: templates/accounts/unit_detail.html:33
 msgid "Open invitations"
 msgstr "Offene Einladungen"
 
-#: templates/accounts/unit_detail.html:51
+#: templates/accounts/unit_detail.html:54
 msgid "No open invitations."
 msgstr "Keine offenen Einladungen."
 
@@ -2097,16 +2120,25 @@ msgstr[1] "%(counter)s Konten"
 msgid "No units yet."
 msgstr "Noch keine Bereitschaften angelegt."
 
-#: templates/accounts/unit_list.html:29
+#: templates/accounts/unit_list.html:30
 msgid "Internal accounts"
 msgstr "Interne Konten"
 
-#: templates/accounts/unit_list.html:30
+#: templates/accounts/unit_list.html:35
 #, python-format
 msgid "%(DISPATCH_NAME)s and admins; they belong to no unit."
 msgstr "%(DISPATCH_NAME)s und Admins; sie gehören zu keiner Bereitschaft."
 
-#: templates/base.html:18
+#: templates/base.html:20
+#, python-format
+msgid ""
+"Demo: emails are not sent; you find them in your <a "
+"href=\"%(inbox_url)s\">inbox</a>."
+msgstr ""
+"Demo: E-Mails werden nicht verschickt, du findest sie in deinem <a "
+"href=\"%(inbox_url)s\">Postfach</a>."
+
+#: templates/base.html:22
 msgid "Demo: emails are not sent; you find them under “Inbox”."
 msgstr "Demo: E-Mails werden nicht verschickt, du findest sie im „Postfach“."
 
@@ -2458,7 +2490,7 @@ msgstr "Navigation umschalten"
 msgid "Overview"
 msgstr "Übersicht"
 
-#: templates/core/_navbar.html:28 templates/core/home.html:88
+#: templates/core/_navbar.html:28 templates/core/home.html:90
 msgid "My unit"
 msgstr "Meine Bereitschaft"
 
@@ -2532,7 +2564,7 @@ msgstr "Alle Dienste"
 msgid "Add duty"
 msgstr "Dienst anlegen"
 
-#: templates/core/home.html:86
+#: templates/core/home.html:88
 msgid "Manage units"
 msgstr "Bereitschaften verwalten"
 

@@ -289,6 +289,40 @@ class AccountForm(forms.ModelForm):
         return [field for field in self if field.name in self.NOTIFICATION_FIELDS]
 
 
+class AccountCreateForm(SetPasswordMixin, AccountForm):
+    """A new account with a password, for admins in demo mode (instead of an invitation)."""
+
+    password1, password2 = SetPasswordMixin.create_password_fields()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self.validate_passwords()
+        self.validate_password_for_user(
+            User(
+                email=cleaned_data.get("email", ""),
+                first_name=cleaned_data.get("first_name", ""),
+                last_name=cleaned_data.get("last_name", ""),
+            )
+        )
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        user.save()
+        # The address counts as verified: the admin vouches for it.
+        EmailAddress.objects.create(user=user, email=user.email, primary=True, verified=True)
+        return user
+
+    def personal_fields(self):
+        return [
+            field for field in super().personal_fields() if not field.name.startswith("password")
+        ]
+
+    def password_fields(self):
+        return [self["password1"], self["password2"]]
+
+
 class UnitForm(forms.ModelForm):
     class Meta:
         model = Unit
