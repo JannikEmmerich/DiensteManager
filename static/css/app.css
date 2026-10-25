@@ -1,7 +1,205 @@
 /* Additions to Bootstrap. */
 
+/*
+ * Colours of the German Red Cross (DRK), from the DRK style guide
+ * (https://styleguide.drk.de/deutsches-rotes-kreuz/basiselemente/farben and
+ * .../digital/webseite). Bootstrap is vendored precompiled, so its theme colours are
+ * overridden here: DRK red for primary actions and headings, DRK dark blue as
+ * secondary colour and for focus rings (a red focus ring would look like an error),
+ * DRK dark red for destructive actions and errors.
+ */
+:root,
+[data-bs-theme=light] {
+    --drk-red: #e60005;
+    --drk-red-rgb: 230, 0, 5;
+    --drk-dark-red: #a51e0f;
+    --drk-dark-red-rgb: 165, 30, 15;
+    --drk-dark-blue: #002d55;
+    --drk-dark-blue-rgb: 0, 45, 85;
+    --drk-medium-blue: #008ccd;
+    --drk-link-blue: #2275d0;
+    --drk-light-blue: #ebf5ff;
+    --drk-blue-30: #b4c3d7;
+    --drk-dark-grey: #554f4a;
+
+    --bs-primary: var(--drk-red);
+    --bs-primary-rgb: var(--drk-red-rgb);
+    --bs-primary-text-emphasis: #5c0002;
+    --bs-primary-bg-subtle: #facccd;
+    --bs-primary-border-subtle: #f5999b;
+
+    --bs-secondary: var(--drk-dark-blue);
+    --bs-secondary-rgb: var(--drk-dark-blue-rgb);
+    --bs-secondary-text-emphasis: var(--drk-dark-blue);
+    --bs-secondary-bg-subtle: var(--drk-light-blue);
+    --bs-secondary-border-subtle: var(--drk-blue-30);
+
+    --bs-info: var(--drk-medium-blue);
+    --bs-info-rgb: 0, 140, 205;
+    --bs-info-text-emphasis: var(--drk-dark-blue);
+    --bs-info-bg-subtle: var(--drk-light-blue);
+    --bs-info-border-subtle: #99d1eb;
+
+    --bs-danger: var(--drk-dark-red);
+    --bs-danger-rgb: var(--drk-dark-red-rgb);
+    --bs-danger-text-emphasis: #420c06;
+    --bs-danger-bg-subtle: #edd2cf;
+    --bs-danger-border-subtle: #dba59f;
+    --bs-form-invalid-color: var(--drk-dark-red);
+    --bs-form-invalid-border-color: var(--drk-dark-red);
+
+    --bs-link-color: var(--drk-link-blue);
+    --bs-link-color-rgb: 34, 117, 208;
+    --bs-link-hover-color: var(--drk-dark-blue);
+    --bs-link-hover-color-rgb: var(--drk-dark-blue-rgb);
+
+    --bs-heading-color: var(--drk-red);
+    --bs-secondary-color: var(--drk-dark-grey);
+    --bs-secondary-color-rgb: 85, 79, 74;
+    --bs-focus-ring-color: rgba(var(--drk-dark-blue-rgb), 0.25);
+}
+
 body {
     min-height: 100vh;
+}
+
+/* Navigation: white with the DRK red stripe, like the DRK vehicles. */
+.app-navbar {
+    --bs-navbar-color: var(--drk-dark-blue);
+    --bs-navbar-hover-color: var(--drk-red);
+    --bs-navbar-active-color: var(--drk-red);
+    --bs-navbar-brand-color: var(--drk-red);
+    --bs-navbar-brand-hover-color: var(--drk-dark-red);
+    background-color: #fff;
+    border-bottom: 4px solid var(--drk-red);
+}
+
+.app-navbar .nav-link.active {
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn-primary {
+    --bs-btn-bg: var(--drk-red);
+    --bs-btn-border-color: var(--drk-red);
+    --bs-btn-hover-bg: var(--drk-dark-red);
+    --bs-btn-hover-border-color: var(--drk-dark-red);
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-blue-rgb);
+    --bs-btn-active-bg: var(--drk-dark-red);
+    --bs-btn-active-border-color: var(--drk-dark-red);
+    --bs-btn-disabled-bg: var(--drk-red);
+    --bs-btn-disabled-border-color: var(--drk-red);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--drk-red);
+    --bs-btn-border-color: var(--drk-red);
+    --bs-btn-hover-bg: var(--drk-red);
+    --bs-btn-hover-border-color: var(--drk-red);
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-blue-rgb);
+    --bs-btn-active-bg: var(--drk-dark-red);
+    --bs-btn-active-border-color: var(--drk-dark-red);
+    --bs-btn-disabled-color: var(--drk-red);
+    --bs-btn-disabled-border-color: var(--drk-red);
+}
+
+.btn-secondary {
+    --bs-btn-bg: var(--drk-dark-blue);
+    --bs-btn-border-color: var(--drk-dark-blue);
+    --bs-btn-hover-bg: #00203d;
+    --bs-btn-hover-border-color: #00203d;
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-blue-rgb);
+    --bs-btn-active-bg: #00203d;
+    --bs-btn-active-border-color: #00203d;
+    --bs-btn-disabled-bg: var(--drk-dark-blue);
+    --bs-btn-disabled-border-color: var(--drk-dark-blue);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--drk-dark-blue);
+    --bs-btn-border-color: var(--drk-dark-blue);
+    --bs-btn-hover-bg: var(--drk-dark-blue);
+    --bs-btn-hover-border-color: var(--drk-dark-blue);
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-blue-rgb);
+    --bs-btn-active-bg: var(--drk-dark-blue);
+    --bs-btn-active-border-color: var(--drk-dark-blue);
+    --bs-btn-disabled-color: var(--drk-dark-blue);
+    --bs-btn-disabled-border-color: var(--drk-dark-blue);
+}
+
+.btn-danger {
+    --bs-btn-bg: var(--drk-dark-red);
+    --bs-btn-border-color: var(--drk-dark-red);
+    --bs-btn-hover-bg: #84180c;
+    --bs-btn-hover-border-color: #84180c;
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-red-rgb);
+    --bs-btn-active-bg: #84180c;
+    --bs-btn-active-border-color: #84180c;
+    --bs-btn-disabled-bg: var(--drk-dark-red);
+    --bs-btn-disabled-border-color: var(--drk-dark-red);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--drk-dark-red);
+    --bs-btn-border-color: var(--drk-dark-red);
+    --bs-btn-hover-bg: var(--drk-dark-red);
+    --bs-btn-hover-border-color: var(--drk-dark-red);
+    --bs-btn-focus-shadow-rgb: var(--drk-dark-red-rgb);
+    --bs-btn-active-bg: var(--drk-dark-red);
+    --bs-btn-active-border-color: var(--drk-dark-red);
+    --bs-btn-disabled-color: var(--drk-dark-red);
+    --bs-btn-disabled-border-color: var(--drk-dark-red);
+}
+
+/* Form fields: dark blue focus, DRK red for checked boxes. */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+    border-color: #7f96aa;
+    box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+.form-check-input:checked,
+.form-check-input[type=checkbox]:indeterminate {
+    background-color: var(--drk-red);
+    border-color: var(--drk-red);
+}
+
+.nav-link:focus-visible {
+    box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+/* Components with their own copy of the primary colour */
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--drk-red);
+}
+
+.list-group {
+    --bs-list-group-active-bg: var(--drk-red);
+    --bs-list-group-active-border-color: var(--drk-red);
+}
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--drk-red);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--drk-red);
+    --bs-pagination-active-border-color: var(--drk-red);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+.progress,
+.progress-stacked {
+    --bs-progress-bar-bg: var(--drk-red);
+}
+
+.accordion {
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
+}
+
+.btn-close {
+    --bs-btn-close-focus-shadow: 0 0 0 0.25rem var(--bs-focus-ring-color);
 }
 
 /* Give the recovery codes on allauth pages enough room. */
