@@ -112,13 +112,25 @@ class Billing(models.Model):
 
     @property
     def period(self):
-        """Date of the first and of the last duty."""
-        dates = [item.duty_date for item in self.items.all()]
+        """Date of the first and of the last duty (of other items only without helpers)."""
+        items = list(self.items.all())
+        dates = [item.duty_date for item in items if not item.is_other] or [
+            item.duty_date for item in items
+        ]
         return (min(dates), max(dates)) if dates else (None, None)
 
 
 class BillingItem(models.Model):
-    """One helper at one duty, as billed."""
+    """A line of a billing: one helper at one duty, or another item such as a vehicle flat
+    rate (``PayType.OTHER``: the text is in ``duty_title``, the quantity in ``hours``).
+
+    All values are copies, as entered when the billing was created.
+    """
+
+    class PayType(models.TextChoices):
+        HOURLY = "hourly", _("Per helper hour")
+        FLAT = "flat", _("Flat rate per helper")
+        OTHER = "other", _("Other item")
 
     billing = models.ForeignKey(
         Billing, verbose_name=_("billing"), on_delete=models.CASCADE, related_name="items"
@@ -136,12 +148,13 @@ class BillingItem(models.Model):
     )
     duty_title = models.CharField(_("duty"), max_length=200)
     duty_date = models.DateField(_("date"))
-    helper_name = models.CharField(_("helper"), max_length=150)
+    helper_name = models.CharField(_("helper"), max_length=150, blank=True)
     # Of the position the helper was reported for (abbreviation if there is one).
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
-    pay_type = models.CharField(_("duty pay"), max_length=10, choices=Duty.PayType.choices)
+    pay_type = models.CharField(_("duty pay"), max_length=10, choices=PayType.choices)
     rate = models.DecimalField(_("rate in euros"), max_digits=8, decimal_places=2)
-    hours = models.DecimalField(_("hours"), max_digits=5, decimal_places=2, null=True, blank=True)
+    # Hours for hourly pay; for other items an optional quantity.
+    hours = models.DecimalField(_("hours"), max_digits=7, decimal_places=2, null=True, blank=True)
     amount = models.DecimalField(_("amount"), max_digits=10, decimal_places=2)
 
     class Meta:
@@ -151,7 +164,8 @@ class BillingItem(models.Model):
         constraints = [
             models.CheckConstraint(
                 condition=Q(pay_type="hourly", hours__gt=0)
-                | Q(pay_type="flat", hours__isnull=True),
+                | Q(pay_type="flat", hours__isnull=True)
+                | Q(pay_type="other"),
                 name="billing_item_hours_match_pay_type",
             ),
         ]
@@ -164,3 +178,7 @@ class BillingItem(models.Model):
         return (
             f"{self.helper_name} ({self.qualification})" if self.qualification else self.helper_name
         )
+
+    @property
+    def is_other(self):
+        return self.pay_type == self.PayType.OTHER

@@ -20,9 +20,10 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from duties.models import Duty
 from duties.templatetags.duty_tags import hours as format_hours
 from duties.templatetags.duty_tags import money
+
+from .models import BillingItem
 
 FONT_DIR = Path(__file__).resolve().parent / "fonts"
 FONT = "DejaVuSans"
@@ -65,9 +66,11 @@ def _date(value):
 
 
 def _rate(item):
-    if item.pay_type == Duty.PayType.HOURLY:
+    if item.pay_type == BillingItem.PayType.HOURLY:
         return _("%(amount)s/h") % {"amount": money(item.rate)}
-    return _("%(amount)s flat") % {"amount": money(item.rate)}
+    if item.pay_type == BillingItem.PayType.FLAT:
+        return _("%(amount)s flat") % {"amount": money(item.rate)}
+    return money(item.rate)  # other items: the price (per unit with a quantity)
 
 
 def _column_widths(header, cells, total_row):
@@ -136,12 +139,13 @@ def render(billing):
     )
     story.append(Spacer(1, 6 * mm))
 
-    header = [_("Date"), _("Duty"), _("Helper"), _("Hours"), _("Rate"), _("Amount")]
+    quantity = _("Hours/qty.") if any(item.is_other for item in items) else _("Hours")
+    header = [_("Date"), _("Duty"), _("Helper"), quantity, _("Rate"), _("Amount")]
     cells = [
         [
             _date(item.duty_date),
             item.duty_title,
-            item.helper_display,
+            item.helper_display or "–",
             format_hours(item.hours) if item.hours is not None else "–",
             _rate(item),
             money(item.amount),

@@ -168,9 +168,14 @@ the mail server is unreachable, the change is saved anyway and a warning is show
   of the unit see them.
 - **Billing** (dispatchers, *Billing*): lists the units with something to bill, i.e.
   confirmed helpers of finished, released duties with duty pay that are not billed yet.
-  When creating a statement, untick helpers who did not come and correct the hours for
-  hourly pay. Statements are numbered per year (`2026-001`, …) and keep copies of the
-  items, rates and bank details, so later changes do not alter them. A statement is
+  When creating a statement, untick helpers who did not come; every value of a helper's
+  line can be changed for this statement – date, duty, helper, qualification, rate and,
+  for hourly pay, the hours. **Other items** (e.g. a vehicle flat rate or kilometres)
+  are added with "Add a line": date, description, price and optionally a quantity (the
+  amount is then quantity × price; a negative price deducts). A statement can also
+  consist of other items only – "Create statement" on the unit's duty pay overview.
+  Statements are numbered per year (`2026-001`, …) and keep copies of the items, rates
+  and bank details, so later changes do not alter them. A statement is
   *open* until it is marked as *paid*; open statements can be *cancelled*, which makes
   their helpers billable again.
 - **PDF:** every statement can be downloaded as a PDF (A4, in the language of the
