@@ -206,6 +206,16 @@ def duty_release(request, pk):
 def duty_cancel(request, pk):
     _dispatcher_only(request)
     duty = get_object_or_404(Duty, pk=pk)
+    if duty.status == Duty.Status.RELEASED:
+        if duty.has_billed_reports:
+            messages.error(request, _("This duty has been billed and can no longer be cancelled."))
+            return redirect(duty)
+        if duty.has_started and not request.POST.get("confirm_started"):
+            messages.error(
+                request,
+                _("Please confirm that you want to cancel a duty that has already started."),
+            )
+            return redirect(duty)
     if _change_status(duty, Duty.Status.RELEASED, Duty.Status.CANCELLED, "cancelled_at"):
         history.record(
             duty, history.Action.CANCELLED, request.user, history.scope_for_duty(duty.pk)

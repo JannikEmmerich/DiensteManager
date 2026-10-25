@@ -185,6 +185,17 @@ class Duty(models.Model):
         return self.ends_at < timezone.now()
 
     @property
+    def has_billed_reports(self):
+        """Whether a helper of this duty is in a billing that is not cancelled."""
+        from billing.models import Billing, BillingItem
+
+        return (
+            BillingItem.objects.filter(report__duty=self)
+            .exclude(billing__status=Billing.Status.CANCELLED)
+            .exists()
+        )
+
+    @property
     def reports_close_at(self):
         """Until when units report helpers and withdraw reports: the deadline or the start."""
         if self.report_deadline and self.report_deadline < self.starts_at:
