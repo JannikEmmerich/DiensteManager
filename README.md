@@ -224,12 +224,12 @@ catalogue is older than the `.po` file.
 
 ## Local development
 
-Requires Python ≥ 3.12 and GNU gettext (`msgfmt`, e.g. `sudo dnf install gettext`).
+Requires Python ≥ 3.12, GNU gettext (`msgfmt`) and [uv](https://docs.astral.sh/uv/),
+e.g. `sudo dnf install gettext uv`.
 
 ```bash
 cd ~/PycharmProjects/DiensteManager
-python3 -m venv .venv                 # if it does not exist yet
-.venv/bin/pip install -e . --group dev
+uv sync                               # .venv with exactly the versions in uv.lock
 cp .env.example .env                  # locally: DJANGO_DEBUG=True
 .venv/bin/python manage.py compilemessages --ignore=.venv
 .venv/bin/python manage.py migrate
@@ -239,6 +239,12 @@ cp .env.example .env                  # locally: DJANGO_DEBUG=True
 
 Then open <http://localhost:8000>. Without `EMAIL_HOST`, all emails are printed to the
 console – including invitation links.
+
+**Dependencies:** `pyproject.toml` names the packages and the allowed versions,
+`uv.lock` pins the exact versions (with hashes) that CI, the Docker image and `uv sync`
+install. After changing `pyproject.toml`, run `uv lock` and commit both files (CI fails
+otherwise); `uv lock --upgrade` updates everything within the allowed versions.
+Dependabot proposes such updates weekly.
 
 **PyCharm:** the project was renamed; the configured interpreter still points to
 `~/PycharmProjects/PythonProject/.venv`. Select

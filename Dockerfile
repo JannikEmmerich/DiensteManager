@@ -13,9 +13,14 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Install the dependencies first so that this layer stays in the build cache.
-COPY pyproject.toml ./
-RUN pip install .
+# Install the dependencies first so that this layer stays in the build cache: exactly
+# the versions in uv.lock, checked against their hashes (uv only exports the list).
+COPY pyproject.toml uv.lock ./
+RUN pip install uv \
+    && uv export --quiet --frozen --no-dev --no-emit-project --output-file /tmp/requirements.txt \
+    && pip install --require-hashes --requirement /tmp/requirements.txt \
+    && pip uninstall --yes uv \
+    && rm /tmp/requirements.txt
 
 COPY . .
 RUN DJANGO_SECRET_KEY=build-only python manage.py compilemessages \

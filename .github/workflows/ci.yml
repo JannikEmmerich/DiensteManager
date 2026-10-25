@@ -61,15 +61,18 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
-          cache-dependency-path: pyproject.toml
+          cache-dependency-path: uv.lock
 
       - name: Install GNU gettext
         run: sudo apt-get update && sudo apt-get install --yes --no-install-recommends gettext
 
+      # Exactly the versions in uv.lock; --locked fails if pyproject.toml changed without
+      # "uv lock".
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -e . --group dev
+          python -m pip install --upgrade pip uv
+          uv export --quiet --locked --group dev --no-emit-project --output-file "$RUNNER_TEMP/requirements.txt"
+          pip install --require-hashes --requirement "$RUNNER_TEMP/requirements.txt"
 
       - name: Lint and formatting
         run: |
