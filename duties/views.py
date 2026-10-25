@@ -145,13 +145,25 @@ def duty_update(request, pk):
             name for name in notifications.RELEVANT_CHANGES if name in form.changed_data
         ]
         if positions_after != positions_before:
+            # Only recorded: the helpers needed are the dispatchers' business, e.g. one
+            # helper fewer because they found one themselves. No email for that.
             changes.append(history.change("positions", positions_before, positions_after))
-            changed_fields.append("positions")
         if changes:
             history.record(
                 duty, history.Action.CHANGED, request.user, history.scope_for_duty(duty.pk), changes
             )
         messages.success(request, _("Saved."))
+        confirmed = duty.reports.filter(status=Report.Status.CONFIRMED).count()
+        if confirmed > duty.helpers_needed:
+            messages.warning(
+                request,
+                _(
+                    "More helpers are confirmed (%(confirmed)d) than needed (%(needed)d). "
+                    "Take back the reports of those you no longer need; their units are "
+                    "notified."
+                )
+                % {"confirmed": confirmed, "needed": duty.helpers_needed},
+            )
         if duty.status == Duty.Status.RELEASED:
             if changed_fields:
                 notifications.duty_changed(request, duty, changed_fields)
