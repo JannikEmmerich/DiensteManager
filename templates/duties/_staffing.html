@@ -1,0 +1,6 @@
+{% load i18n %}
+<span class="badge {% if duty.confirmed_count >= duty.helpers_needed %}text-bg-success{% else %}text-bg-warning{% endif %}"
+      title="{% translate 'confirmed / needed' %}">{{ duty.confirmed_count }}/{{ duty.helpers_needed }}</span>
+{% if duty.pending_count %}
+    <span class="small text-body-secondary">{% blocktranslate trimmed count counter=duty.pending_count %}+{{ counter }} pending{% plural %}+{{ counter }} pending{% endblocktranslate %}</span>
+{% endif %}

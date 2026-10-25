@@ -1,0 +1,2 @@
+{% for report in reports %}- {{ report.name }}{% if report.qualification %} ({{ report.qualification }}){% endif %}{% if with_status %}: {{ report.get_status_display }}{% elif report.note %} – {{ report.note }}{% endif %}
+{% endfor %}

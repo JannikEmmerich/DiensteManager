@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from accounts import permissions
+from duties.permissions import is_unit_account
 
 
 def site(request):
@@ -13,5 +14,8 @@ def site(request):
             "invite": permissions.can_invite(user),
             "manage_units": permissions.is_dispatcher(user),
             "view_own_unit": permissions.is_unit_lead(user),
+            "view_duties": permissions.is_dispatcher(user) or is_unit_account(user),
+            "manage_duties": permissions.is_dispatcher(user),
+            "send_emails": permissions.is_dispatcher(user),
         },
     }

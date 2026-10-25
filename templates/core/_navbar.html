@@ -14,6 +14,11 @@
                     <li class="nav-item">
                         <a class="nav-link{% if page == 'home' %} active{% endif %}" href="{% url 'home' %}">{% translate "Overview" %}</a>
                     </li>
+                    {% if can.view_duties %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page and page|slice:':5' == 'duty_' or page == 'report_create' %} active{% endif %}" href="{% url 'duty_list' %}">{% translate "Duties" %}</a>
+                        </li>
+                    {% endif %}
                     {% if can.manage_units %}
                         <li class="nav-item">
                             <a class="nav-link{% if page == 'unit_list' %} active{% endif %}" href="{% url 'unit_list' %}">{% translate "Units" %}</a>
@@ -21,6 +26,11 @@
                     {% elif can.view_own_unit %}
                         <li class="nav-item">
                             <a class="nav-link{% if page == 'unit_detail' %} active{% endif %}" href="{% url 'unit_detail' user.unit_id %}">{% translate "My unit" %}</a>
+                        </li>
+                    {% endif %}
+                    {% if can.send_emails %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page and page|slice:':8' == 'mailing_' %} active{% endif %}" href="{% url 'mailing_list' %}">{% translate "Emails" %}</a>
                         </li>
                     {% endif %}
                     {% if can.invite %}

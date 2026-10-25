@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with unit=unit.name %}{{ unit }} has reported these helpers:{% endblocktranslate %}
+
+{% include "duties/email/_reports.txt" %}
+{% translate "Duty:" %} {% include "duties/email/_duty.txt" %}
+{% translate "Confirm or decline the reports here:" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

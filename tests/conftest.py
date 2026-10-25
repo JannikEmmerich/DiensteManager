@@ -1,12 +1,15 @@
 import json
+from datetime import timedelta
 from urllib.parse import parse_qs, urlparse
 
 import pytest
 import requests
 from allauth.account.models import EmailAddress
 from django.urls import reverse
+from django.utils import timezone
 
 from accounts.models import Invitation, Role, Unit, User
+from duties.models import Duty, Report
 
 PASSWORD = "a-secure-Password-42"
 
@@ -59,6 +62,28 @@ def create_invitation(email, role, unit=None, invited_by=None, language="en"):
     token = invitation.new_token()
     invitation.save()
     return invitation, token
+
+
+def create_duty(status=Duty.Status.RELEASED, units=(), starts_in=timedelta(days=7), **fields):
+    """A duty that starts in a week and lasts four hours; offered to all units by default."""
+    starts_at = timezone.now() + starts_in
+    values = {
+        "title": "Marathon",
+        "location": "Market square",
+        "starts_at": starts_at,
+        "ends_at": starts_at + timedelta(hours=4),
+        "helpers_needed": 3,
+        "status": status,
+        "all_units": not units,
+    }
+    values.update(fields)
+    duty = Duty.objects.create(**values)
+    duty.units.set(units)
+    return duty
+
+
+def create_report(duty, unit, name="Hanna Helper", reported_by=None, **fields):
+    return Report.objects.create(duty=duty, unit=unit, name=name, reported_by=reported_by, **fields)
 
 
 @pytest.fixture

@@ -1,0 +1,6 @@
+{% load i18n %}
+{% blocktranslate trimmed count counter=count %}
+    The email goes to <strong>{{ counter }}</strong> person.
+{% plural %}
+    The email goes to <strong>{{ counter }}</strong> people.
+{% endblocktranslate %}

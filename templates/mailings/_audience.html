@@ -1,0 +1,1 @@
+{% load i18n %}{{ mailing.get_audience_display }} · {% if mailing.all_units %}{% translate "All units" %}{% else %}{{ mailing.units.all|join:", " }}{% endif %}

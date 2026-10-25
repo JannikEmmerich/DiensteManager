@@ -3,9 +3,9 @@
 Staff planning with external units: external units see our duties with open staffing
 needs and report people for them. The duties are going to be imported from HiOrg-Server.
 
-**Status: skeleton.** User management, sign-in (local and with HiOrg-Server),
-invitations, units, German/English UI and the Docker setup are done. Duties, staffing
-needs and reports come next.
+**Status:** user management, sign-in (local and with HiOrg-Server), invitations, units,
+duties with release and reports, email notifications, emails from dispatchers,
+German/English UI and the Docker setup are done. Importing duties from HiOrg-Server comes next.
 
 ## Stack
 
@@ -21,11 +21,60 @@ needs and reports come next.
 | Role | May |
 |---|---|
 | **Admin** (superuser) | everything incl. the Django admin `/admin/`; the only role that invites or blocks dispatchers |
-| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members |
-| **Unit lead** | view their own unit, invite and block unit leads and members there |
-| **Member** | overview and own account (later: see duties, report people) |
+| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports; send emails to the units |
+| **Unit lead** | view their own unit, invite and block unit leads and members there; report helpers, withdraw any report of the unit |
+| **Member** | see the duties offered to their unit, report helpers, withdraw their own reports |
 
-The rules live in `accounts/permissions.py`.
+The rules live in `accounts/permissions.py` and `duties/permissions.py`.
+
+## Duties and reports
+
+- **Duties** are entered by dispatchers under *Duties → Add duty* (title, location, start,
+  end, number of helpers needed, description). Each duty records its source (*entered
+  manually*, later *HiOrg-Server*) for the upcoming import.
+- **Release:** new duties are drafts that only dispatchers see. Units see a duty once it
+  has been released ("Save and release" or "Release" on the duty).
+- **Offered to:** all units, or only selected ones. Other units neither see the duty nor
+  get notified. A unit that has reported helpers must stay selected.
+- **Reports:** unit leads and members report helpers (name, optional qualification and
+  note; several at once) until the duty starts. Units only see their own reports plus
+  the overall staffing (confirmed / needed). Members withdraw their own reports, unit
+  leads every report of their unit. A person can only be reported once per duty and unit.
+- **Decisions:** dispatchers confirm or decline each report (or "Confirm all pending").
+- Released duties are **cancelled** instead of deleted; only drafts can be deleted.
+
+## Email notifications
+
+Every recipient gets their own email in the language of their account (or the default
+language). The person who triggered a notification never receives it.
+
+| Event | Recipients |
+|---|---|
+| Duty released, or offered to additional units | active accounts of those units with *New duties for my unit* switched on |
+| Helpers reported or withdrawn | dispatchers and admins with *Reports* switched on |
+| Report confirmed or declined | unit leads of the unit and whoever made the report, with *Reports* switched on |
+| Title, time or location of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
+
+Both switches are under *My account → Email notifications* and are on by default. The
+emails are sent right away during the request; if the mail server is unreachable, the
+change is saved anyway and a warning is shown.
+
+## Emails from dispatchers
+
+Dispatchers write emails to the units under *Emails → Write an email*, or with the
+buttons on a duty ("Email the units") and on a unit.
+
+- **Recipients:** the unit leads only, or all accounts (unit leads and members); of all
+  units or only selected ones. Blocked accounts are left out; the notification settings
+  do not apply. The form shows how many people the email reaches.
+- **Sender:** every recipient gets their own email from `DEFAULT_FROM_EMAIL`, shown as
+  "*Name of the dispatcher* via DiensteManager". **Reply-To is the dispatcher's
+  address**, so answers go directly to them. (Sending from the dispatcher's own address
+  would fail SPF/DMARC checks.)
+- Opened from a duty, the units with reported helpers (otherwise those the duty is
+  offered to) are preselected and the email links to the duty.
+- Optionally a copy goes to the dispatcher. Sent emails are listed with their recipients
+  under *Emails*; an email is only recorded if it could be sent.
 
 ## Sign-in and accounts
 
@@ -154,6 +203,8 @@ docker compose logs -f web            # logs (and emails, without SMTP)
 ```
 config/      settings (all via environment variables), URLs, WSGI
 accounts/    users, units, invitations, permissions, HiOrg sign-in adapter, language
+duties/      duties, reports, their permissions and email notifications
+mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
@@ -168,6 +219,9 @@ docker/      container entry point
    interface is an option: API key under *System → Settings → Manage API keys*, each
    duty must be released for retrieval by connected EFS. It returns period, location,
    positions and assigned staff, but no staffing target – clarify its use with HiOrg
-   support first.
-2. **Staffing needs per duty** (number, qualification) maintained in the portal.
-3. **Reports:** units report people for duties, the dispatchers confirm.
+   support first. Imported duties get `source = hiorg` and the HiOrg ID in
+   `external_id` (unique per source), arrive as drafts and are released as usual.
+2. **Staffing needs per qualification** (e.g. 2 paramedics, 4 first aiders) instead of
+   a single number.
+3. **Sending emails in the background** (queue or digest) once there are many units
+   and accounts.

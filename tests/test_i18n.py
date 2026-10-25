@@ -16,6 +16,9 @@ from django.utils import translation
 from django.utils.translation import gettext
 
 from accounts.models import Role
+from duties.models import Duty
+
+from .conftest import create_duty
 
 PO_FILE = Path(settings.BASE_DIR) / "locale" / "de" / "LC_MESSAGES" / "django.po"
 MO_FILE = PO_FILE.with_suffix(".mo")
@@ -151,3 +154,33 @@ def test_password_reset_email_uses_account_language(client, member):
     )
     assert len(mail.outbox) == 1
     assert german("Password Reset Email") in mail.outbox[0].subject
+
+
+def test_notifications_use_the_language_of_each_recipient(client, dispatcher, unit_lead, member):
+    unit_lead.language = "de"
+    unit_lead.save()
+    duty = create_duty(status=Duty.Status.DRAFT, title="Marathon")
+    client.force_login(dispatcher)
+    client.post(reverse("duty_release", args=[duty.pk]), HTTP_ACCEPT_LANGUAGE="en")
+    by_recipient = {message.to[0]: message for message in mail.outbox}
+    german_mail = by_recipient[unit_lead.email]
+    assert german("A new duty has been released for your unit:") in german_mail.body
+    assert german_mail.subject.startswith(
+        "[DiensteManager] " + german("New duty: %(title)s (%(period)s)").split("%")[0]
+    )
+    # Without a language of its own, an account gets the default language (en in tests).
+    assert "A new duty has been released for your unit:" in by_recipient[member.email].body
+
+
+def test_dispatcher_email_footer_uses_the_recipient_language(client, dispatcher, unit_lead):
+    unit_lead.language = "de"
+    unit_lead.save()
+    client.force_login(dispatcher)
+    client.post(
+        reverse("mailing_create"),
+        {"subject": "Hallo", "body": "Text", "audience": "unit_leads", "all_units": "True"},
+        HTTP_ACCEPT_LANGUAGE="en",
+    )
+    (message,) = mail.outbox
+    expected = german("%(sender)s sent this email via %(site)s. Replies go directly to %(sender)s.")
+    assert expected % {"sender": dispatcher, "site": settings.SITE_NAME} in message.body

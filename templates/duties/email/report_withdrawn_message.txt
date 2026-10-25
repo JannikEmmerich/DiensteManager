@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% include "duties/email/_greeting.txt" %}
+{% blocktranslate trimmed with unit=unit.name name=report.name %}{{ unit }} has withdrawn the report for {{ name }}.{% endblocktranslate %}
+
+{% translate "Duty:" %} {% include "duties/email/_duty.txt" %}
+{{ duty_url }}
+{% include "duties/email/_footer.txt" %}{% endautoescape %}

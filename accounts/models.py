@@ -68,6 +68,9 @@ class User(AbstractUser):
         blank=True,
         help_text=_("Leave empty to follow the browser setting."),
     )
+    # Email notifications, see duties/notifications.py.
+    notify_new_duties = models.BooleanField(_("new duties"), default=True)
+    notify_reports = models.BooleanField(_("reports"), default=True)
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"

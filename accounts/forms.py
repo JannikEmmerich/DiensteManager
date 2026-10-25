@@ -7,6 +7,39 @@ from . import permissions
 from .models import LANGUAGE_CHOICES, Invitation, Role, Unit, User
 
 
+def unit_selection_fields(label, help_text):
+    """Radio buttons "all units / only the selected units" plus the unit checkboxes.
+
+    Returns the fields ``all_units`` (``True`` or ``False``) and ``units``.
+    """
+    all_units = forms.TypedChoiceField(
+        label=label,
+        choices=[("True", _("All units")), ("False", _("Only the selected units"))],
+        coerce=lambda value: value == "True",
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+        initial="True",
+    )
+    units = forms.ModelMultipleChoiceField(
+        label=_("Selected units"),
+        queryset=Unit.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+        help_text=help_text,
+    )
+    return all_units, units
+
+
+def clean_unit_selection(form, cleaned_data):
+    """Empties the selection for "all units" and requires a unit otherwise."""
+    if cleaned_data.get("all_units"):
+        cleaned_data["units"] = Unit.objects.none()
+        return True
+    if "units" in cleaned_data and not cleaned_data["units"]:
+        form.add_error("units", _("Please select at least one unit."))
+        return False
+    return "units" in cleaned_data
+
+
 class InvitationForm(forms.ModelForm):
     class Meta:
         model = Invitation
@@ -79,9 +112,15 @@ class AcceptInvitationForm(SetPasswordMixin, forms.Form):
 
 
 class ProfileForm(forms.ModelForm):
+    NOTIFICATION_FIELDS = ["notify_new_duties", "notify_reports"]
+
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "language"]
+        fields = ["first_name", "last_name", "language", "notify_new_duties", "notify_reports"]
+        labels = {
+            "notify_new_duties": _("New duties for my unit"),
+            "notify_reports": _("Reports"),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -91,6 +130,27 @@ class ProfileForm(forms.ModelForm):
             ("", _("Automatic (browser setting)")),
             *LANGUAGE_CHOICES,
         ]
+        user = self.instance
+        if permissions.is_dispatcher(user):
+            # Dispatchers release the duties themselves.
+            del self.fields["notify_new_duties"]
+            self.fields["notify_reports"].help_text = _("When units report or withdraw helpers.")
+        elif user.role == Role.UNIT_LEAD:
+            self.fields["notify_reports"].help_text = _(
+                "When reports of my unit are confirmed or declined, and when a duty with "
+                "reports of my unit changes or is cancelled."
+            )
+        else:
+            self.fields["notify_reports"].help_text = _(
+                "When helpers I reported are confirmed or declined, and when their duty "
+                "changes or is cancelled."
+            )
+
+    def personal_fields(self):
+        return [field for field in self if field.name not in self.NOTIFICATION_FIELDS]
+
+    def notification_fields(self):
+        return [field for field in self if field.name in self.NOTIFICATION_FIELDS]
 
 
 class UnitForm(forms.ModelForm):

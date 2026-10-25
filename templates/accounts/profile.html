@@ -19,10 +19,16 @@
         </div>
     </div>
 
-    <h2 class="h5">{% translate "Personal settings" %}</h2>
     <form method="post" class="mb-4">
         {% csrf_token %}
-        {% include "core/_form_fields.html" %}
+        <h2 class="h5">{% translate "Personal settings" %}</h2>
+        {% for field in form.personal_fields %}
+            {% include "core/_field.html" %}
+        {% endfor %}
+        <h2 class="h5 mt-4">{% translate "Email notifications" %}</h2>
+        {% for field in form.notification_fields %}
+            {% include "core/_field.html" %}
+        {% endfor %}
         <button class="btn btn-primary" type="submit">{% translate "Save" %}</button>
     </form>
 

@@ -3,6 +3,11 @@
 import pytest
 from django.urls import reverse
 
+from duties.models import Duty
+from mailings.models import Mailing
+
+from .conftest import create_duty, create_report
+
 
 @pytest.mark.parametrize("name", ["account_login", "account_reset_password", "account_signup"])
 def test_public_pages_render(client, db, name):
@@ -25,6 +30,10 @@ def test_public_pages_render(client, db, name):
         "invitation_create",
         "unit_list",
         "unit_create",
+        "duty_list",
+        "duty_create",
+        "mailing_list",
+        "mailing_create",
     ],
 )
 def test_pages_for_dispatchers_render(client, dispatcher, name):
@@ -38,6 +47,46 @@ def test_unit_pages_render(client, dispatcher, unit_lead, member, unit):
         reverse("unit_detail", args=[unit.pk]),
         reverse("unit_update", args=[unit.pk]),
         reverse("invitation_create") + f"?unit={unit.pk}",
+    ]:
+        assert client.get(url).status_code == 200, url
+
+
+def test_duty_pages_render(client, dispatcher, unit_lead, unit):
+    draft = create_duty(status=Duty.Status.DRAFT)
+    duty = create_duty()
+    create_report(duty, unit, reported_by=unit_lead)
+    client.force_login(dispatcher)
+    for url in [
+        reverse("home"),
+        reverse("duty_list") + "?show=past",
+        draft.get_absolute_url(),
+        duty.get_absolute_url(),
+        reverse("duty_update", args=[duty.pk]),
+    ]:
+        assert client.get(url).status_code == 200, url
+    client.force_login(unit_lead)
+    for url in [
+        reverse("home"),
+        reverse("duty_list"),
+        duty.get_absolute_url(),
+        reverse("report_create", args=[duty.pk]),
+    ]:
+        assert client.get(url).status_code == 200, url
+
+
+def test_mailing_pages_render(client, dispatcher, unit_lead, unit):
+    duty = create_duty()
+    client.force_login(dispatcher)
+    client.post(
+        reverse("mailing_create"),
+        {"subject": "Hello", "body": "Text", "audience": "unit_leads", "all_units": "True"},
+    )
+    for url in [
+        reverse("mailing_list"),
+        Mailing.objects.get().get_absolute_url(),
+        reverse("mailing_create") + f"?duty={duty.pk}",
+        reverse("mailing_create") + f"?unit={unit.pk}",
+        reverse("unit_detail", args=[unit.pk]),
     ]:
         assert client.get(url).status_code == 200, url
 

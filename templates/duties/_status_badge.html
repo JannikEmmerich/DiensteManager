@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if duty.status == "draft" %}
+    <span class="badge text-bg-secondary">{% translate "Draft" %}</span>
+{% elif duty.status == "cancelled" %}
+    <span class="badge text-bg-danger">{% translate "Cancelled" %}</span>
+{% elif duty.is_open_for_reports %}
+    <span class="badge text-bg-primary">{% translate "Open for reports" %}</span>
+{% else %}
+    <span class="badge text-bg-light border">{% translate "Reporting closed" %}</span>
+{% endif %}

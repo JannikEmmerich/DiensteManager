@@ -16,5 +16,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path("", include("accounts.urls")),
+    path("duties/", include("duties.urls")),
+    path("emails/", include("mailings.urls")),
     path("", include("core.urls")),
 ]

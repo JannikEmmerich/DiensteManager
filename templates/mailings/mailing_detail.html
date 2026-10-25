@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{{ mailing.subject }}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-3">{{ mailing.subject }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">{% translate "Sent" %}</dt>
+                <dd class="col-sm-9">{{ mailing.sent_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
+                <dt class="col-sm-3">{% translate "Sent by" %}</dt>
+                <dd class="col-sm-9">{% if mailing.sent_by %}{{ mailing.sent_by }} ({{ mailing.sent_by.email }}){% else %}–{% endif %}</dd>
+                <dt class="col-sm-3">{% translate "Recipients" %}</dt>
+                <dd class="col-sm-9">{% include "mailings/_audience.html" %}</dd>
+                {% if mailing.duty %}
+                    <dt class="col-sm-3">{% translate "Duty" %}</dt>
+                    <dd class="col-sm-9"><a href="{{ mailing.duty.get_absolute_url }}">{{ mailing.duty.title }}</a> · {{ mailing.duty|period }}</dd>
+                {% endif %}
+            </dl>
+            <hr>
+            <div>{{ mailing.body|linebreaksbr }}</div>
+        </div>
+    </div>
+
+    <h2 class="h5">
+        {% blocktranslate trimmed count counter=recipients|length %}{{ counter }} recipient{% plural %}{{ counter }} recipients{% endblocktranslate %}
+    </h2>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>{% translate "Name" %}</th>
+                    <th>{% translate "Email address" %}</th>
+                    <th>{% translate "Unit" %}</th>
+                    <th>{% translate "Role" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for recipient in recipients %}
+                    <tr>
+                        <td>{{ recipient.get_full_name|default:"–" }}</td>
+                        <td>{{ recipient.email }}</td>
+                        <td>{{ recipient.unit|default:"–" }}</td>
+                        <td>{{ recipient.get_role_display }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a class="btn btn-link px-0" href="{% url 'mailing_list' %}">{% translate "All emails" %}</a>
+{% endblock content %}
