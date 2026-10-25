@@ -43,6 +43,14 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   qualifications under *Duties → Qualifications* (name, abbreviation, order; new ones
   come last); qualifications in use cannot be deleted, only deactivated, and a position
   with reported helpers cannot be removed.
+- **Also counts as:** a qualification can count as another one, e.g. emergency
+  paramedic → paramedic → first aider. Helpers then also fill the places of the lower
+  qualifications down the chain, never the other way round: with 2 × first aider and
+  1 × paramedic needed, 1 first aider and 2 paramedics fill all places. The staffing
+  per position, the open places when reporting and the colours follow this; each
+  helper keeps the qualification they were reported with (and its rate). Confirmed
+  helpers are placed before pending ones; helpers who fit nowhere overstaff their own
+  position.
 - **Release:** new duties are drafts that only dispatchers see. Units see a duty once it
   has been released ("Save and release" or "Release" on the duty).
 - **Offered to:** all units, or only selected ones. Other units neither see the duty nor

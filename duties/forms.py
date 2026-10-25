@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from accounts.forms import clean_unit_selection, unit_selection_fields
 from accounts.models import Unit
 
+from . import staffing
 from .models import Duty, DutyPosition, Qualification, Report
 
 # Upper limit of helpers per position and per duty (the database fields are small integers).
@@ -185,11 +186,14 @@ DutyPositionFormSet = forms.inlineformset_factory(
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = Qualification
-        fields = ["name", "abbreviation", "sort_order", "is_active"]
+        fields = ["name", "abbreviation", "includes", "sort_order", "is_active"]
         widgets = {"sort_order": forms.NumberInput(attrs={"min": 0, "step": 10})}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        field = self.fields["includes"]
+        field.queryset = Qualification.objects.exclude(pk=self.instance.pk)
+        field.empty_label = "–"
         if self.instance.pk is None:
             # New qualifications come last.
             last = Qualification.objects.aggregate(last=Max("sort_order"))["last"]
@@ -209,6 +213,35 @@ class BaseQualificationFormSet(forms.BaseModelFormSet):
         super().__init__(*args, **kwargs)
         # An empty row to start with, as long as there are none.
         self.extra = 0 if self.get_queryset().exists() else 1
+
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+        # "Also counts as" must not go round in circles. New qualifications cannot be
+        # chosen yet, so only the saved ones can form a circle.
+        includes = dict(Qualification.objects.values_list("pk", "includes"))
+        names = dict(Qualification.objects.values_list("pk", "name"))
+        for form in self.forms:
+            if form.instance.pk and form.cleaned_data:
+                included = form.cleaned_data.get("includes")
+                includes[form.instance.pk] = included.pk if included else None
+                names[form.instance.pk] = form.cleaned_data.get("name")
+        circles = set()
+        for pk in includes:
+            seen = staffing.chain(pk, includes)
+            if includes.get(seen[-1]) is not None:  # back to one in the chain
+                start = seen.index(includes[seen[-1]])
+                circles.add(frozenset(seen[start:]))
+        if circles:
+            raise forms.ValidationError(
+                _("These qualifications count as each other: %(qualifications)s")
+                % {
+                    "qualifications": "; ".join(
+                        sorted(", ".join(sorted(names[pk] for pk in circle)) for circle in circles)
+                    )
+                }
+            )
 
 
 QualificationFormSet = forms.modelformset_factory(

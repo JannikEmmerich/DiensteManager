@@ -3,6 +3,7 @@
 import importlib
 from datetime import timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 from django.apps import apps
@@ -10,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from billing import services
+from duties import staffing
 from duties.models import Duty, DutyPosition, Qualification, Report
 from lifecycle import history
 
@@ -375,6 +377,126 @@ def test_staffing_per_position(client, member, unit, paramedic, first_aider):
     assert "2 × Paramedic (RS) · 15.00 € per helper hour" in page
     assert ">2/2</span>" in page
     assert ">0/3</span>" in page
+
+
+# --- Higher qualifications count for lower ones -------------------------------------------------
+
+
+def _counts(positions, reports, includes):
+    """Runs the staffing count on plain positions (pk, qualification, count)."""
+    positions = [
+        SimpleNamespace(pk=pk, qualification_id=qualification, count=count)
+        for pk, qualification, count in positions
+    ]
+    staffing.count(positions, reports, includes)
+    return {p.pk: (p.confirmed_count, p.pending_count) for p in positions}
+
+
+CONFIRMED, PENDING = Report.Status.CONFIRMED, Report.Status.REPORTED
+# Qualifications: 3 emergency paramedic counts as 2 paramedic, which counts as 1 first aider.
+CHAIN = {1: None, 2: 1, 3: 2}
+
+
+def test_paramedics_fill_places_for_first_aiders():
+    # 2 first aiders and 1 paramedic needed; 1 first aider and 2 paramedics confirmed.
+    positions = [(10, 1, 2), (20, 2, 1)]
+    reports = [(10, CONFIRMED), (20, CONFIRMED), (20, CONFIRMED)]
+    assert _counts(positions, reports, CHAIN) == {10: (2, 0), 20: (1, 0)}
+    # Without "also counts as", the second paramedic overstaffs their own position.
+    assert _counts(positions, reports, {1: None, 2: None}) == {10: (1, 0), 20: (2, 0)}
+
+
+def test_counting_follows_the_chain_but_not_backwards():
+    positions = [(10, 1, 1), (20, 2, 1), (30, 3, 1)]
+    # Emergency paramedics fill the places of paramedics and first aiders.
+    assert _counts(positions, [(30, CONFIRMED)] * 3, CHAIN) == {
+        10: (1, 0),
+        20: (1, 0),
+        30: (1, 0),
+    }
+    # First aiders never fill places for paramedics.
+    assert _counts(positions, [(10, CONFIRMED), (10, CONFIRMED)], CHAIN) == {
+        10: (2, 0),
+        20: (0, 0),
+        30: (0, 0),
+    }
+
+
+def test_pending_helpers_take_the_places_left():
+    positions = [(10, 1, 2), (20, 2, 1)]
+    reports = [(20, PENDING), (20, CONFIRMED), (10, PENDING), (20, PENDING)]
+    assert _counts(positions, reports, CHAIN) == {10: (0, 2), 20: (1, 1)}
+
+
+def test_anyone_fills_places_for_any_qualification():
+    positions = [(10, 1, 1), (40, None, 2)]
+    reports = [(10, CONFIRMED), (10, CONFIRMED), (40, CONFIRMED), (None, CONFIRMED)]
+    assert _counts(positions, reports, CHAIN) == {10: (1, 0), 40: (2, 0)}
+    # Helpers for any qualification only fill those places.
+    assert _counts([(10, 1, 1)], [(None, CONFIRMED)], CHAIN) == {10: (0, 0)}
+
+
+def test_circles_do_not_hang():
+    assert staffing.chain(1, {1: 2, 2: 1}) == [1, 2]
+
+
+def test_duty_page_counts_higher_qualifications(client, member, unit, paramedic, first_aider):
+    paramedic.includes = first_aider
+    paramedic.save()
+    duty = create_duty(helpers_needed=3)
+    duty.positions.all().delete()
+    sanh = DutyPosition.objects.create(duty=duty, qualification=first_aider, count=2)
+    rs = DutyPosition.objects.create(duty=duty, qualification=paramedic, count=1)
+    create_report(duty, unit, name="A", position=sanh, status=Report.Status.CONFIRMED)
+    create_report(duty, unit, name="B", position=rs, status=Report.Status.CONFIRMED)
+    create_report(duty, unit, name="C", position=rs, status=Report.Status.CONFIRMED)
+    client.force_login(member)
+    page = client.get(duty.get_absolute_url()).text
+    assert '<span class="badge text-bg-success">2/2</span>' in page
+    assert '<span class="badge text-bg-success">1/1</span>' in page
+    assert "text-bg-warning" not in page
+    # The helpers keep the qualification they were reported with.
+    assert page.count("<td>Paramedic (RS)</td>") == 2
+
+
+def test_choices_count_higher_qualifications(client, member, unit, paramedic, first_aider):
+    paramedic.includes = first_aider
+    paramedic.save()
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    for name in ["A", "B", "C"]:
+        create_report(duty, unit, name=name, position=rs, status=Report.Status.CONFIRMED)
+    client.force_login(member)
+    page = client.get(reverse("report_create", args=[duty.pk])).text
+    assert ">Paramedic (RS) – all taken</option>" in page
+    assert ">First aider (SanH) – 2 open</option>" in page
+
+
+def test_catalogue_sets_what_a_qualification_counts_as(client, dispatcher, paramedic, first_aider):
+    client.force_login(dispatcher)
+    data = {
+        "qualifications-TOTAL_FORMS": "2",
+        "qualifications-INITIAL_FORMS": "2",
+        "qualifications-0-id": paramedic.pk,
+        "qualifications-0-name": "Paramedic",
+        "qualifications-0-includes": first_aider.pk,
+        "qualifications-0-sort_order": "10",
+        "qualifications-0-is_active": "on",
+        "qualifications-1-id": first_aider.pk,
+        "qualifications-1-name": "First aider",
+        "qualifications-1-sort_order": "20",
+        "qualifications-1-is_active": "on",
+    }
+    page = client.get(reverse("qualification_list")).text
+    assert "Also counts as" in page
+    client.post(reverse("qualification_list"), data)
+    paramedic.refresh_from_db()
+    assert paramedic.includes == first_aider
+    # Not in circles.
+    data["qualifications-1-includes"] = paramedic.pk
+    response = client.post(reverse("qualification_list"), data)
+    assert "These qualifications count as each other: First aider, Paramedic" in response.text
+    first_aider.refresh_from_db()
+    assert first_aider.includes is None
 
 
 # --- Rates per position ------------------------------------------------------------------------

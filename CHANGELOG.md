@@ -7,6 +7,14 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Qualifications can count as another one ("Also counts as" in the catalogue), e.g.
+  emergency paramedic → paramedic → first aider. Helpers with a higher qualification
+  then also fill places for the lower ones: with 2 × first aider and 1 × paramedic
+  needed, 1 first aider and 2 paramedics staff the duty fully. Set it up under
+  *Duties → Qualifications* after updating.
+
 ### Changed
 
 - Reporting helpers is simpler: the form starts with one row, "Add another helper"

@@ -12,6 +12,14 @@
                     deleted; deactivate those you no longer need.
                 {% endblocktranslate %}
             </p>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed %}
+                    <strong>Also counts as:</strong> helpers with the qualification also fill
+                    places for the one chosen here, and for the one that one counts as. E.g.
+                    emergency paramedic → paramedic → first aider: an emergency paramedic also
+                    fills places for paramedics and first aiders, but not the other way round.
+                {% endblocktranslate %}
+            </p>
             <form method="post">
                 {% csrf_token %}
                 {% translate "Add another qualification" as add_label %}

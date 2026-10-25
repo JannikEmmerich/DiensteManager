@@ -12,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
 
+from . import staffing
+
 CENT = Decimal("0.01")
 
 
@@ -27,6 +29,17 @@ class Qualification(models.Model):
         _("active"),
         default=True,
         help_text=_("Inactive qualifications cannot be chosen for new positions any more."),
+    )
+    # Helpers with this qualification also fill positions for the one it includes, and
+    # for the one that one includes, and so on (see duties.staffing).
+    includes = models.ForeignKey(
+        "self",
+        verbose_name=_("also counts as"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="included_by",
+        help_text=_("E.g. paramedics also count as first aiders."),
     )
 
     class Meta:
@@ -235,16 +248,16 @@ class Duty(models.Model):
         return Decimal(0)
 
     def positions_with_staffing(self):
-        """The positions in their order, with the number of confirmed and pending reports."""
-        return (
-            self.positions.select_related("qualification")
-            .annotate(
-                confirmed_count=Count("reports", filter=Q(reports__status=Report.Status.CONFIRMED)),
-                pending_count=Count("reports", filter=Q(reports__status=Report.Status.REPORTED)),
-            )
-            # Meta.ordering is not applied to queries with GROUP BY.
-            .order_by(*DutyPosition._meta.ordering)
-        )
+        """The positions with the number of confirmed and pending helpers who fill them.
+
+        Helpers also fill positions whose qualification theirs includes (see
+        duties.staffing).
+        """
+        positions = list(self.positions.select_related("qualification"))
+        reports = self.reports.filter(status__in=Report.ACTIVE).values_list("position", "status")
+        includes = dict(Qualification.objects.values_list("pk", "includes"))
+        staffing.count(positions, list(reports), includes)
+        return positions
 
     def update_helpers_needed(self):
         """``helpers_needed`` is the sum of the positions."""
