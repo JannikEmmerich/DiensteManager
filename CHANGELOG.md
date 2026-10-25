@@ -7,6 +7,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] – 2026-10-25
+
+When updating from 0.6.0 (or 0.5.0) nothing needs to be done; the database is migrated
+when the container starts.
+
 ### Changed
 
 - Demo mode: admins add accounts directly with a password ("Add account" on a unit's
