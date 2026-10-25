@@ -10,6 +10,7 @@ from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from accounts.permissions import is_dispatcher
+from lifecycle import history
 
 from . import notifications, permissions
 from .forms import DutyForm, HelperUnitForm, ReportFormSet
@@ -65,6 +66,10 @@ def duty_detail(request, pk):
             "duty": duty,
             "reports": reports,
             "can_report": permissions.can_report(request.user, duty),
+            # The history names helpers of all units, so only dispatchers see it.
+            "history": history.entries(history.scope_for_duty(duty.pk))
+            if is_dispatcher(request.user)
+            else None,
             "offered_units": duty.units.all() if not duty.all_units else None,
         },
     )
@@ -78,6 +83,7 @@ def duty_create(request):
         duty.created_by = request.user
         duty.save()
         form.save_m2m()
+        history.record(duty, history.Action.CREATED, request.user, history.scope_for_duty(duty.pk))
         if "release" in request.POST:
             _release(request, duty)
         else:
@@ -100,6 +106,14 @@ def duty_update(request, pk):
     form = DutyForm(request.POST or None, instance=duty)
     if request.method == "POST" and form.is_valid():
         form.save()
+        if form.has_changed():
+            history.record(
+                duty,
+                history.Action.CHANGED,
+                request.user,
+                history.scope_for_duty(duty.pk),
+                history.form_changes(form),
+            )
         messages.success(request, _("Saved."))
         if duty.status == Duty.Status.RELEASED:
             changes = [name for name in notifications.RELEVANT_CHANGES if name in form.changed_data]
@@ -132,6 +146,7 @@ def _release(request, duty):
     if duty.has_started:
         messages.error(request, _("This duty has already started and can no longer be released."))
     elif _change_status(duty, Duty.Status.DRAFT, Duty.Status.RELEASED, "released_at"):
+        history.record(duty, history.Action.RELEASED, request.user, history.scope_for_duty(duty.pk))
         messages.success(request, _("Duty released. The units have been notified."))
         notifications.duty_released(request, duty)
     else:
@@ -151,6 +166,9 @@ def duty_cancel(request, pk):
     _dispatcher_only(request)
     duty = get_object_or_404(Duty, pk=pk)
     if _change_status(duty, Duty.Status.RELEASED, Duty.Status.CANCELLED, "cancelled_at"):
+        history.record(
+            duty, history.Action.CANCELLED, request.user, history.scope_for_duty(duty.pk)
+        )
         messages.success(request, _("Duty cancelled."))
         notifications.duty_cancelled(request, duty)
     else:
@@ -165,6 +183,7 @@ def duty_delete(request, pk):
     if duty.status != Duty.Status.DRAFT:
         messages.error(request, _("Only drafts can be deleted. Cancel released duties instead."))
         return redirect(duty)
+    history.record(duty, history.Action.DELETED, request.user, history.scope_for_duty(duty.pk))
     duty.delete()
     messages.success(request, _("Duty “%(title)s” deleted.") % {"title": duty.title})
     return redirect("duty_list")
@@ -183,7 +202,9 @@ def report_create(request, pk):
     unit = request.user.unit
     formset = ReportFormSet(request.POST or None, duty=duty, unit=unit)
     if request.method == "POST" and formset.is_valid():
-        reports = _save_new_reports(request, formset, duty, unit, reported_by=request.user)
+        reports = _save_new_reports(
+            request, formset, duty, unit, history.Action.REPORTED, reported_by=request.user
+        )
         if reports is not None:
             messages.success(
                 request,
@@ -215,6 +236,7 @@ def report_add(request, pk):
             formset,
             duty,
             unit,
+            history.Action.ADDED,
             status=Report.Status.CONFIRMED,
             reported_by=request.user,
             decided_by=request.user,
@@ -241,7 +263,7 @@ def report_add(request, pk):
     )
 
 
-def _save_new_reports(request, formset, duty, unit, **values):
+def _save_new_reports(request, formset, duty, unit, action, **values):
     """Saves the filled-in rows; returns the reports, or None if a name was taken meanwhile."""
     reports = formset.new_reports()
     for report in reports:
@@ -253,6 +275,7 @@ def _save_new_reports(request, formset, duty, unit, **values):
         with transaction.atomic():
             for report in reports:
                 report.save()
+                history.record(report, action, request.user, history.scope_for_duty(duty.pk))
     except IntegrityError:
         # Someone else reported the same person in the meantime.
         messages.error(request, _("One of these people has already been reported."))
@@ -279,6 +302,12 @@ def report_withdraw(request, pk):
     ):
         report.status = Report.Status.WITHDRAWN
         report.withdrawn_at = now
+        history.record(
+            report,
+            history.Action.WITHDRAWN,
+            request.user,
+            history.scope_for_duty(report.duty_id),
+        )
         messages.success(request, _("Report for %(name)s withdrawn.") % {"name": report.name})
         notifications.report_withdrawn(request, report)
     return redirect(report.duty)
@@ -301,6 +330,14 @@ def _decide(request, reports, status):
             report.decided_at = now
             report.decided_by = request.user
             changed.append(report)
+            history.record(
+                report,
+                history.Action.CONFIRMED
+                if status == Report.Status.CONFIRMED
+                else history.Action.DECLINED,
+                request.user,
+                history.scope_for_duty(report.duty_id),
+            )
     return changed
 
 

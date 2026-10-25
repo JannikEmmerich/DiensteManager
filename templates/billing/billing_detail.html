@@ -66,6 +66,8 @@
                 <h2 class="h6">{% translate "Note" %}</h2>
                 <p>{{ billing.note|linebreaksbr }}</p>
             {% endif %}
+            <h2 class="h6 mt-4">{% translate "Change history" %}</h2>
+            {% include "lifecycle/_history.html" with entries=history %}
         </div>
         <div class="col-lg-4">
             <div class="card">

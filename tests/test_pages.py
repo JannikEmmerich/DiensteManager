@@ -9,6 +9,7 @@ from django.urls import reverse
 from billing import services
 from billing.models import BankAccount
 from duties.models import Duty, Report
+from lifecycle import history
 from mailings.models import Mailing
 
 from .conftest import create_duty, create_report
@@ -123,6 +124,11 @@ def test_billing_pages_render(client, dispatcher, unit_lead, unit):
     ]:
         assert client.get(url).status_code == 200, url
     billing = services.create_billing(unit, [(report, Decimal(4))], "", dispatcher)
+    history.record(
+        billing, history.Action.CREATED, dispatcher, history.scope_for_billing(billing.pk)
+    )
+    history.record(duty, history.Action.RELEASED, dispatcher, history.scope_for_duty(duty.pk))
+    assert client.get(duty.get_absolute_url()).status_code == 200
     for user in (dispatcher, unit_lead):
         client.force_login(user)
         for url in [

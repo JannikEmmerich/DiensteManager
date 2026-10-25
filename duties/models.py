@@ -7,6 +7,7 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Lower
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
@@ -228,6 +229,8 @@ class Report(models.Model):
     )
     decided_at = models.DateTimeField(_("decided at"), null=True, blank=True)
     withdrawn_at = models.DateTimeField(_("withdrawn at"), null=True, blank=True)
+    # Data lifecycle: name, qualification and note are erased after the retention period.
+    anonymized_at = models.DateTimeField(_("anonymised at"), null=True, blank=True)
 
     class Meta:
         verbose_name = _("report")
@@ -235,18 +238,18 @@ class Report(models.Model):
         ordering = ["unit__name", "created_at"]
         constraints = [
             # A unit reports a person only once per duty; after withdrawing, it may
-            # report them again.
+            # report them again. Anonymised reports have no name any more.
             models.UniqueConstraint(
                 Lower("name"),
                 "duty",
                 "unit",
-                condition=~Q(status="withdrawn"),
+                condition=~Q(status="withdrawn") & Q(anonymized_at__isnull=True),
                 name="report_unique_name_per_duty_and_unit",
             ),
         ]
 
     def __str__(self):
-        return self.name
+        return self.name or gettext("(anonymised)")
 
     @property
     def is_active(self):

@@ -1,0 +1,23 @@
+{% load i18n history_tags %}
+{% if entries %}
+    <ul class="list-group list-group-flush small">
+        {% for entry in entries %}
+            <li class="list-group-item px-0">
+                <div>
+                    <span class="text-body-secondary">{{ entry.created_at|date:"SHORT_DATETIME_FORMAT" }}</span>
+                    · <strong>{{ entry.object_repr }}</strong> {{ entry.get_action_display }}{% if entry.user_repr %} · {{ entry.user_repr }}{% endif %}
+                </div>
+                {% history_changes entry as rows %}
+                {% if rows %}
+                    <ul class="mb-0">
+                        {% for label, old, new in rows %}
+                            <li>{{ label }}: <del>{{ old }}</del> → {{ new }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="small text-body-secondary">{% translate "No changes recorded yet." %}</p>
+{% endif %}

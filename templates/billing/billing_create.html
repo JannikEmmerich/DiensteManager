@@ -4,6 +4,14 @@
 {% block content %}
     <h1 class="h3 mb-1">{% translate "Create statement" %}</h1>
     <p class="text-body-secondary">{{ unit.name }}</p>
+    {% if bank_recently_changed %}
+        <div class="alert alert-warning">
+            {% blocktranslate trimmed with date=bank_account.updated_at|date:"SHORT_DATETIME_FORMAT" name=bank_account.updated_by|default:"–" iban=bank_account.iban_display %}
+                The bank details of this unit were changed on {{ date }} by {{ name }} (IBAN
+                {{ iban }}). Before transferring money, check that the change was agreed.
+            {% endblocktranslate %}
+        </div>
+    {% endif %}
     {% if not bank_account %}
         <div class="alert alert-warning">
             {% translate "This unit has not entered any bank details yet. You can still create the statement; the PDF then has no bank account." %}

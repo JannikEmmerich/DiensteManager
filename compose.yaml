@@ -46,6 +46,28 @@ services:
       retries: 3
       start_period: 30s
 
+  housekeeping:
+    # Data lifecycle: applies the retention periods once a day (see README). Same image
+    # as web.
+    image: ghcr.io/jannikemmerich/dienstemanager:${DIENSTEMANAGER_VERSION:-latest}
+    build: .
+    restart: unless-stopped
+    entrypoint: ["/app/docker/housekeeping.sh"]
+    # The healthcheck of the image asks the web server, which does not run here.
+    healthcheck:
+      disable: true
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: ${DOMAIN:?DOMAIN is missing in .env}
+      DATABASE_URL: postgres://dienstemanager:${POSTGRES_PASSWORD}@db:5432/dienstemanager
+      CACHE_URL: dbcache://django_cache
+    depends_on:
+      web:
+        condition: service_healthy
+
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
