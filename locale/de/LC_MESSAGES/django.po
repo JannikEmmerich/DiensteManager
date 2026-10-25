@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 03:05+0100\n"
+"POT-Creation-Date: 2026-10-25 10:38+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: accounts/adapters.py:99
+#: accounts/adapters.py:100
 msgid "The invitation is no longer valid."
 msgstr "Die Einladung ist nicht mehr gültig."
 
@@ -114,12 +114,22 @@ msgstr "Automatisch (Browsereinstellung)"
 #: accounts/forms.py:152
 msgid ""
 "When a statement of the duty pay of my unit is created (with the PDF), paid "
-"or cancelled."
+"or cancelled, and when its bank details change."
 msgstr ""
 "Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit PDF),"
-" bezahlt oder storniert wird."
+" bezahlt oder storniert wird und wenn sich ihre Bankverbindung ändert."
 
-#: accounts/forms.py:160
+#: accounts/forms.py:156
+msgid "Changed bank details"
+msgstr "Geänderte Bankverbindungen"
+
+#: accounts/forms.py:158
+msgid "When a unit changes the account to which its duty pay is transferred."
+msgstr ""
+"Wenn eine Bereitschaft das Konto ändert, auf das ihre Dienstgelder überwiesen"
+" werden."
+
+#: accounts/forms.py:165
 #, python-format
 msgid ""
 "The summary comes every day at %(hour)d:00. Changed and cancelled duties, "
@@ -130,11 +140,11 @@ msgstr ""
 "abgesagte Dienste, Abrechnungen, geänderte Bankverbindungen und E-Mails der "
 "Disposition kommen immer sofort."
 
-#: accounts/forms.py:170
+#: accounts/forms.py:175
 msgid "When units report or withdraw helpers."
 msgstr "Wenn Bereitschaften Helfer melden oder Meldungen zurückziehen."
 
-#: accounts/forms.py:173
+#: accounts/forms.py:178
 msgid ""
 "When reports of my unit are confirmed or declined, and when a duty with "
 "reports of my unit changes or is cancelled."
@@ -142,13 +152,21 @@ msgstr ""
 "Wenn Meldungen meiner Bereitschaft bestätigt oder abgelehnt werden und wenn "
 "sich ein Dienst mit Meldungen meiner Bereitschaft ändert oder abgesagt wird."
 
-#: accounts/forms.py:178
+#: accounts/forms.py:183
 msgid ""
 "When helpers I reported are confirmed or declined, and when their duty "
 "changes or is cancelled."
 msgstr ""
 "Wenn von mir gemeldete Helfer bestätigt oder abgelehnt werden und wenn sich "
 "ihr Dienst ändert oder abgesagt wird."
+
+#: accounts/middleware.py:94
+msgid ""
+"Your account must be protected with two-factor authentication. Please set it "
+"up now."
+msgstr ""
+"Dein Konto muss mit der Zwei-Faktor-Anmeldung geschützt werden. Bitte richte "
+"sie jetzt ein."
 
 #: accounts/models.py:23
 msgid "Dispatcher (internal)"
@@ -621,18 +639,17 @@ msgstr "Nur offene Abrechnungen können als bezahlt markiert werden."
 #, python-format
 msgid "Statement %(number)s cancelled. Its helpers can be billed again."
 msgstr ""
-"Abrechnung %(number)s storniert. Ihre Helfer können erneut abgerechnet "
-"werden."
+"Abrechnung %(number)s storniert. Die Helfer können erneut abgerechnet werden."
 
 #: billing/views.py:204
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
-#: config/settings.py:259
+#: config/settings.py:277
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:260
+#: config/settings.py:278
 msgid "English"
 msgstr "Englisch"
 
@@ -1848,7 +1865,7 @@ msgstr "Als bezahlt markieren"
 #: templates/billing/billing_detail.html:18
 msgid "Cancel this statement? Its helpers can then be billed again."
 msgstr ""
-"Diese Abrechnung stornieren? Ihre Helfer können dann erneut abgerechnet "
+"Diese Abrechnung stornieren? Die Helfer können dann erneut abgerechnet "
 "werden."
 
 #: templates/billing/billing_detail.html:21
@@ -1858,7 +1875,7 @@ msgstr "Abrechnung stornieren"
 #: templates/billing/billing_detail.html:28
 #, python-format
 msgid "Cancelled on %(date)s. Its helpers can be billed again."
-msgstr "Storniert am %(date)s. Ihre Helfer können erneut abgerechnet werden."
+msgstr "Storniert am %(date)s. Die Helfer können erneut abgerechnet werden."
 
 #: templates/billing/billing_detail.html:30
 #, python-format
@@ -1938,6 +1955,14 @@ msgstr "IBAN:"
 
 #: templates/billing/email/bank_account_changed_message.txt:7
 msgid ""
+"Please make sure the change is genuine before the next statement, e.g. by "
+"calling the unit lead."
+msgstr ""
+"Bitte prüfe vor der nächsten Abrechnung, ob die Änderung echt ist, z. B. mit "
+"einem Anruf bei der Bereitschaftsleitung."
+
+#: templates/billing/email/bank_account_changed_message.txt:7
+msgid ""
 "If this change was not agreed, please contact the dispatchers right away."
 msgstr ""
 "Falls diese Änderung nicht abgesprochen war, melde dich bitte sofort bei der "
@@ -1954,7 +1979,7 @@ msgid ""
 "The dispatchers have cancelled the statement %(number)s of %(unit)s. Its "
 "helpers will be billed again in a new statement."
 msgstr ""
-"die Disposition hat die Abrechnung %(number)s von %(unit)s storniert. Ihre "
+"die Disposition hat die Abrechnung %(number)s von %(unit)s storniert. Die "
 "Helfer werden in einer neuen Abrechnung erneut abgerechnet."
 
 #: templates/billing/email/billing_cancelled_subject.txt:1
@@ -2567,8 +2592,8 @@ msgid ""
 "email."
 msgstr ""
 "Für Helfer, die sich direkt bei dir gemeldet haben, z. B. per E-Mail oder "
-"Telefon. Sie werden sofort bestätigt; die Bereitschaftsleitungen der "
-"Bereitschaft werden per E-Mail benachrichtigt."
+"Telefon. Diese Helfer werden sofort bestätigt; die Bereitschaftsleitungen der"
+" Bereitschaft werden per E-Mail benachrichtigt."
 
 #: templates/duties/report_add.html:21
 msgid "Add and confirm"

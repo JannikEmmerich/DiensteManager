@@ -1,0 +1,320 @@
+# German texts of django-allauth with "du" instead of "Sie", like the rest of the
+# portal. Only allauth's formal texts are listed here; this catalogue comes after
+# locale/ in LOCALE_PATHS and before allauth's own one. tests/test_i18n.py fails if
+# an allauth update brings new formal texts.
+msgid ""
+msgstr ""
+"Project-Id-Version: DiensteManager\n"
+"PO-Revision-Date: 2026-10-25 11:00+0100\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: allauth/account/adapter.py:825
+msgid "Use your password"
+msgstr "Verwende dein Passwort"
+
+#: allauth/account/adapter.py:834
+msgid "Use authenticator app or code"
+msgstr "Verwende eine Authentifizierungs-App oder einen Code"
+
+#: allauth/account/adapter.py:841 allauth/templates/mfa/authenticate.html:41
+#: allauth/templates/mfa/webauthn/reauthenticate.html:15
+msgid "Use a security key"
+msgstr "Verwende einen Sicherheitsschlüssel"
+
+#: allauth/account/fields.py:62
+msgid "Enter a phone number including country code (e.g. +1 for the US)."
+msgstr ""
+"Gib eine Telefonnummer einschließlich Ländervorwahl ein (z. B. +49 für "
+"Deutschland)."
+
+#: allauth/mfa/adapter.py:30
+msgid ""
+"You cannot add an email address to an account protected by two-factor "
+"authentication."
+msgstr ""
+"Du kannst keine E-Mail-Adresse zu einem Konto hinzufügen, das durch die Zwei-"
+"Faktor-Authentifizierung geschützt ist."
+
+#: allauth/mfa/adapter.py:33
+msgid "You cannot deactivate two-factor authentication."
+msgstr "Du kannst die Zwei-Faktor-Authentifizierung nicht deaktivieren."
+
+#: allauth/mfa/adapter.py:36
+msgid ""
+"You cannot generate recovery codes without having two-factor authentication "
+"enabled."
+msgstr ""
+"Du kannst keine Wiederherstellungscodes generieren, ohne die Zwei-Faktor-"
+"Authentifizierung aktiviert zu haben."
+
+#: allauth/mfa/adapter.py:40
+msgid ""
+"You cannot activate two-factor authentication until you have verified your "
+"email address."
+msgstr ""
+"Du kannst die Zwei-Faktor-Authentifizierung erst aktivieren, wenn du deine "
+"E-Mail-Adresse bestätigt hast."
+
+#: allauth/mfa/webauthn/forms.py:59
+msgid ""
+"Enabling passwordless operation allows you to sign in using just this key, "
+"but imposes additional requirements such as biometrics or PIN protection."
+msgstr ""
+"Wenn du den passwortlosen Betrieb aktivierst, kannst du dich nur mit diesem "
+"Schlüssel anmelden, musst aber zusätzliche Anforderungen erfüllen, wie z. B. "
+"biometrische Daten oder PIN-Schutz."
+
+#: allauth/socialaccount/adapter.py:38
+msgid "You cannot disconnect your last remaining third-party account."
+msgstr "Du kannst dein letztes verbleibendes Drittanbieterkonto nicht trennen."
+
+#: allauth/templates/account/base_confirm_code.html:27
+msgid ""
+"We've sent a code to %(recipient)s. The code expires shortly, so please enter"
+" it soon."
+msgstr ""
+"Wir haben einen Code an %(recipient)s gesendet. Der Code läuft in Kürze ab, "
+"bitte gib ihn bald ein."
+
+#: allauth/templates/account/base_reauthenticate.html:12
+msgid "Please reauthenticate to safeguard your account."
+msgstr "Bitte authentifiziere dich erneut, um dein Konto zu schützen."
+
+#: allauth/templates/account/confirm_email_verification_code.html:8
+msgid "Enter Email Verification Code"
+msgstr "Gib den E-Mail-Bestätigungscode ein"
+
+#: allauth/templates/account/confirm_phone_verification_code.html:8
+msgid "Enter Phone Verification Code"
+msgstr "Gib den Telefon-Bestätigungscode ein"
+
+#: allauth/templates/account/email/base_notification.txt:5
+msgid ""
+"You are receiving this mail because the following change was made to your "
+"account:"
+msgstr ""
+"Du erhältst diese E-Mail, weil die folgende Änderung an deinem Konto "
+"vorgenommen wurde:"
+
+#: allauth/templates/account/email/base_notification.txt:10
+msgid ""
+"If you do not recognize this change then please take proper security precautions immediately. The change to your account originates from:\n"
+"\n"
+"- IP address: %(ip)s\n"
+"- Browser: %(user_agent)s\n"
+"- Date: %(timestamp)s"
+msgstr ""
+"Wenn du diese Änderung nicht erkennst, ergreife bitte umgehend angemessene Sicherheitsmaßnahmen. Die Änderung an deinem Konto stammt von:\n"
+"\n"
+"- IP-Adresse: %(ip)s\n"
+"- Browser: %(user_agent)s\n"
+"- Datum: %(timestamp)s"
+
+#: allauth/templates/account/email/email_changed_message.txt:4
+msgid "Your email has been changed from %(from_email)s to %(to_email)s."
+msgstr ""
+"Deine E-Mail-Adresse wurde von %(from_email)s auf %(to_email)s geändert."
+
+#: allauth/templates/account/email/email_confirm_message.txt:4
+msgid "Your email has been confirmed."
+msgstr "Deine E-Mail-Adresse wurde bestätigt."
+
+#: allauth/templates/account/email/email_confirmation_message.txt:5
+msgid ""
+"You're receiving this email because user %(user_display)s has given your "
+"email address to register an account on %(site_domain)s."
+msgstr ""
+"Du erhältst diese E-Mail, weil %(user_display)s deine E-Mail-Adresse "
+"angegeben hat, um ein Konto bei %(site_domain)s zu registrieren."
+
+#: allauth/templates/account/email/email_confirmation_message.txt:7
+msgid ""
+"Your email verification code is listed below. Please enter it in your open "
+"browser window."
+msgstr ""
+"Dein E-Mail-Bestätigungscode steht unten. Bitte gib ihn in deinem geöffneten "
+"Browserfenster ein."
+
+#: allauth/templates/account/email/email_confirmation_message.txt:9
+msgid "To confirm this is correct, go to %(activate_url)s"
+msgstr "Um zu bestätigen, dass das stimmt, öffne %(activate_url)s"
+
+#: allauth/templates/account/email/email_deleted_message.txt:4
+msgid "Email address %(deleted_email)s has been removed from your account."
+msgstr "Die E-Mail-Adresse %(deleted_email)s wurde aus deinem Konto entfernt."
+
+#: allauth/templates/account/email/login_code_message.txt:5
+msgid ""
+"Your sign-in code is listed below. Please enter it in your open browser "
+"window."
+msgstr ""
+"Dein Anmeldecode steht unten. Bitte gib ihn in deinem geöffneten "
+"Browserfenster ein."
+
+#: allauth/templates/account/email/login_code_message.txt:9
+#: allauth/templates/account/email/password_reset_code_message.txt:9
+#: allauth/templates/account/email/unknown_account_message.txt:6
+msgid "This mail can be safely ignored if you did not initiate this action."
+msgstr ""
+"Wenn du das nicht selbst ausgelöst hast, kannst du diese E-Mail einfach "
+"ignorieren."
+
+#: allauth/templates/account/email/password_reset_code_message.txt:5
+msgid ""
+"Your password reset code is listed below. Please enter it in your open "
+"browser window."
+msgstr ""
+"Dein Code zum Zurücksetzen des Passworts steht unten. Bitte gib ihn in deinem"
+" geöffneten Browserfenster ein."
+
+#: allauth/templates/account/email/password_reset_message.txt:4
+msgid "Your password has been reset."
+msgstr "Dein Passwort wurde zurückgesetzt."
+
+#: allauth/templates/account/email/password_set_message.txt:4
+msgid "Your password has been set."
+msgstr "Dein Passwort wurde festgelegt."
+
+#: allauth/templates/account/email/unknown_account_message.txt:4
+msgid ""
+"You are receiving this email because you, or someone else, tried to access an"
+" account with email %(email)s. However, we do not have any record of such an "
+"account in our database."
+msgstr ""
+"Du erhältst diese E-Mail, weil du oder jemand anderes versucht hat, auf ein "
+"Konto mit der E-Mail-Adresse %(email)s zuzugreifen. Ein solches Konto gibt es"
+" bei uns jedoch nicht."
+
+#: allauth/templates/account/email/unknown_account_message.txt:8
+msgid "If it was you, you can sign up for an account using the link below."
+msgstr "Wenn du das warst, kannst du über den Link unten ein Konto erstellen."
+
+#: allauth/templates/account/messages/phone_verified.txt:2
+msgid "You have verified phone number %(phone)s."
+msgstr "Du hast die Telefonnummer %(phone)s bestätigt."
+
+#: allauth/templates/account/reauthenticate.html:6
+msgid "Enter your password:"
+msgstr "Gib dein Passwort ein:"
+
+#: allauth/templates/account/request_login_code.html:12
+msgid "You will receive a special code for a password-free sign-in."
+msgstr "Du erhältst einen speziellen Code für die Anmeldung ohne Passwort."
+
+#: allauth/templates/mfa/authenticate.html:13
+msgid ""
+"Your account is protected by two-factor authentication. Please enter an "
+"authenticator code:"
+msgstr ""
+"Dein Konto ist durch die Zwei-Faktor-Authentifizierung geschützt. Bitte gib "
+"einen Code aus deiner Authenticator-App ein:"
+
+#: allauth/templates/mfa/index.html:50
+msgid "You have added %(count)s security key."
+msgid_plural "You have added %(count)s security keys."
+msgstr[0] "Du hast %(count)s Sicherheitsschlüssel hinzugefügt."
+msgstr[1] "Du hast %(count)s Sicherheitsschlüssel hinzugefügt."
+
+#: allauth/templates/mfa/messages/recovery_codes_generated.txt:4
+msgid "Save them  in a secure location now — they won't be shown again."
+msgstr ""
+"Speichere sie jetzt an einem sicheren Ort – sie werden nicht noch einmal "
+"angezeigt."
+
+#: allauth/templates/mfa/reauthenticate.html:6
+msgid "Enter an authenticator code:"
+msgstr "Gib einen Code aus deiner Authenticator-App ein:"
+
+#: allauth/templates/mfa/recovery_codes/generate.html:9
+msgid "You are about to generate a new set of recovery codes for your account."
+msgstr ""
+"Du bist dabei, neue Wiederherstellungscodes für dein Konto zu erzeugen."
+
+#: allauth/templates/mfa/recovery_codes/generate.html:11
+msgid "This action will invalidate your existing codes."
+msgstr "Deine bisherigen Codes werden damit ungültig."
+
+#: allauth/templates/mfa/recovery_codes/generate.html:13
+msgid "Are you sure?"
+msgstr "Bist du sicher?"
+
+#: allauth/templates/mfa/totp/activate_form.html:11
+msgid ""
+"To protect your account with two-factor authentication, scan the QR code "
+"below with your authenticator app. Then, input the verification code "
+"generated by the app below."
+msgstr ""
+"Um dein Konto mit der Zwei-Faktor-Authentifizierung zu schützen, scanne den "
+"QR-Code unten mit deiner Authenticator-App. Gib dann den Bestätigungscode, "
+"den die App anzeigt, unten ein."
+
+#: allauth/templates/mfa/totp/activate_form.html:24
+msgid ""
+"You can store this secret and use it to reinstall your authenticator app at a"
+" later time."
+msgstr ""
+"Du kannst dieses Geheimnis aufbewahren, um deine Authenticator-App später neu"
+" einzurichten."
+
+#: allauth/templates/mfa/totp/deactivate_form.html:12
+msgid ""
+"You are about to deactivate authenticator app based authentication. Are you "
+"sure?"
+msgstr ""
+"Du bist dabei, die Anmeldung mit der Authenticator-App zu deaktivieren. Bist "
+"du sicher?"
+
+#: allauth/templates/mfa/trust.html:11
+msgid ""
+"If you choose to trust this browser, you will not be asked for a verification"
+" code the next time you sign in."
+msgstr ""
+"Wenn du diesem Browser vertraust, brauchst du beim nächsten Anmelden keinen "
+"Bestätigungscode."
+
+#: allauth/templates/mfa/webauthn/authenticator_confirm_delete.html:9
+msgid "Are you sure you want to remove this security key?"
+msgstr ""
+"Bist du sicher, dass du diesen Sicherheitsschlüssel entfernen möchtest?"
+
+#: allauth/templates/mfa/webauthn/signup_form.html:10
+msgid ""
+"You are about to create a passkey for your account. As you can add additional"
+" keys later on, you can use a descriptive name to tell the keys apart."
+msgstr ""
+"Du bist dabei, einen Passkey für dein Konto zu erstellen. Da du später "
+"weitere Schlüssel hinzufügen kannst, gib ihm am besten einen aussagekräftigen"
+" Namen, um die Schlüssel auseinanderzuhalten."
+
+#: allauth/templates/socialaccount/authentication_error.html:12
+msgid ""
+"An error occurred while attempting to login via your third-party account."
+msgstr ""
+"Bei der Anmeldung über dein Drittanbieterkonto ist ein Fehler aufgetreten."
+
+#: allauth/templates/socialaccount/connections.html:13
+msgid ""
+"You can sign in to your account using any of the following third-party "
+"accounts:"
+msgstr ""
+"Du kannst dich mit einem der folgenden Drittanbieterkonten bei deinem Konto "
+"anmelden:"
+
+#: allauth/templates/socialaccount/email/account_connected_message.txt:4
+msgid ""
+"A third-party account from %(provider)s has been connected to your account."
+msgstr ""
+"Ein Drittanbieterkonto von %(provider)s wurde mit deinem Konto verbunden."
+
+#: allauth/templates/socialaccount/email/account_disconnected_message.txt:4
+msgid ""
+"A third-party account from %(provider)s has been disconnected from your "
+"account."
+msgstr ""
+"Ein Drittanbieterkonto von %(provider)s wurde von deinem Konto getrennt."
