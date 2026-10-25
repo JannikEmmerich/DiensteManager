@@ -359,8 +359,8 @@ check that it builds.
 Writing `@claude` and a request in an issue or pull request (comment) starts Claude Code
 (`.github/workflows/claude.yml`, for accounts with write access). It works on a branch
 `claude/issue-…`, may run the tests, ruff and the translation and migration commands,
-and answers with a link to open the pull request. `claude-code-review.yml` reviews every
-pull request.
+and answers with a link to open the pull request. It follows `CLAUDE.md` (conventions
+and commands of this project). `claude-code-review.yml` reviews every pull request.
 
 ### Docker images
 
@@ -424,6 +424,7 @@ static/      app.css, app.js and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
 docker/      container entry point
 .github/     CI and release workflow, image clean-up, Dependabot, release notes script
+CLAUDE.md    conventions and commands for Claude (sessions and the @claude workflow)
 ```
 
 ## Next steps
