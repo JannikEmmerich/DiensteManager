@@ -13,6 +13,10 @@ All notable changes are listed here. The format follows
   and member, dispatchers those of all units (on the unit's page). Admins edit all data
   of other accounts in the portal – name, email address, role (also dispatcher), unit,
   language and notifications; the internal accounts are listed under *Units*.
+- Duties can be copied (button "Copy" on the duty page), e.g. for recurring events.
+  The new duty form is prefilled with title, location, description, duty pay, offered
+  units and positions; only date and times have to be entered. The copy is a draft
+  without reports.
 - Qualifications can count as another one ("Also counts as" in the catalogue), e.g.
   emergency paramedic → paramedic → first aider. Helpers with a higher qualification
   then also fill places for the lower ones: with 2 × first aider and 1 × paramedic

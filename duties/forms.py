@@ -183,6 +183,20 @@ DutyPositionFormSet = forms.inlineformset_factory(
 )
 
 
+def copy_formset_class(positions):
+    """The positions formset with one row per position to copy (the first row is the minimum)."""
+    return forms.inlineformset_factory(
+        Duty,
+        DutyPosition,
+        form=DutyPositionForm,
+        formset=BaseDutyPositionFormSet,
+        extra=max(len(positions) - 1, 0),
+        min_num=1,
+        validate_min=True,
+        can_delete=True,
+    )
+
+
 class QualificationForm(forms.ModelForm):
     class Meta:
         model = Qualification
