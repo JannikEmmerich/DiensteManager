@@ -19,6 +19,7 @@ from .forms import (
     QualificationFormSet,
     ReportFormSet,
     WithdrawalRequestForm,
+    copy_formset_class,
 )
 from .models import Duty, Report
 
@@ -102,8 +103,66 @@ def _save_positions(duty, formset):
     return formset.summary()
 
 
+def _copy_source(request):
+    """The duty named by ``?copy=<id>``, if any."""
+    try:
+        return Duty.objects.filter(pk=int(request.GET.get("copy", ""))).first()
+    except ValueError:
+        return None
+
+
+def _copy_initial(request, source):
+    """Form and position values for a new duty copied from ``source``.
+
+    Date and times are left out (they have to be entered), as are reports and the status.
+    Positions with a qualification that is no longer active are left out.
+    """
+    form_initial = {
+        "title": source.title,
+        "location": source.location,
+        "description": source.description,
+        "pay_type": source.pay_type,
+        "pay_rate": source.pay_rate,
+        "all_units": str(source.all_units),
+        "units": list(source.units.values_list("pk", flat=True)),
+    }
+    positions = []
+    skipped = []
+    for position in source.positions.select_related("qualification"):
+        if position.qualification and not position.qualification.is_active:
+            skipped.append(position.qualification.name)
+            continue
+        positions.append(
+            {
+                "count": position.count,
+                "qualification": position.qualification_id,
+                "pay_rate": position.pay_rate,
+            }
+        )
+    if skipped:
+        messages.warning(
+            request,
+            _("These qualifications are no longer active and were not copied: %(names)s")
+            % {"names": ", ".join(skipped)},
+        )
+    return form_initial, positions
+
+
 def duty_create(request):
     _dispatcher_only(request)
+    source = _copy_source(request) if request.method == "GET" else None
+    if source:
+        form_initial, positions = _copy_initial(request, source)
+        formset_class = copy_formset_class(positions)
+        return render(
+            request,
+            "duties/duty_form.html",
+            {
+                "form": DutyForm(initial=form_initial),
+                "formset": formset_class(instance=Duty(), prefix="positions", initial=positions),
+                "copied_from": source,
+            },
+        )
     form = DutyForm(request.POST or None)
     formset = DutyPositionFormSet(request.POST or None, instance=Duty(), prefix="positions")
     if request.method == "POST" and all([form.is_valid(), formset.is_valid()]):

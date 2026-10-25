@@ -14,6 +14,13 @@
                         email.
                     {% endblocktranslate %}
                 </div>
+            {% elif copied_from %}
+                <div class="alert alert-info">
+                    {% blocktranslate trimmed with title=copied_from.title %}
+                        Copy of “{{ title }}”. Please enter the date and times. The copy is saved as
+                        a draft without any reports.
+                    {% endblocktranslate %}
+                </div>
             {% elif not duty %}
                 <p class="text-body-secondary">
                     {% blocktranslate trimmed %}

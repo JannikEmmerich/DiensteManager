@@ -18,6 +18,7 @@
                 {% if duty.status != "cancelled" %}
                     <a class="btn btn-outline-secondary" href="{% url 'duty_update' duty.pk %}">{% translate "Edit" %}</a>
                 {% endif %}
+                <a class="btn btn-outline-secondary" href="{% url 'duty_create' %}?copy={{ duty.pk }}">{% translate "Copy" %}</a>
                 {% if duty.status == "draft" %}
                     {% if duty.all_units %}
                         {% translate "Release this duty? All units will be notified by email." as confirm_text %}
