@@ -207,7 +207,8 @@ def duty_cancel(request, pk):
             return redirect(duty)
         if duty.has_started and not request.POST.get("confirm_started"):
             messages.error(
-                request, _("Please confirm that you want to cancel a duty that has already started.")
+                request,
+                _("Please confirm that you want to cancel a duty that has already started."),
             )
             return redirect(duty)
     if _change_status(duty, Duty.Status.RELEASED, Duty.Status.CANCELLED, "cancelled_at"):
