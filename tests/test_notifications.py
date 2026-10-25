@@ -119,7 +119,7 @@ def test_reports_notify_dispatchers_in_one_email(client, dispatcher, admin, memb
     assert _recipients(mailoutbox) == ["admin@example.org", "dispatcher@example.org"]
     message = mailoutbox[0]
     assert message.subject == "[DiensteManager] Unit North reported 2 helpers for Marathon"
-    assert "- Hanna Helper\n- Paul Partner\n" in message.body
+    assert "- Hanna Helper (Helper)\n- Paul Partner (Helper)\n" in message.body
 
 
 def test_withdrawal_notifies_dispatchers(client, dispatcher, member, unit, mailoutbox):

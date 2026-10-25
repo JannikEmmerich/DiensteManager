@@ -34,4 +34,5 @@ urlpatterns = [
     ),
     path("reports/<int:pk>/take-back/", views.report_take_back, name="report_take_back"),
     path("reports/<int:pk>/keep/", views.report_reject_withdrawal, name="report_reject_withdrawal"),
+    path("reports/<int:pk>/assign/", views.report_assign, name="report_assign"),
 ]

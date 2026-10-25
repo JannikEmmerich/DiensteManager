@@ -50,7 +50,7 @@ def billable_reports(unit):
     return (
         unbilled_reports()
         .filter(unit=unit, duty__ends_at__lt=timezone.now())
-        .select_related("duty", "position__qualification")
+        .select_related("duty", "position__qualification", "assigned_position__qualification")
         .order_by("duty__starts_at", "duty__title", "name")
     )
 
@@ -114,7 +114,7 @@ def unit_pay_lines(unit, year):
     reports = (
         unbilled_reports()
         .filter(unit=unit, duty__starts_at__year=year)
-        .select_related("duty", "position__qualification")
+        .select_related("duty", "position__qualification", "assigned_position__qualification")
     )
     for report in reports:
         duty = report.duty
@@ -202,7 +202,9 @@ def create_billing(unit, lines, note, user):
                     duty_title=duty.title,
                     duty_date=timezone.localdate(duty.starts_at),
                     helper_name=report.name,
-                    qualification=report.position.short_label if report.position else "",
+                    qualification=report.filled_position.short_label
+                    if report.filled_position
+                    else "",
                     pay_type=duty.pay_type,
                     rate=report.pay_rate,
                     hours=hours if hourly else None,

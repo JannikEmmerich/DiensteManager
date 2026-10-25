@@ -1,10 +1,14 @@
 """Which reported helpers fill which position of a duty.
 
-A helper counts for the position they were reported for, for a position whose
-qualification theirs includes (e.g. a paramedic for a first aider, see
-``Qualification.includes``), or for a position with any qualification. Confirmed helpers
-are placed first, then the pending ones in the places left. Helpers who fit nowhere count
-for their own position, which is then overstaffed.
+A helper is reported for a position, i.e. with its qualification. They can fill that
+position or one whose qualification theirs includes (e.g. a paramedic a first aider's
+place, see ``Qualification.includes``).
+
+Confirmed helpers fill a fixed position (``Report.assigned_position``), which also sets
+their pay: when they are confirmed, their own position if a place is free, otherwise the
+free position closest to their qualification; the dispatchers can change it. Pending
+helpers are only counted, in the places left. Helpers who fit nowhere count for their own
+position, which is then overstaffed.
 
 The most specific positions are filled first, i.e. those whose qualification includes the
 most others: whoever can fill one of them can also fill every position that is filled
@@ -26,41 +30,64 @@ def chain(qualification_id, includes):
     return found
 
 
+def fitting(own, positions, includes):
+    """The positions a helper reported for the position ``own`` can fill, closest first."""
+    if own is None:
+        return []
+    qualifications = chain(own.qualification_id, includes)
+    found = [p for p in positions if p.qualification_id in qualifications]
+    # Their own position first, then down the chain.
+    return sorted(found, key=lambda p: qualifications.index(p.qualification_id))
+
+
+def assign(own, positions, filled, includes):
+    """The position a newly confirmed helper fills.
+
+    ``filled`` counts the confirmed helpers per position ID. Their own position if a place
+    is free there, otherwise the free position closest to their qualification, otherwise
+    their own one anyway.
+    """
+    for position in fitting(own, positions, includes):
+        if filled[position.pk] < position.count:
+            return position
+    return own
+
+
 def count(positions, reports, includes):
     """Sets ``confirmed_count`` and ``pending_count`` on the positions of a duty.
 
-    ``reports`` are the (position ID, status) pairs of the active reports.
+    ``reports`` are (reported position ID, assigned position ID, status) of the active
+    reports.
     """
     from .models import Report
 
+    by_id = {p.pk: p for p in positions}
+    confirmed = Counter(
+        assigned_id or position_id
+        for position_id, assigned_id, status in reports
+        if status == Report.Status.CONFIRMED
+    )
+    for position in positions:
+        position.confirmed_count = confirmed[position.pk]
+        position.pending_count = 0
+    free = {p.pk: max(p.count - confirmed[p.pk], 0) for p in positions}
+    # Pending helpers by the position they were reported for.
+    pending = Counter(
+        position_id
+        for position_id, _assigned_id, status in reports
+        if status == Report.Status.REPORTED and position_id in by_id
+    )
     chains = {p.pk: chain(p.qualification_id, includes) for p in positions}
-
-    def fits(own_id, position):
-        if position.qualification_id is None:
-            return True  # any qualification
-        return position.qualification_id in chains.get(own_id, ())
-
-    # Most specific first; positions for any qualification last.
-    order = sorted(positions, key=lambda p: -len(chains[p.pk]) if p.qualification_id else 1)
-    free = {p.pk: p.count for p in positions}
-    for attribute, status in [
-        ("confirmed_count", Report.Status.CONFIRMED),
-        ("pending_count", Report.Status.REPORTED),
-    ]:
-        # Helpers by the position they were reported for (None: none any more).
-        helpers = Counter(position_id for position_id, s in reports if s == status)
-        placed = Counter()
-        for position in order:
-            # Helpers reported for this very position first.
-            for own_id in sorted(helpers, key=lambda own_id: own_id != position.pk):
-                if not free[position.pk]:
-                    break
-                if helpers[own_id] and fits(own_id, position):
-                    taken = min(helpers[own_id], free[position.pk])
-                    helpers[own_id] -= taken
-                    free[position.pk] -= taken
-                    placed[position.pk] += taken
-        # The rest overstaff their own position.
-        placed.update({own_id: number for own_id, number in helpers.items() if own_id})
-        for position in positions:
-            setattr(position, attribute, placed[position.pk])
+    for position in sorted(positions, key=lambda p: -len(chains[p.pk])):
+        # Helpers reported for this very position first.
+        for own_id in sorted(pending, key=lambda own_id: own_id != position.pk):
+            if not free[position.pk]:
+                break
+            if pending[own_id] and position.qualification_id in chains[own_id]:
+                taken = min(pending[own_id], free[position.pk])
+                pending[own_id] -= taken
+                free[position.pk] -= taken
+                position.pending_count += taken
+    # The rest overstaff their own position.
+    for own_id, number in pending.items():
+        by_id[own_id].pending_count += number

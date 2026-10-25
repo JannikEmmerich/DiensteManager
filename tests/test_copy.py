@@ -57,6 +57,7 @@ def test_copy_prefills_the_form_without_dates(
         (4, first_aider.pk),
     ]
     assert formset.forms[1]["pay_rate"].value() == Decimal("9.00")
+    assert "there are none yet" not in response.text  # the qualifications exist
 
 
 def test_saving_a_copy_creates_a_draft_without_reports(

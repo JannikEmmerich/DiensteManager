@@ -69,3 +69,8 @@ def can_decide_report(user, report):
 
 def can_take_back_report(user, report):
     return is_dispatcher(user) and report.can_be_taken_back
+
+
+def can_assign_report(user, report):
+    """Choose the position a confirmed helper fills, and so their pay."""
+    return is_dispatcher(user) and report.status == Report.Status.CONFIRMED

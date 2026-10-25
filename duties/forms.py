@@ -118,10 +118,18 @@ class DutyPositionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["count"].validators.append(MaxValueValidator(MAX_HELPERS))
         field = self.fields["qualification"]
-        field.empty_label = _("Any qualification")
+        field.empty_label = _("– choose –")
         # Inactive qualifications only for positions that already have them.
         used = Q(pk=self.instance.qualification_id) if self.instance.qualification_id else Q()
         field.queryset = Qualification.objects.filter(Q(is_active=True) | used)
+
+
+def _has_helpers(position):
+    """Active reports for the position, or confirmed helpers who fill it."""
+    return (
+        position.reports.filter(status__in=Report.ACTIVE).exists()
+        or position.assigned_reports.filter(status=Report.Status.CONFIRMED).exists()
+    )
 
 
 class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
@@ -138,7 +146,7 @@ class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
         kept_back = [
             form.instance.label
             for form in self.deleted_forms
-            if form.instance.pk and form.instance.reports.filter(status__in=Report.ACTIVE).exists()
+            if form.instance.pk and _has_helpers(form.instance)
         ]
         if kept_back:
             raise forms.ValidationError(
@@ -149,6 +157,12 @@ class BaseDutyPositionFormSet(forms.BaseInlineFormSet):
         for form in self.forms:
             if not form.cleaned_data or form.cleaned_data.get("DELETE"):
                 continue
+            changes_qualification = form.instance.pk and "qualification" in form.changed_data
+            if changes_qualification and _has_helpers(form.instance):
+                form.add_error(
+                    "qualification",
+                    _("Helpers have been reported for this position; its qualification stays."),
+                )
             qualification = form.cleaned_data.get("qualification")
             if qualification in seen:
                 form.add_error("qualification", _("This qualification is listed twice."))
@@ -299,7 +313,7 @@ class ReportForm(forms.ModelForm):
 
 def position_choice_label(position):
     """E.g. "Paramedic (RS) – 2 open", for a position from ``positions_with_staffing()``."""
-    label = str(position.qualification) if position.qualification else _("Any qualification")
+    label = position.label
     if position.open_count:
         return _("%(position)s – %(count)d open") % {
             "position": label,
