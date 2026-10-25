@@ -28,6 +28,11 @@
                             <a class="nav-link{% if page == 'unit_detail' %} active{% endif %}" href="{% url 'unit_detail' user.unit_id %}">{% translate "My unit" %}</a>
                         </li>
                     {% endif %}
+                    {% if can.send_emails %}
+                        <li class="nav-item">
+                            <a class="nav-link{% if page and page|slice:':8' == 'mailing_' %} active{% endif %}" href="{% url 'mailing_list' %}">{% translate "Emails" %}</a>
+                        </li>
+                    {% endif %}
                     {% if can.invite %}
                         <li class="nav-item">
                             <a class="nav-link{% if page == 'invitation_list' %} active{% endif %}" href="{% url 'invitation_list' %}">{% translate "Invitations" %}</a>

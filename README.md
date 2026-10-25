@@ -4,8 +4,8 @@ Staff planning with external units: external units see our duties with open staf
 needs and report people for them. The duties are going to be imported from HiOrg-Server.
 
 **Status:** user management, sign-in (local and with HiOrg-Server), invitations, units,
-duties with release and reports, email notifications, German/English UI and the Docker
-setup are done. Importing duties from HiOrg-Server comes next.
+duties with release and reports, email notifications, emails from dispatchers,
+German/English UI and the Docker setup are done. Importing duties from HiOrg-Server comes next.
 
 ## Stack
 
@@ -21,7 +21,7 @@ setup are done. Importing duties from HiOrg-Server comes next.
 | Role | May |
 |---|---|
 | **Admin** (superuser) | everything incl. the Django admin `/admin/`; the only role that invites or blocks dispatchers |
-| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports |
+| **Dispatcher** (internal) | create and view all units, invite and block unit leads and members; create, release and cancel duties, confirm or decline reports; send emails to the units |
 | **Unit lead** | view their own unit, invite and block unit leads and members there; report helpers, withdraw any report of the unit |
 | **Member** | see the duties offered to their unit, report helpers, withdraw their own reports |
 
@@ -58,6 +58,23 @@ language). The person who triggered a notification never receives it.
 Both switches are under *My account → Email notifications* and are on by default. The
 emails are sent right away during the request; if the mail server is unreachable, the
 change is saved anyway and a warning is shown.
+
+## Emails from dispatchers
+
+Dispatchers write emails to the units under *Emails → Write an email*, or with the
+buttons on a duty ("Email the units") and on a unit.
+
+- **Recipients:** the unit leads only, or all accounts (unit leads and members); of all
+  units or only selected ones. Blocked accounts are left out; the notification settings
+  do not apply. The form shows how many people the email reaches.
+- **Sender:** every recipient gets their own email from `DEFAULT_FROM_EMAIL`, shown as
+  "*Name of the dispatcher* via DiensteManager". **Reply-To is the dispatcher's
+  address**, so answers go directly to them. (Sending from the dispatcher's own address
+  would fail SPF/DMARC checks.)
+- Opened from a duty, the units with reported helpers (otherwise those the duty is
+  offered to) are preselected and the email links to the duty.
+- Optionally a copy goes to the dispatcher. Sent emails are listed with their recipients
+  under *Emails*; an email is only recorded if it could be sent.
 
 ## Sign-in and accounts
 
@@ -187,6 +204,7 @@ docker compose logs -f web            # logs (and emails, without SMTP)
 config/      settings (all via environment variables), URLs, WSGI
 accounts/    users, units, invitations, permissions, HiOrg sign-in adapter, language
 duties/      duties, reports, their permissions and email notifications
+mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations

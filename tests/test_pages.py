@@ -4,6 +4,7 @@ import pytest
 from django.urls import reverse
 
 from duties.models import Duty
+from mailings.models import Mailing
 
 from .conftest import create_duty, create_report
 
@@ -31,6 +32,8 @@ def test_public_pages_render(client, db, name):
         "unit_create",
         "duty_list",
         "duty_create",
+        "mailing_list",
+        "mailing_create",
     ],
 )
 def test_pages_for_dispatchers_render(client, dispatcher, name):
@@ -67,6 +70,23 @@ def test_duty_pages_render(client, dispatcher, unit_lead, unit):
         reverse("duty_list"),
         duty.get_absolute_url(),
         reverse("report_create", args=[duty.pk]),
+    ]:
+        assert client.get(url).status_code == 200, url
+
+
+def test_mailing_pages_render(client, dispatcher, unit_lead, unit):
+    duty = create_duty()
+    client.force_login(dispatcher)
+    client.post(
+        reverse("mailing_create"),
+        {"subject": "Hello", "body": "Text", "audience": "unit_leads", "all_units": "True"},
+    )
+    for url in [
+        reverse("mailing_list"),
+        Mailing.objects.get().get_absolute_url(),
+        reverse("mailing_create") + f"?duty={duty.pk}",
+        reverse("mailing_create") + f"?unit={unit.pk}",
+        reverse("unit_detail", args=[unit.pk]),
     ]:
         assert client.get(url).status_code == 200, url
 

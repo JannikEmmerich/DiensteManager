@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
+from accounts.forms import clean_unit_selection, unit_selection_fields
 from accounts.models import Unit
 
 from .models import Duty, Report
@@ -28,19 +29,8 @@ class MinuteDateTimeField(forms.DateTimeField):
 
 
 class DutyForm(forms.ModelForm):
-    all_units = forms.TypedChoiceField(
-        label=_("Offered to"),
-        choices=[("True", _("All units")), ("False", _("Only the selected units"))],
-        coerce=lambda value: value == "True",
-        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
-        initial="True",
-    )
-    units = forms.ModelMultipleChoiceField(
-        label=_("Selected units"),
-        queryset=Unit.objects.all(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
-        help_text=_("Only relevant if the duty is offered to selected units only."),
+    all_units, units = unit_selection_fields(
+        _("Offered to"), _("Only relevant if the duty is offered to selected units only.")
     )
 
     class Meta:
@@ -67,17 +57,13 @@ class DutyForm(forms.ModelForm):
         ends_at = cleaned_data.get("ends_at")
         if starts_at and ends_at and ends_at <= starts_at:
             self.add_error("ends_at", _("The end must be after the start."))
-        if cleaned_data.get("all_units"):
-            cleaned_data["units"] = Unit.objects.none()
-        elif "units" in cleaned_data and not cleaned_data["units"]:
-            self.add_error("units", _("Please select at least one unit."))
-        else:
+        if clean_unit_selection(self, cleaned_data) and not cleaned_data.get("all_units"):
             self._check_units_with_reports(cleaned_data)
         return cleaned_data
 
     def _check_units_with_reports(self, cleaned_data):
         """A unit with active reports must keep seeing the duty."""
-        if self.instance.pk is None or "units" not in cleaned_data:
+        if self.instance.pk is None:
             return
         selected = {unit.pk for unit in cleaned_data["units"]}
         dropped = (

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load i18n duty_tags %}
+{% block head_title %}{% translate "Write an email" %}{% endblock head_title %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="h3 mb-3">{% translate "Write an email" %}</h1>
+            <p class="text-body-secondary">
+                {% blocktranslate trimmed with email=user.email %}
+                    Every recipient gets their own email from the portal. Replies go directly to
+                    your address <strong>{{ email }}</strong>. The email reaches everyone selected,
+                    regardless of their notification settings.
+                {% endblocktranslate %}
+            </p>
+            {% if duty %}
+                <div class="alert alert-info">
+                    {% blocktranslate trimmed with title=duty.title period=duty|period %}
+                        About the duty <strong>{{ title }}</strong> ({{ period }}). The email links to the duty.
+                    {% endblocktranslate %}
+                </div>
+            {% endif %}
+            {% translate "Send this email now?" as confirm_text %}
+            <form method="post" id="mailing-form" onsubmit="return confirm('{{ confirm_text|escapejs }}')">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+                {{ form.duty }}
+                {% include "core/_choice_list.html" with field=form.audience %}
+                {% include "core/_choice_list.html" with field=form.all_units %}
+                {% include "core/_choice_list.html" with field=form.units %}
+                <div class="alert alert-light border" id="recipient-count"
+                     hx-get="{% url 'mailing_recipients' %}" hx-include="[name=audience], [name=all_units], [name=units]"
+                     hx-trigger="load, change from:#mailing-form" aria-live="polite"></div>
+                {% include "core/_field.html" with field=form.subject %}
+                {% include "core/_field.html" with field=form.body %}
+                {% include "core/_field.html" with field=form.send_copy %}
+                <button class="btn btn-primary" type="submit">{% translate "Send" %}</button>
+                <a class="btn btn-link" href="{% if duty %}{{ duty.get_absolute_url }}{% else %}{% url 'mailing_list' %}{% endif %}">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

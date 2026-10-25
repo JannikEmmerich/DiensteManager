@@ -66,6 +66,9 @@
                 {% if can.manage_duties %}
                     <a class="list-group-item list-group-item-action" href="{% url 'duty_create' %}">{% translate "Add duty" %}</a>
                 {% endif %}
+                {% if can.send_emails %}
+                    <a class="list-group-item list-group-item-action" href="{% url 'mailing_create' %}">{% translate "Write an email" %}</a>
+                {% endif %}
                 {% if can.invite %}
                     <a class="list-group-item list-group-item-action" href="{% url 'invitation_create' %}">{% translate "Invite a person" %}</a>
                 {% endif %}

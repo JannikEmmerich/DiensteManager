@@ -11,6 +11,9 @@
             {% if can_report %}
                 <a class="btn btn-primary" href="{% url 'report_create' duty.pk %}">{% translate "Report helpers" %}</a>
             {% endif %}
+            {% if can.send_emails and duty.status != "draft" %}
+                <a class="btn btn-outline-secondary" href="{% url 'mailing_create' %}?duty={{ duty.pk }}">{% translate "Email the units" %}</a>
+            {% endif %}
             {% if can.manage_duties %}
                 {% if duty.status != "cancelled" %}
                     <a class="btn btn-outline-secondary" href="{% url 'duty_update' duty.pk %}">{% translate "Edit" %}</a>

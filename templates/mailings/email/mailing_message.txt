@@ -1,0 +1,11 @@
+{% load i18n duty_tags %}{% autoescape off %}{% if is_copy %}{% blocktranslate trimmed count counter=recipient_count %}This is a copy of your email to {{ counter }} person.{% plural %}This is a copy of your email to {{ counter }} people.{% endblocktranslate %}
+
+{% endif %}{{ mailing.body }}
+{% if mailing.duty %}
+{% translate "Duty:" %} {{ mailing.duty.title }}, {{ mailing.duty|period }}
+{{ duty_url }}
+{% endif %}
+-- 
+{% blocktranslate trimmed with sender=sender site=SITE_NAME %}{{ sender }} sent this email via {{ site }}. Replies go directly to {{ sender }}.{% endblocktranslate %}
+{% if recipient.unit and not is_copy %}{% blocktranslate trimmed with role=recipient.get_role_display unit=recipient.unit %}You receive it as {{ role }} of the unit {{ unit }}.{% endblocktranslate %}
+{% endif %}{% endautoescape %}

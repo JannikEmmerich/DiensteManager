@@ -16,5 +16,6 @@ def site(request):
             "view_own_unit": permissions.is_unit_lead(user),
             "view_duties": permissions.is_dispatcher(user) or is_unit_account(user),
             "manage_duties": permissions.is_dispatcher(user),
+            "send_emails": permissions.is_dispatcher(user),
         },
     }

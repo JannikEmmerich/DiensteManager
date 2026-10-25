@@ -7,6 +7,39 @@ from . import permissions
 from .models import LANGUAGE_CHOICES, Invitation, Role, Unit, User
 
 
+def unit_selection_fields(label, help_text):
+    """Radio buttons "all units / only the selected units" plus the unit checkboxes.
+
+    Returns the fields ``all_units`` (``True`` or ``False``) and ``units``.
+    """
+    all_units = forms.TypedChoiceField(
+        label=label,
+        choices=[("True", _("All units")), ("False", _("Only the selected units"))],
+        coerce=lambda value: value == "True",
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+        initial="True",
+    )
+    units = forms.ModelMultipleChoiceField(
+        label=_("Selected units"),
+        queryset=Unit.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+        help_text=help_text,
+    )
+    return all_units, units
+
+
+def clean_unit_selection(form, cleaned_data):
+    """Empties the selection for "all units" and requires a unit otherwise."""
+    if cleaned_data.get("all_units"):
+        cleaned_data["units"] = Unit.objects.none()
+        return True
+    if "units" in cleaned_data and not cleaned_data["units"]:
+        form.add_error("units", _("Please select at least one unit."))
+        return False
+    return "units" in cleaned_data
+
+
 class InvitationForm(forms.ModelForm):
     class Meta:
         model = Invitation
