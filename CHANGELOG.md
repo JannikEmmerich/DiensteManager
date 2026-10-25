@@ -9,6 +9,12 @@ All notable changes are listed here. The format follows
 
 ### Added
 
+- Helpers can be reported with a higher qualification than the duty asks for, e.g. an
+  emergency paramedic for a paramedic's place: the qualification select also lists every
+  qualification that counts as one asked for ("Also counts as"). Dispatchers see the
+  helper's real qualification on the duty and in the emails; the helper is reported for
+  the closest position, and assignment and pay work as before. Existing reports keep
+  the qualification of their position.
 - More freedom when creating a statement: every value of a helper's line can be
   changed (date, duty, helper, qualification, rate, hours), and other items such as a
   vehicle flat rate can be added ("Add a line": date, description, price, optional

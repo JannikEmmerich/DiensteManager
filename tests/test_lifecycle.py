@@ -242,7 +242,14 @@ def test_billing_warns_about_recent_bank_changes(client, dispatcher, unit):
 def test_old_reports_are_anonymised(dispatcher, unit, other_unit):
     old = create_duty(starts_in=timedelta(days=-400))
     recent = create_duty(starts_in=timedelta(days=-10))
-    first = create_report(old, unit, name="Old 1", qualification="Paramedic", note="Note")
+    first = create_report(
+        old,
+        unit,
+        name="Old 1",
+        qualification="Paramedic",
+        note="Note",
+        position=old.positions.get(),
+    )
     second = create_report(old, unit, name="Old 2", status=Report.Status.CONFIRMED)
     kept = create_report(recent, unit, name="Recent")
     history.record(first, history.Action.REPORTED, dispatcher, history.scope_for_duty(old.pk))
@@ -252,7 +259,9 @@ def test_old_reports_are_anonymised(dispatcher, unit, other_unit):
     for report in (first, second):
         report.refresh_from_db()
         assert (report.name, report.qualification, report.note) == ("", "", "")
+        assert report.helper_qualification is None
         assert report.anonymized_at is not None
+    assert first.position == old.positions.get()
     kept.refresh_from_db()
     assert kept.name == "Recent"
     # The history of the anonymised reports is gone, that of the duty stays.

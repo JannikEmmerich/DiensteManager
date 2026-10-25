@@ -74,6 +74,7 @@ def duty_detail(request, pk):
             "unit",
             "reported_by",
             "withdrawal_requested_by",
+            "helper_qualification",
             "position__qualification",
             "assigned_position__qualification",
         )
@@ -87,7 +88,7 @@ def duty_detail(request, pk):
                 "can_decide": permissions.can_decide_report(request.user, report),
                 "can_take_back": permissions.can_take_back_report(request.user, report),
                 # The positions a confirmed helper may fill, if there is a choice.
-                "assign_to": staffing.fitting(report.position, positions, includes)
+                "assign_to": staffing.fitting(report.helper_qualification_id, positions, includes)
                 if can_assign and report.pk not in billed
                 else [],
             }
@@ -638,7 +639,7 @@ def report_confirm_all(request, pk):
     _dispatcher_only(request)
     duty = get_object_or_404(Duty, pk=pk, status=Duty.Status.RELEASED)
     pending = duty.reports.filter(status=Report.Status.REPORTED).select_related(
-        "unit", "position__qualification"
+        "unit", "helper_qualification", "position__qualification"
     )
     reports = _decide(request, list(pending), Report.Status.CONFIRMED)
     if reports:
@@ -658,7 +659,9 @@ def report_assign(request, pk):
     report = _visible_report(request, pk)
     duty = report.duty
     positions = list(duty.positions.select_related("qualification"))
-    fitting = staffing.fitting(report.position, positions, Qualification.includes_map())
+    fitting = staffing.fitting(
+        report.helper_qualification_id, positions, Qualification.includes_map()
+    )
     chosen = next((p for p in fitting if str(p.pk) == request.POST.get("position")), None)
     if not permissions.can_assign_report(request.user, report) or chosen is None:
         messages.error(request, _("This helper cannot fill that position."))

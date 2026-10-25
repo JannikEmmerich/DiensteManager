@@ -292,25 +292,67 @@ class HelperUnitForm(forms.Form):
 class ReportForm(forms.ModelForm):
     class Meta:
         model = Report
-        fields = ["name", "position", "note"]
-        labels = {"name": _("Name of the helper"), "position": _("Qualification")}
+        fields = ["name", "helper_qualification", "note"]
+        labels = {"name": _("Name of the helper"), "helper_qualification": _("Qualification")}
 
-    def __init__(self, *args, duty, positions, **kwargs):
+    def __init__(self, *args, positions, options, **kwargs):
         super().__init__(*args, **kwargs)
-        if len(positions) <= 1:
-            # Nothing to choose: the only position (if any) is taken.
-            del self.fields["position"]
-            self.instance.position = positions[0] if positions else None
+        self.options = options
+        if len(options) <= 1:
+            # Nothing to choose: the only qualification (if any) is taken.
+            del self.fields["helper_qualification"]
+            for qualification, fitting in options.values():
+                self.instance.helper_qualification = qualification
+                self.instance.position = fitting[0]
             return
-        labels = {position.pk: position_choice_label(position) for position in positions}
-        field = self.fields["position"]
-        field.queryset = duty.positions.select_related("qualification")
-        field.label_from_instance = lambda position: labels.get(position.pk, position.label)
+        labels = {
+            pk: option_label(qualification, fitting)
+            for pk, (qualification, fitting) in options.items()
+        }
+        field = self.fields["helper_qualification"]
+        field.queryset = Qualification.objects.filter(pk__in=options)
+        field.label_from_instance = lambda qualification: labels[qualification.pk]
         field.required = True
         field.empty_label = None
-        # The first position with open places is preselected, so that empty rows count as
-        # unchanged.
-        field.initial = next((p for p in positions if p.open_count), positions[0]).pk
+        # The qualification of the first position with open places is preselected, so
+        # that empty rows count as unchanged.
+        field.initial = next((p for p in positions if p.open_count), positions[0]).qualification_id
+
+    def clean(self):
+        cleaned_data = super().clean()
+        qualification = cleaned_data.get("helper_qualification")
+        if qualification is not None:
+            # Reported for the closest position the helper can fill.
+            self.instance.position = self.options[qualification.pk][1][0]
+        return cleaned_data
+
+
+def qualification_options(positions):
+    """The qualifications helpers can be reported with, each with the positions they fit.
+
+    Those the positions ask for and every one that counts as one of them (see
+    ``Qualification.includes``), e.g. emergency paramedics for a paramedic's position:
+    the dispatchers see what the helpers really are. Mapped by ID, in the order of the
+    catalogue; the positions closest first.
+    """
+    includes = Qualification.includes_map()
+    asked_for = {position.qualification_id for position in positions}
+    options = {}
+    for qualification in Qualification.objects.filter(Q(is_active=True) | Q(pk__in=asked_for)):
+        fitting = staffing.fitting(qualification.pk, positions, includes)
+        if fitting:
+            options[qualification.pk] = (qualification, fitting)
+    return options
+
+
+def option_label(qualification, fitting):
+    """E.g. "Paramedic (RS) – 2 open" or "Emergency paramedic (NFS) – counts as RS, FA"."""
+    if fitting[0].qualification_id == qualification.pk:
+        return position_choice_label(fitting[0])
+    return _("%(qualification)s – counts as %(positions)s") % {
+        "qualification": qualification,
+        "positions": ", ".join(position.short_label for position in fitting),
+    }
 
 
 def position_choice_label(position):
@@ -329,8 +371,9 @@ class BaseReportFormSet(forms.BaseFormSet):
 
     def __init__(self, *args, duty, unit, **kwargs):
         form_kwargs = kwargs.setdefault("form_kwargs", {})
-        form_kwargs["duty"] = duty
-        form_kwargs["positions"] = list(duty.positions_with_staffing())
+        positions = list(duty.positions_with_staffing())
+        form_kwargs["positions"] = positions
+        form_kwargs["options"] = qualification_options(positions)
         super().__init__(*args, **kwargs)
         self.duty = duty
         self.unit = unit

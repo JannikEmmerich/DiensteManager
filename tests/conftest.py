@@ -113,6 +113,10 @@ def positions_data(*rows, duty=None):
 
 
 def create_report(duty, unit, name="Hanna Helper", reported_by=None, **fields):
+    position = fields.get("position")
+    if position is not None:
+        # Unless given, the helper has the qualification of their position.
+        fields.setdefault("helper_qualification", position.qualification)
     return Report.objects.create(duty=duty, unit=unit, name=name, reported_by=reported_by, **fields)
 
 

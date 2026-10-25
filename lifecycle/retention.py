@@ -54,8 +54,14 @@ def anonymise_reports(now):
         HistoryEntry.objects.filter(
             content_type=ContentType.objects.get_for_model(Report), object_id__in=ids
         ).delete()
+        # The position stays for the statistics.
         Report.objects.filter(pk__in=ids).update(
-            name="", qualification="", note="", withdrawal_note="", anonymized_at=now
+            name="",
+            qualification="",
+            helper_qualification=None,
+            note="",
+            withdrawal_note="",
+            anonymized_at=now,
         )
     return len(ids)
 
