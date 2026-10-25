@@ -19,6 +19,8 @@ All notable changes are listed here. The format follows
 
 - Units can only withdraw reports themselves until they are confirmed; afterwards only
   the dispatchers can. Dispatchers take back confirmed reports instead of declining them.
+- Duties with billed helpers can no longer be cancelled (until the billing is cancelled);
+  duties that have started ask for confirmation first (#19).
 
 ## [0.2.0] – 2026-10-25
 
