@@ -5,15 +5,18 @@ a language get the default language). Who receives what:
 
 - duty released, or offered to additional units: the active accounts of those units
   with "new duties" switched on;
-- helpers reported or withdrawn: the dispatchers with "reports" switched on;
-- reports confirmed or declined, helpers entered by a dispatcher, duty changed or
-  cancelled: the unit leads of the unit concerned and whoever reported the helpers, if
-  they have "reports" switched on.
+- helpers reported or withdrawn, a unit asks to withdraw a report: the dispatchers with
+  "reports" switched on;
+- reports confirmed, declined or taken back by the dispatchers, a request to withdraw
+  refused, helpers entered by a dispatcher, duty changed or cancelled: the unit leads of
+  the unit concerned and whoever reported the helpers, if they have "reports" switched
+  on.
 
 The person who triggered a notification never receives it. With the email queue
 (``EMAIL_QUEUE``, see outbox/queue.py) the emails are sent in the background; news about
 new duties and reports then waits for the daily summary of the accounts that want one.
-Changes and cancellations of duties always go out right away. Errors when sending right
+Changes and cancellations of duties and everything about requests to withdraw always go
+out right away. Errors when sending right
 away are logged and shown as a warning; they never undo the change itself.
 """
 
@@ -47,7 +50,15 @@ def _field_label(duty, name):
 
 
 # Changes to a released duty that the units with reports are told about.
-RELEVANT_CHANGES = ("title", "starts_at", "ends_at", "location", "pay_type", "pay_rate")
+RELEVANT_CHANGES = (
+    "title",
+    "starts_at",
+    "ends_at",
+    "report_deadline",
+    "location",
+    "pay_type",
+    "pay_rate",
+)
 
 
 # --- Recipients ----------------------------------------------------------------------
@@ -190,6 +201,36 @@ def report_withdrawn(request, report):
         "report_withdrawn",
         {"duty": report.duty, "unit": report.unit, "report": report},
         digestible=True,
+    )
+
+
+def withdrawal_requested(request, report):
+    """A unit asks the dispatchers to withdraw a report."""
+    _send(
+        request,
+        _dispatchers(),
+        "withdrawal_requested",
+        {"duty": report.duty, "unit": report.unit, "report": report},
+    )
+
+
+def report_taken_back(request, report, requested):
+    """The dispatchers have withdrawn a report; ``requested``: because the unit asked."""
+    _send(
+        request,
+        _unit_contacts(report.unit_id, [report]),
+        "report_taken_back",
+        {"duty": report.duty, "unit": report.unit, "report": report, "requested": requested},
+    )
+
+
+def withdrawal_rejected(request, report):
+    """The dispatchers keep a report that the unit asked to withdraw."""
+    _send(
+        request,
+        _unit_contacts(report.unit_id, [report]),
+        "withdrawal_rejected",
+        {"duty": report.duty, "unit": report.unit, "report": report},
     )
 
 

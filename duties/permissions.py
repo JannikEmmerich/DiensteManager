@@ -3,8 +3,10 @@
 - Dispatchers (and admins): create, edit, release, cancel and delete duties; see all
   reports and confirm or decline them.
 - Unit leads and members: see released duties offered to their unit, and only their own
-  unit's reports. They report helpers until the duty starts. Members withdraw the
-  reports they made, unit leads every report of their unit.
+  unit's reports. They report helpers until the report deadline (or else the start).
+  Members act on the reports they made, unit leads on every report of their unit: they
+  withdraw reports that are not confirmed yet while reports are open, and otherwise ask
+  the dispatchers to withdraw them, who take them back or keep them.
 """
 
 from accounts.models import Role
@@ -46,13 +48,24 @@ def can_report(user, duty):
     )
 
 
-def can_withdraw_report(user, report):
+def _acts_for_report(user, report):
+    """The unit account may act on the report: its unit leads, or the member who made it."""
     if is_dispatcher(user) or not is_unit_account(user) or report.unit_id != user.unit_id:
         return False
-    if user.role != Role.UNIT_LEAD and report.reported_by_id != user.pk:
-        return False
-    return report.can_be_withdrawn
+    return user.role == Role.UNIT_LEAD or report.reported_by_id == user.pk
+
+
+def can_withdraw_report(user, report):
+    return _acts_for_report(user, report) and report.can_be_withdrawn
+
+
+def can_request_withdrawal(user, report):
+    return _acts_for_report(user, report) and report.can_request_withdrawal
 
 
 def can_decide_report(user, report):
     return is_dispatcher(user) and report.can_be_decided
+
+
+def can_take_back_report(user, report):
+    return is_dispatcher(user) and report.can_be_taken_back

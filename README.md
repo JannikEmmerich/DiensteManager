@@ -45,12 +45,23 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   has been released ("Save and release" or "Release" on the duty).
 - **Offered to:** all units, or only selected ones. Other units neither see the duty nor
   get notified. A unit that has reported helpers must stay selected.
+- **Report deadline** (optional, per duty): until then units report helpers and withdraw
+  reports themselves; without one, until the duty starts. It is shown in the list, on
+  the duty and in the emails; changing it notifies the units with reports.
 - **Reports:** unit leads and members report helpers (position, name, optional
-  qualification and note; several at once) until the duty starts; with a single position
-  there is nothing to choose. Units only see their own reports plus the staffing per
-  position (confirmed / needed). Members withdraw their own reports, unit
-  leads every report of their unit. A person can only be reported once per duty and unit.
+  qualification and note; several at once) until the report deadline; with a single
+  position there is nothing to choose. Units only see their own reports plus the
+  staffing per position. A person can only be reported once per duty and unit.
 - **Decisions:** dispatchers confirm or decline each report (or "Confirm all pending").
+  Only confirmed helpers count as planned (confirmed / needed); pending ones are shown
+  as "+N pending".
+- **Withdrawing:** members act on the reports they made, unit leads on every report of
+  their unit. Reports that are not confirmed yet they withdraw themselves until the
+  report deadline. Confirmed reports (and all after the deadline, until the duty ends)
+  only the dispatchers can take back: the unit asks for it ("Ask to withdraw", with an
+  optional reason), the dispatchers get an email and see the request on the duty and on
+  the overview, and then take the report back or keep it – the unit is told either way.
+  Dispatchers can also take back a confirmed report on their own.
 - **Helpers who register with a dispatcher directly** (e.g. by email) are entered by the
   dispatcher under "Add helpers" on the duty: unit plus names, confirmed right away; the
   unit leads are notified.
@@ -64,9 +75,9 @@ language). The person who triggered a notification never receives it.
 | Event | Recipients |
 |---|---|
 | Duty released, or offered to additional units | active accounts of those units with *New duties for my unit* switched on |
-| Helpers reported or withdrawn | dispatchers and admins with *Reports* switched on |
-| Report confirmed or declined; helpers added by a dispatcher | unit leads of the unit and whoever made the report, with *Reports* switched on |
-| Title, time, location or duty pay of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
+| Helpers reported or withdrawn; a unit asks to withdraw a report | dispatchers and admins with *Reports* switched on |
+| Report confirmed, declined or taken back; request to withdraw refused; helpers added by a dispatcher | unit leads of the unit and whoever made the report, with *Reports* switched on |
+| Title, time, report deadline, location or duty pay of a released duty changed; duty cancelled | unit leads and reporters of units with active reports, with *Reports* switched on |
 | Billing created (PDF attached), paid or cancelled | unit leads of the unit with *Billings* switched on |
 
 The switches are under *My account → Email notifications* and are on by default.
@@ -147,7 +158,7 @@ day. The periods are set in `.env`; `0` keeps the data forever.
 
 | Data | What happens | Setting (default) |
 |---|---|---|
-| Reports (helper name, qualification, note) | anonymised after the end of the duty; the number of helpers stays. Helpers that can still be billed are kept until their statement is paid – the statement keeps its own copy | `RETENTION_REPORTS_DAYS` (365) |
+| Reports (helper name, qualification, note, reason for a withdrawal) | anonymised after the end of the duty; the number of helpers stays. Helpers that can still be billed are kept until their statement is paid – the statement keeps its own copy | `RETENTION_REPORTS_DAYS` (365) |
 | Change history | deleted; for anonymised reports right away | `RETENTION_HISTORY_DAYS` (730) |
 | Emails from dispatchers | deleted after sending | `RETENTION_MAILINGS_DAYS` (365) |
 | Accepted, revoked and expired invitations | deleted after acceptance, revocation or expiry | `RETENTION_INVITATIONS_DAYS` (180) |
@@ -348,8 +359,8 @@ check that it builds.
 Writing `@claude` and a request in an issue or pull request (comment) starts Claude Code
 (`.github/workflows/claude.yml`, for accounts with write access). It works on a branch
 `claude/issue-…`, may run the tests, ruff and the translation and migration commands,
-and answers with a link to open the pull request. `claude-code-review.yml` reviews every
-pull request.
+and answers with a link to open the pull request. It follows `CLAUDE.md` (conventions
+and commands of this project). `claude-code-review.yml` reviews every pull request.
 
 ### Docker images
 
@@ -413,6 +424,7 @@ static/      app.css, app.js and vendored libraries (Bootstrap, htmx)
 tests/       pytest tests incl. a simulated HiOrg-Server
 docker/      container entry point
 .github/     CI and release workflow, image clean-up, Dependabot, release notes script
+CLAUDE.md    conventions and commands for Claude (sessions and the @claude workflow)
 ```
 
 ## Next steps

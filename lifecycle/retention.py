@@ -1,6 +1,6 @@
 """Data lifecycle: what is anonymised or deleted after which time.
 
-- Reports (helper name, qualification, note) of duties that ended more than
+- Reports (helper name, qualification, notes) of duties that ended more than
   ``RETENTION_REPORTS_DAYS`` ago are anonymised; the counts stay for the statistics.
   Helpers that can still be billed are kept until they are billed and the billing is
   paid (the billing keeps its own copy of the name).
@@ -55,7 +55,7 @@ def anonymise_reports(now):
             content_type=ContentType.objects.get_for_model(Report), object_id__in=ids
         ).delete()
         Report.objects.filter(pk__in=ids).update(
-            name="", qualification="", note="", anonymized_at=now
+            name="", qualification="", note="", withdrawal_note="", anonymized_at=now
         )
     return len(ids)
 

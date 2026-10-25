@@ -1,6 +1,7 @@
 {% load i18n duty_tags %}{{ duty.title }}
 {% translate "When:" %} {{ duty|period }}
-{% if duty.location %}{% translate "Where:" %} {{ duty.location }}
+{% if duty.report_deadline %}{% translate "Report deadline:" %} {{ duty.report_deadline|date:"SHORT_DATETIME_FORMAT" }}
+{% endif %}{% if duty.location %}{% translate "Where:" %} {{ duty.location }}
 {% endif %}{% translate "Helpers needed:" %} {{ duty.helpers_needed }}{% for position in duty.positions.all %}{% if position.qualification or not forloop.first or not forloop.last %}
   {{ position }}{% if duty.has_pay and position.pay_rate %} ({{ duty|pay:position.pay_rate }}){% endif %}{% endif %}{% endfor %}{% if duty.has_pay %}
 {% translate "Duty pay:" %} {{ duty|pay }}{% endif %}

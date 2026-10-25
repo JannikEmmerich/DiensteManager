@@ -7,6 +7,19 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Optional report deadline per duty: afterwards units can no longer report helpers or
+  withdraw reports themselves (#24).
+- Requests to withdraw: units ask the dispatchers to withdraw a confirmed report (or any
+  report after the deadline), with an optional reason; the dispatchers get an email and
+  take the report back or keep it, and the unit is told either way.
+
+### Changed
+
+- Units can only withdraw reports themselves until they are confirmed; afterwards only
+  the dispatchers can. Dispatchers take back confirmed reports instead of declining them.
+
 ## [0.2.0] – 2026-10-25
 
 When updating from 0.1.0: admins and dispatchers have to set up two-factor

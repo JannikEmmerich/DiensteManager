@@ -165,7 +165,7 @@ def test_pages_work_with_the_content_security_policy(client, admin, unit_lead, u
     billing = services.create_billing(unit, [(report, Decimal(4))], "", admin)
     open_duty = create_duty()
     create_report(open_duty, unit, name="Open", reported_by=unit_lead)
-    create_report(open_duty, unit, name="Other", status=Report.Status.CONFIRMED)
+    confirmed = create_report(open_duty, unit, name="Other", status=Report.Status.CONFIRMED)
     pages = {
         admin: [
             reverse("home"),
@@ -184,7 +184,11 @@ def test_pages_work_with_the_content_security_policy(client, admin, unit_lead, u
             reverse("admin:accounts_user_changelist"),
             reverse("admin:accounts_user_change", args=[unit_lead.pk]),
         ],
-        unit_lead: [open_duty.get_absolute_url(), reverse("report_create", args=[open_duty.pk])],
+        unit_lead: [
+            open_duty.get_absolute_url(),
+            reverse("report_create", args=[open_duty.pk]),
+            reverse("report_request_withdrawal", args=[confirmed.pk]),
+        ],
         None: [reverse("account_login"), reverse("account_reset_password")],
     }
     for user, urls in pages.items():
