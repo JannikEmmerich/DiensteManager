@@ -118,3 +118,37 @@ def test_behind_a_cloudflare_tunnel(client, settings, db, rf):
     assert client.get(reverse("account_login")).status_code == 301
     # The sign-in rate limits count per visitor, not per tunnel.
     assert get_adapter().get_client_ip(rf.get("/", **headers)) == "203.0.113.7"
+
+
+CF = {"ALLAUTH_TRUSTED_CLIENT_IP_HEADER": "CF-Connecting-IP"}
+
+
+@pytest.mark.parametrize(
+    ("trusted", "headers", "address"),
+    [
+        (CF, {"HTTP_CF_CONNECTING_IP": "203.0.113.7"}, "203.0.113.7"),
+        (CF, {"HTTP_CF_CONNECTING_IP": "2001:db8::7"}, "2001:db8::7"),
+        # Caddy appends the address it sees to X-Forwarded-For.
+        (
+            {"ALLAUTH_TRUSTED_PROXY_COUNT": 1},
+            {"HTTP_X_FORWARDED_FOR": "198.51.100.1, 203.0.113.7"},
+            "203.0.113.7",
+        ),
+        # Untrusted headers, or none or nonsense from the proxy: the proxy's own address.
+        (
+            {},
+            {"HTTP_CF_CONNECTING_IP": "203.0.113.7", "HTTP_X_FORWARDED_FOR": "203.0.113.7"},
+            "127.0.0.1",
+        ),
+        (CF, {}, "127.0.0.1"),
+        (CF, {"HTTP_CF_CONNECTING_IP": "not an address"}, "127.0.0.1"),
+        ({"ALLAUTH_TRUSTED_PROXY_COUNT": 2}, {"HTTP_X_FORWARDED_FOR": "203.0.113.7"}, "127.0.0.1"),
+    ],
+)
+def test_access_log_shows_the_visitor(client, db, settings, trusted, headers, address):
+    """gunicorn writes REMOTE_ADDR of the WSGI environ to its access log after the response."""
+    for name, value in trusted.items():
+        setattr(settings, name, value)
+    response = client.get(reverse("account_login"), **headers)
+    assert response.status_code == 200
+    assert response.wsgi_request.environ["REMOTE_ADDR"] == address

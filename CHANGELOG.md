@@ -7,6 +7,12 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The access log shows the visitor's IP address instead of the proxy's (Caddy:
+  `X-Forwarded-For`, Cloudflare Tunnel: `CF-Connecting-IP`); the app uses the same
+  address as the sign-in rate limits.
+
 ## [0.7.1] – 2026-10-25
 
 When updating from 0.7.0 nothing needs to be done.
