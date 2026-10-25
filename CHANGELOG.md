@@ -7,6 +7,12 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Removed
+
+- The email to the unit leads when a statement is marked as paid. They still get one
+  when a statement is created (with the PDF) or cancelled; the duty pay overview shows
+  which statements are paid.
+
 ### Added
 
 - Qualifications can count as another one ("Also counts as" in the catalogue), e.g.

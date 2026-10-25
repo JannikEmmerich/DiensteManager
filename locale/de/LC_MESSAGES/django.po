@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 12:05+0000\n"
+"POT-Creation-Date: 2026-10-25 12:12+0000\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -113,11 +113,11 @@ msgstr "Automatisch (Browsereinstellung)"
 
 #: accounts/forms.py:152
 msgid ""
-"When a statement of the duty pay of my unit is created (with the PDF), paid "
-"or cancelled, and when its bank details change."
+"When a statement of the duty pay of my unit is created (with the PDF) or "
+"cancelled, and when its bank details change."
 msgstr ""
-"Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit "
-"PDF), bezahlt oder storniert wird und wenn sich ihre Bankverbindung ändert."
+"Wenn eine Abrechnung der Dienstgelder meiner Bereitschaft erstellt (mit PDF) "
+"oder storniert wird und wenn sich ihre Bankverbindung ändert."
 
 #: accounts/forms.py:156
 msgid "Changed bank details"
@@ -631,17 +631,17 @@ msgstr "Abrechnung %(number)s erstellt."
 msgid "Statement %(number)s marked as paid."
 msgstr "Abrechnung %(number)s als bezahlt markiert."
 
-#: billing/views.py:185
+#: billing/views.py:184
 msgid "Only open statements can be marked as paid."
 msgstr "Nur offene Abrechnungen können als bezahlt markiert werden."
 
-#: billing/views.py:199
+#: billing/views.py:198
 #, python-format
 msgid "Statement %(number)s cancelled. Its helpers can be billed again."
 msgstr ""
 "Abrechnung %(number)s storniert. Die Helfer können erneut abgerechnet werden."
 
-#: billing/views.py:204
+#: billing/views.py:203
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
@@ -2121,20 +2121,6 @@ msgstr "Die Abrechnung hängt als PDF an. Du findest sie auch hier:"
 #, python-format
 msgid "Statement of duty pay %(number)s: %(total)s"
 msgstr "Abrechnung Dienstgelder %(number)s: %(total)s"
-
-#: templates/billing/email/billing_paid_message.txt:2
-#, python-format
-msgid ""
-"The dispatchers have marked the statement %(number)s of %(unit)s as paid "
-"(%(total)s)."
-msgstr ""
-"die Disposition hat die Abrechnung %(number)s von %(unit)s als bezahlt "
-"markiert (%(total)s)."
-
-#: templates/billing/email/billing_paid_subject.txt:1
-#, python-format
-msgid "Statement %(number)s has been paid"
-msgstr "Abrechnung %(number)s wurde bezahlt"
 
 #: templates/billing/unit_pay.html:12
 msgid "Year"

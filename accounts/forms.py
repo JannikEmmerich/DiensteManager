@@ -149,8 +149,8 @@ class ProfileForm(forms.ModelForm):
         user = self.instance
         if permissions.is_unit_lead(user):
             self.fields["notify_billing"].help_text = _(
-                "When a statement of the duty pay of my unit is created (with the PDF), "
-                "paid or cancelled, and when its bank details change."
+                "When a statement of the duty pay of my unit is created (with the PDF) or "
+                "cancelled, and when its bank details change."
             )
         elif permissions.is_dispatcher(user):
             self.fields["notify_billing"].label = _("Changed bank details")

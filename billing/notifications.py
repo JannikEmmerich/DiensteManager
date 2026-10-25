@@ -1,8 +1,8 @@
 """Emails about billings and bank details (switch "Billings" under "My account").
 
-Billings go to the unit leads of the unit. Changed bank details go to its unit leads and
-to the dispatchers, so that a changed IBAN does not go unnoticed even if the only unit
-lead changed it.
+Created and cancelled billings go to the unit leads of the unit. Changed bank details go
+to its unit leads and to the dispatchers, so that a changed IBAN does not go unnoticed
+even if the only unit lead changed it.
 """
 
 from django.db.models import Q
@@ -65,10 +65,6 @@ def bank_account_changed(request, bank_account):
 
 def billing_created(request, billing):
     _send(request, billing, "billing_created", attach_pdf=True)
-
-
-def billing_paid(request, billing):
-    _send(request, billing, "billing_paid")
 
 
 def billing_cancelled(request, billing):

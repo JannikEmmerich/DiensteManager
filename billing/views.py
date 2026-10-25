@@ -180,7 +180,6 @@ def billing_mark_paid(request, pk):
         messages.success(
             request, _("Statement %(number)s marked as paid.") % {"number": billing.number}
         )
-        notifications.billing_paid(request, billing)
     else:
         messages.error(request, _("Only open statements can be marked as paid."))
     return redirect(billing)
