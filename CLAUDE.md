@@ -29,6 +29,11 @@ python manage.py makemessages -l de --ignore=.venv --ignore=staticfiles --ignore
 python manage.py compilemessages --ignore=.venv
 ```
 
+Merge conflicts with master: `git fetch origin && git merge origin/master` (never rebase
+or force-push a pushed branch). For a conflict in `locale/de/LC_MESSAGES/django.po`,
+take master's file (`git checkout --theirs`), run `makemessages` and translate the
+branch's texts again; then run the tests and ruff before committing the merge.
+
 Outside DEBUG, `manage.py` needs `DJANGO_SECRET_KEY` (set in CI and in the Claude
 workflow). Locally, `uv sync` creates `.venv` and `DJANGO_DEBUG=True` in `.env` is
 enough.
