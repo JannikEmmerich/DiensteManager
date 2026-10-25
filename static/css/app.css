@@ -242,3 +242,16 @@ body {
 .billing-lines td:nth-child(3) .form-control {
     min-width: 12rem;
 }
+
+/* Demo mode: a strip under the navigation, and emails of the inbox as plain text. */
+.demo-banner {
+    background-color: var(--drk-light-blue);
+    color: var(--drk-dark-blue);
+}
+
+.email-body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: inherit;
+    font-size: inherit;
+}

@@ -19,5 +19,6 @@ urlpatterns = [
     path("duties/", include("duties.urls")),
     path("emails/", include("mailings.urls")),
     path("billing/", include("billing.urls")),
+    path("inbox/", include("demo.urls")),
     path("", include("core.urls")),
 ]

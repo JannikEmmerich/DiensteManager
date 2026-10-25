@@ -7,6 +7,13 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Demo mode (`DEMO_MODE=True`): emails are not sent but shown under *Inbox* – everyone
+  sees their own, admins all of them. Only admins change email addresses and passwords,
+  use two-factor authentication and invite (create accounts); password reset is
+  switched off.
+
 ## [0.5.0] – 2026-10-25
 
 When updating from 0.4.0 nothing needs to be done; the database is migrated when the

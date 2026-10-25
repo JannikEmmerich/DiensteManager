@@ -2,12 +2,14 @@
 {% with page=request.resolver_match.url_name %}
 <div class="list-group">
     <a class="list-group-item list-group-item-action{% if page == 'profile' %} active{% endif %}" href="{% url 'profile' %}">{% translate "My account" %}</a>
-    <a class="list-group-item list-group-item-action{% if page == 'account_email' %} active{% endif %}" href="{% url 'account_email' %}">{% translate "Email address" %}</a>
-    <a class="list-group-item list-group-item-action{% if page == 'account_change_password' or page == 'account_set_password' %} active{% endif %}" href="{% url 'account_change_password' %}">{% translate "Password" %}</a>
-    {% if HIORG_ENABLED %}
-        <a class="list-group-item list-group-item-action{% if page == 'socialaccount_connections' %} active{% endif %}" href="{% url 'socialaccount_connections' %}">{% translate "HiOrg link" %}</a>
+    {% if can.change_sign_in %}
+        <a class="list-group-item list-group-item-action{% if page == 'account_email' %} active{% endif %}" href="{% url 'account_email' %}">{% translate "Email address" %}</a>
+        <a class="list-group-item list-group-item-action{% if page == 'account_change_password' or page == 'account_set_password' %} active{% endif %}" href="{% url 'account_change_password' %}">{% translate "Password" %}</a>
+        {% if HIORG_ENABLED %}
+            <a class="list-group-item list-group-item-action{% if page == 'socialaccount_connections' %} active{% endif %}" href="{% url 'socialaccount_connections' %}">{% translate "HiOrg link" %}</a>
+        {% endif %}
+        <a class="list-group-item list-group-item-action{% if page and page|slice:':4' == 'mfa_' %} active{% endif %}" href="{% url 'mfa_index' %}">{% translate "Two-factor authentication" %}</a>
     {% endif %}
-    <a class="list-group-item list-group-item-action{% if page and page|slice:':4' == 'mfa_' %} active{% endif %}" href="{% url 'mfa_index' %}">{% translate "Two-factor authentication" %}</a>
     {% if can.view_duties %}
         <a class="list-group-item list-group-item-action{% if page == 'calendar_settings' %} active{% endif %}" href="{% url 'calendar_settings' %}">{% translate "Calendar subscription" %}</a>
     {% endif %}

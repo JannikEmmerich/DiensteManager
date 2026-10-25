@@ -12,7 +12,7 @@
 - Paid and cancelled billings are deleted after ``RETENTION_BILLINGS_YEARS`` full
   calendar years (retention periods for accounting records); open ones never.
 - Sent and failed emails of the email queue are deleted ``RETENTION_OUTBOX_DAYS`` after
-  they were written; queued ones never.
+  they were written; queued ones never. So are the emails in the inbox of demo mode.
 
 A period of 0 keeps the data forever.
 """
@@ -28,6 +28,7 @@ from django.utils import timezone
 from accounts.models import Invitation
 from billing.models import Billing
 from billing.services import unbilled_reports
+from demo.models import DemoEmail
 from duties.models import Report
 from mailings.models import Mailing
 from outbox.models import OutgoingEmail
@@ -124,6 +125,14 @@ def delete_outgoing_emails(now):
     return per_model.get(OutgoingEmail._meta.label, 0)
 
 
+def delete_demo_emails(now):
+    days = settings.RETENTION_OUTBOX_DAYS
+    if not days:
+        return 0
+    _total, per_model = DemoEmail.objects.filter(created_at__lt=now - timedelta(days=days)).delete()
+    return per_model.get(DemoEmail._meta.label, 0)
+
+
 def apply(now=None, dry_run=False):
     """Applies all retention periods; returns what was done (or would be, for a dry run)."""
     now = now or timezone.now()
@@ -135,6 +144,7 @@ def apply(now=None, dry_run=False):
             "invitations_deleted": delete_invitations(now),
             "billings_deleted": delete_billings(now),
             "outgoing_emails_deleted": delete_outgoing_emails(now),
+            "demo_emails_deleted": delete_demo_emails(now),
         }
         if dry_run:
             transaction.set_rollback(True)

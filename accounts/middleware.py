@@ -68,6 +68,42 @@ MFA_SETUP_VIEWS = {
 }
 
 
+# What only admins may open in demo mode: changing the email address or the password,
+# resetting the password (its email only reaches the inbox) and linking HiOrg.
+DEMO_ADMIN_ONLY_VIEWS = {
+    "account_email",
+    "account_change_password",
+    "account_set_password",
+    "account_reset_password",
+    "account_reset_password_done",
+    "account_reset_password_from_key",
+    "account_reset_password_from_key_done",
+    "socialaccount_connections",
+}
+# Two-factor authentication is off for everyone else, but admins still sign in with it.
+MFA_SIGN_IN_VIEWS = {"mfa_authenticate", "mfa_reauthenticate", "mfa_trust"}
+
+
+class DemoModeMiddleware:
+    """In demo mode, only admins change their sign-in (see ``DEMO_MODE``)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        return self.get_response(request)
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        name = request.resolver_match.url_name or ""
+        admin_only = name in DEMO_ADMIN_ONLY_VIEWS or (
+            name.startswith("mfa_") and name not in MFA_SIGN_IN_VIEWS
+        )
+        if not admin_only or not permissions.demo_restricted(request.user):
+            return None
+        messages.error(request, _("In demo mode, only an admin can do this."))
+        return redirect("profile" if request.user.is_authenticated else "account_login")
+
+
 class MfaRequiredMiddleware:
     """Sends accounts that must use two-factor authentication to its setup first.
 

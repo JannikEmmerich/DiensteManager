@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block head_title %}{{ email.subject }}{% endblock head_title %}
+{% block content %}
+    <h1 class="h3 mb-3">{{ email.subject }}</h1>
+    <div class="card mb-3">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">{% translate "Received" %}</dt>
+                <dd class="col-sm-9">{{ email.created_at|date:"SHORT_DATETIME_FORMAT" }}</dd>
+                <dt class="col-sm-3">{% translate "From" %}</dt>
+                <dd class="col-sm-9">{{ email.from_email|default:"–" }}</dd>
+                <dt class="col-sm-3">{% translate "To" %}</dt>
+                <dd class="col-sm-9">{{ email.to|join:", "|default:"–" }}</dd>
+                {% if email.cc %}
+                    <dt class="col-sm-3">{% translate "Cc" %}</dt>
+                    <dd class="col-sm-9">{{ email.cc|join:", " }}</dd>
+                {% endif %}
+                {% if email.bcc and user.is_superuser %}
+                    <dt class="col-sm-3">{% translate "Bcc" %}</dt>
+                    <dd class="col-sm-9">{{ email.bcc|join:", " }}</dd>
+                {% endif %}
+                {% if email.reply_to %}
+                    <dt class="col-sm-3">{% translate "Reply to" %}</dt>
+                    <dd class="col-sm-9">{{ email.reply_to|join:", " }}</dd>
+                {% endif %}
+                {% if email.attachments.all %}
+                    <dt class="col-sm-3">{% translate "Attachments" %}</dt>
+                    <dd class="col-sm-9">
+                        {% for attachment in email.attachments.all %}
+                            <a href="{% url 'demo_inbox_attachment' attachment.pk %}">{{ attachment.filename }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </dd>
+                {% endif %}
+            </dl>
+            <hr>
+            <pre class="email-body mb-0">{{ email.body|urlize }}</pre>
+        </div>
+    </div>
+    <a class="btn btn-link px-0" href="{% url 'demo_inbox' %}">{% translate "Back to the inbox" %}</a>
+{% endblock content %}

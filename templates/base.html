@@ -13,6 +13,11 @@
 </head>
 <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
     {% include "core/_navbar.html" %}
+    {% if DEMO_MODE %}
+        <div class="demo-banner text-center small py-1">
+            {% translate "Demo: emails are not sent; you find them under “Inbox”." %}
+        </div>
+    {% endif %}
     <main class="container py-4">
         {% include "core/_messages.html" %}
         {% block main %}{% block content %}{% endblock content %}{% endblock main %}

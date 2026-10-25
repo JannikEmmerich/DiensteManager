@@ -265,6 +265,28 @@ buttons on a duty ("Email the units") and on a unit.
   separated by commas; empty: nobody is forced).
 - The Django admin uses the same sign-in including two-factor authentication.
 
+## Demo mode
+
+`DEMO_MODE=True` in `.env` turns an installation into a demo, e.g. for trying the portal
+with prepared accounts. A strip under the navigation says so.
+
+- **No emails are sent.** They are stored instead and shown under **Inbox**: everyone
+  sees the emails they would have received at their address (with links and
+  attachments such as statements); admins can also see all of them ("All"), e.g. the
+  link of an invitation. This also applies with `EMAIL_HOST` set and to the email queue
+  (the worker stores the emails, daily summaries included). After
+  `RETENTION_OUTBOX_DAYS` (30) they are deleted.
+- **Only admins (superusers) change email addresses and passwords** – their own, and
+  those of others under *Edit* on the account. For everyone else *My account* has no
+  email address, password, HiOrg link and two-factor settings, and resetting the password
+  is switched off (its email would only reach the inbox; admins use
+  `manage.py changepassword`).
+- **Two-factor authentication is off** for everyone but admins: dispatchers are not
+  forced to set it up, and authenticators set up before are not asked for. Admins keep
+  it (mandatory as dispatchers, see `MFA_REQUIRED_ROLES`).
+- **Only admins create accounts:** only they invite, and only their invitations can be
+  accepted. Dispatchers and unit leads still change roles and block accounts.
+
 ## Languages
 
 - The UI is available in **German** (default) and **English**. Code, comments and
@@ -499,6 +521,7 @@ mailings/    emails from dispatchers to the units (Reply-To: the dispatcher)
 billing/     duty pay overview, bank details, billings and their PDF
 lifecycle/   change history and retention periods (apply_retention)
 outbox/      email queue, retries, daily summary and the worker (run_worker)
+demo/        demo mode: email backend that stores emails, and the inbox
 core/        overview, health check (/healthz), form helpers
 templates/   layout, own pages, Bootstrap versions of the allauth pages
 locale/      German translations
