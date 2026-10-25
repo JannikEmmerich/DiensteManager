@@ -317,7 +317,8 @@ docker compose logs -f web worker     # logs (and emails, without SMTP)
 ```
 
 - Three containers run the app: `web` (gunicorn), `worker` (sends the emails and applies
-  the retention periods) and `caddy`, plus the database `db`.
+  the retention periods) and `caddy`, plus the database `db`. Without Caddy, behind
+  your own proxy or a Cloudflare Tunnel: see below.
 
 - The image is `ghcr.io/jannikemmerich/dienstemanager`; pin a version with
   `DIENSTEMANAGER_VERSION` in `.env` (see "Versions, releases and updates"). While the
@@ -336,6 +337,32 @@ docker compose logs -f web worker     # logs (and emails, without SMTP)
 - `manage.py check --deploy` only reports W005/W021 (HSTS for subdomains/preload). Both
   affect the whole domain and are off on purpose; enable them via
   `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS` if appropriate.
+
+### Without Caddy: own reverse proxy or Cloudflare Tunnel
+
+If HTTPS ends somewhere else, e.g. at Cloudflare with `cloudflared`, Caddy is not
+needed. Add this line to `.env`:
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.tunnel.yaml
+```
+
+`docker compose` then starts `db`, `web` and `worker` but not `caddy`, and the app
+listens on **`127.0.0.1:8080`** (plain HTTP, only on this machine). Ports 80/443 are not
+used. A Caddy container that is already running is stopped with
+`docker compose stop caddy && docker compose rm -f caddy`.
+
+- **Cloudflare Tunnel:** a public hostname with the value of `DOMAIN` and the service
+  `http://localhost:8080` (with `cloudflared` on the same machine). `DOMAIN` stays set:
+  it is the allowed host name and the address in emails.
+- The app trusts the proxy's headers: `X-Forwarded-Proto` (HTTPS, otherwise it
+  redirects to HTTPS) and the client IP for the sign-in rate limits, by default from
+  `CF-Connecting-IP` (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER`; empty: `X-Forwarded-For`).
+  Therefore only the proxy may reach the port. `WEB_PORT` changes address and port,
+  e.g. `WEB_PORT=127.0.0.1:9000`; with `0.0.0.0:8080` (e.g. for `cloudflared` in a
+  container), a firewall has to keep everyone else out.
+- **400 Bad Request:** the proxy does not pass the public host name. Pass it on (for
+  `cloudflared`: *HTTP Host Header* = `DOMAIN` in the origin settings).
 
 ## Versions, releases and updates
 
