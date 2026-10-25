@@ -304,6 +304,21 @@ def test_cancelled_billing_frees_its_helpers(client, dispatcher, unit, unit_lead
     assert "has been cancelled" in mailoutbox[-1].subject
 
 
+def test_billed_duties_cannot_be_cancelled(client, dispatcher, unit):
+    duty = _paid_duty()
+    report = _confirmed(duty, unit)
+    billing = services.create_billing(unit, [(report, Decimal(4))], "", dispatcher)
+    client.force_login(dispatcher)
+    client.post(reverse("duty_cancel", args=[duty.pk]), {"confirm_started": "1"})
+    duty.refresh_from_db()
+    assert duty.status == Duty.Status.RELEASED
+    # Once the billing is cancelled, the duty can be cancelled again.
+    client.post(reverse("billing_cancel", args=[billing.pk]))
+    client.post(reverse("duty_cancel", args=[duty.pk]), {"confirm_started": "1"})
+    duty.refresh_from_db()
+    assert duty.status == Duty.Status.CANCELLED
+
+
 def test_unit_leads_cannot_change_billings(client, dispatcher, unit, unit_lead):
     billing = services.create_billing(
         unit, [(_confirmed(_paid_duty(), unit), Decimal(4))], "", dispatcher
