@@ -7,6 +7,17 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] – 2026-10-25
+
+When updating from 0.3.0:
+
+- Every position now needs a qualification. Positions that had "any qualification" get
+  the qualification "Helfer"; rename it under *Duties → Qualifications* if you like.
+- Set up "Also counts as" there (e.g. Notfallsanitäter → Rettungssanitäter → Sanitäter),
+  so that higher qualifications fill places of lower ones.
+- Helpers confirmed before the update keep the position they were reported for, and so
+  their pay. On upcoming duties you can change it under *Assigned to*.
+
 ### Added
 
 - Calendar subscription (iCal): under *My account → Calendar subscription* every account

@@ -4,10 +4,11 @@ Staff planning with external units: external units see our duties with open staf
 needs and report people for them. The duties are going to be imported from HiOrg-Server.
 
 **Status:** user management, sign-in (local and with HiOrg-Server), invitations, units,
-duties with release, staffing needs per qualification and reports, email notifications
-(in the background, optionally as a daily summary), emails from dispatchers, duty pay and
-billing with PDF statements, change history and retention periods, German/English UI and
-the Docker setup are done. Importing duties from HiOrg-Server comes next.
+duties with release, staffing needs per qualification and reports, a calendar
+subscription, email notifications (in the background, optionally as a daily summary),
+emails from dispatchers, duty pay and billing with PDF statements, change history and
+retention periods, German/English UI and the Docker setup are done. Importing duties
+from HiOrg-Server comes next.
 
 ## Stack
 
