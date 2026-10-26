@@ -271,8 +271,14 @@ class Duty(models.Model):
         staffing.count(positions, list(reports), Qualification.includes_map())
         return positions
 
+    def lock_staffing(self):
+        """Within a transaction: confirmations at this duty wait for each other, so that
+        two of them never take the same free place (``assign_position``)."""
+        list(Duty.objects.select_for_update().filter(pk=self.pk).values_list("pk"))
+
     def assign_position(self, report):
-        """The position ``report`` fills once it is confirmed (see duties.staffing)."""
+        """The position ``report`` fills once it is confirmed (see duties.staffing); call
+        ``lock_staffing`` first."""
         positions = list(self.positions.select_related("qualification"))
         filled = Counter(
             assigned_id or position_id

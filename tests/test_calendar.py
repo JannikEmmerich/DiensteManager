@@ -163,3 +163,11 @@ def test_options_depend_on_the_role(client, request, account, shown, hidden):
 def test_settings_are_linked_under_my_account(client, member):
     client.force_login(member)
     assert reverse("calendar_settings") in client.get(reverse("profile")).text
+
+
+def test_line_breaks_in_texts_are_escaped(client, member):
+    create_duty(title="Concert\rSTATUS:CANCELLED", location="Hall\r\nnorth\nentrance")
+    body = _get(client, _feed(member)).content.decode()
+    assert "SUMMARY:Concert\\nSTATUS:CANCELLED\r\n" in body
+    assert "LOCATION:Hall\\nnorth\\nentrance\r\n" in body
+    assert "\rSTATUS:CANCELLED" not in body

@@ -21,7 +21,7 @@ from mailings.models import Mailing
 from outbox import worker
 from outbox.models import OutgoingEmail
 
-from .conftest import create_account, create_duty, create_report
+from .conftest import create_account, create_duty, create_report, post_billing
 
 BERLIN = ZoneInfo("Europe/Berlin")
 
@@ -85,7 +85,7 @@ def test_billing_pdf_travels_with_the_email(client, queue, dispatcher, unit, uni
     duty = create_duty(starts_in=timedelta(days=-3), pay_type=Duty.PayType.FLAT, pay_rate=40)
     report = create_report(duty, unit, status=Report.Status.CONFIRMED)
     client.force_login(dispatcher)
-    client.post(reverse("billing_create", args=[unit.pk]), {f"include_{report.pk}": "on"})
+    post_billing(client, unit, {f"include_{report.pk}": "on"})
     assert mailoutbox == []
     worker.send_due()
     ((filename, content, mimetype),) = mailoutbox[0].attachments

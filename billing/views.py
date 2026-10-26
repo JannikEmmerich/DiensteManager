@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -57,6 +57,8 @@ def unit_pay(request, pk):
             "year": year,
             "years": years,
             "lines": lines,
+            # Other items keep a quantity (e.g. kilometres) where helpers have their hours.
+            "has_other_items": any(line.pay_type == BillingItem.PayType.OTHER for line in lines),
             "totals": totals,
             "billings": unit.billings.all(),
             "bank_account": BankAccount.objects.filter(unit=unit).first(),
@@ -121,10 +123,22 @@ def billing_create(request, unit_pk):
     sent_extra = "extra-TOTAL_FORMS" in request.POST
     extra = ExtraLineFormSet(request.POST if sent_extra else None, prefix="extra")
     valid = request.method == "POST" and form.is_valid() and (not sent_extra or extra.is_valid())
+    if request.method == "POST":
+        # Sent again after the billing was created (its helpers are no longer billable).
+        token = form.cleaned_data.get("form_token")
+        created = Billing.objects.filter(form_token=token).first() if token else None
+        if created is not None:
+            return _already_created(request, created)
     extra_lines = extra.extra_lines() if valid and sent_extra else []
     if valid and not form.cleaned_data["selected"] and not extra_lines:
         form.add_error(None, _("Please select at least one helper or add a line."))
         valid = False
+    if valid:
+        try:
+            services.check_amounts([*form.cleaned_data["selected"], *extra_lines])
+        except ValidationError as error:
+            form.add_error(None, error)
+            valid = False
     if valid:
         try:
             billing = services.create_billing(
@@ -133,7 +147,10 @@ def billing_create(request, unit_pk):
                 form.cleaned_data["note"],
                 request.user,
                 extra_lines=extra_lines,
+                form_token=form.cleaned_data["form_token"],
             )
+        except services.AlreadyCreated as error:
+            return _already_created(request, error.billing)
         except services.AlreadyBilled:
             messages.error(request, _("Some of these helpers have been billed in the meantime."))
             return redirect("billing_create", unit_pk=unit.pk)
@@ -155,6 +172,15 @@ def billing_create(request, unit_pk):
             and bank_account.updated_at > timezone.now() - BANK_CHANGE_WARNING,
         },
     )
+
+
+def _already_created(request, billing):
+    messages.info(
+        request,
+        _("Statement %(number)s has already been created with this form.")
+        % {"number": billing.number},
+    )
+    return redirect(billing)
 
 
 def _visible_billing(request, pk):

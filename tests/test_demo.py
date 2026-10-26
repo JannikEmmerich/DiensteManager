@@ -6,6 +6,7 @@ from datetime import timedelta
 import pytest
 from allauth.account.models import EmailAddress
 from allauth.mfa.totp.internal.auth import TOTP, generate_totp_secret
+from allauth.socialaccount.models import SocialAccount
 from django.core import mail
 from django.urls import reverse
 from django.utils import timezone
@@ -15,7 +16,7 @@ from demo.models import DemoEmail
 from lifecycle import retention
 from outbox import queue, worker
 
-from .conftest import PASSWORD, create_invitation
+from .conftest import PASSWORD, create_invitation, hiorg_userinfo
 
 
 @pytest.fixture
@@ -113,6 +114,31 @@ def test_only_admins_change_their_sign_in(client, demo, member, admin, url_name)
     assert response.get("Location") != reverse("profile")
 
 
+def _sign_in_and_confirm(client, user):
+    client.post(reverse("account_login"), {"login": user.email, "password": PASSWORD})
+    client.post(reverse("account_reauthenticate"), {"password": PASSWORD})
+
+
+def test_only_admins_link_hiorg(client, demo, member, admin, hiorg_login):
+    """Also when linking starts from the HiOrg sign-in instead of "My account"."""
+    _sign_in_and_confirm(client, member)
+    response, _server = hiorg_login(client, hiorg_userinfo(sub="sub-member"), process="connect")
+    assert response["Location"] == reverse("profile")
+    assert not SocialAccount.objects.exists()
+    client.logout()
+    _sign_in_and_confirm(client, admin)
+    hiorg_login(client, hiorg_userinfo(sub="sub-admin"), process="connect")
+    assert SocialAccount.objects.get().user == admin
+
+
+def test_only_admins_change_their_password_in_the_django_admin(client, demo, member):
+    member.is_staff = True
+    member.save()
+    client.force_login(member)
+    response = client.get(reverse("admin:password_change"))
+    assert response["Location"] == reverse("profile")
+
+
 def test_profile_without_sign_in_settings(client, demo, member):
     client.force_login(member)
     page = client.get(reverse("profile")).text
@@ -197,6 +223,11 @@ def test_admins_add_accounts_with_a_password(client, demo, admin, unit):
         reverse("account_login"), {"login": erin.email, "password": "a-long-demo-pass"}
     )
     assert response["Location"] == reverse("home")
+
+
+def test_odd_unit_parameter(client, demo, admin):
+    client.force_login(admin)
+    assert client.get(reverse("account_create") + "?unit=%C2%B2").status_code == 200
 
 
 def test_internal_accounts_and_wrong_input(client, demo, admin, unit):

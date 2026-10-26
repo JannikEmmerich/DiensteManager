@@ -62,7 +62,7 @@
                                 <th>{% translate "Date" %}</th>
                                 <th>{% translate "Duty" %}</th>
                                 <th>{% translate "Helper" %}</th>
-                                <th class="text-end">{% translate "Hours" %}</th>
+                                <th class="text-end">{% if has_other_items %}{% translate "Hours/qty." %}{% else %}{% translate "Hours" %}{% endif %}</th>
                                 <th class="text-end">{% translate "Amount" %}</th>
                                 <th>{% translate "Status" %}</th>
                             </tr>

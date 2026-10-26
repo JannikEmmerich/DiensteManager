@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiensteManager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 16:39+0100\n"
+"POT-Creation-Date: 2026-10-26 02:09+0100\n"
 "PO-Revision-Date: 2026-10-25 01:10+0200\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -13,7 +13,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: accounts/adapters.py:100
+#: accounts/adapters.py:75 accounts/middleware.py:106
+msgid "In demo mode, only an admin can do this."
+msgstr "Im Demo-Modus kann das nur ein Admin."
+
+#: accounts/adapters.py:105
 msgid "The invitation is no longer valid."
 msgstr "Die Einladung ist nicht mehr gültig."
 
@@ -34,7 +38,7 @@ msgid "Important dates"
 msgstr "Wichtige Daten"
 
 #: accounts/admin.py:75 billing/models.py:70 duties/models.py:152
-#: duties/models.py:414 outbox/models.py:43
+#: duties/models.py:420 outbox/models.py:43
 msgid "status"
 msgstr "Status"
 
@@ -71,11 +75,11 @@ msgstr "Gilt für die E-Mail und als anfängliche Sprache des neuen Kontos."
 msgid "– none (internal account) –"
 msgstr "– keine (internes Konto) –"
 
-#: accounts/forms.py:88 accounts/forms.py:261
+#: accounts/forms.py:88 accounts/forms.py:263
 msgid "An account with this email address already exists."
 msgstr "Für diese E-Mail-Adresse gibt es bereits ein Konto."
 
-#: accounts/forms.py:91 accounts/forms.py:264
+#: accounts/forms.py:91 accounts/forms.py:266
 msgid "There is already a pending invitation for this email address."
 msgstr "Für diese E-Mail-Adresse gibt es bereits eine offene Einladung."
 
@@ -83,7 +87,7 @@ msgstr "Für diese E-Mail-Adresse gibt es bereits eine offene Einladung."
 msgid "Internal accounts do not belong to a unit."
 msgstr "Interne Konten gehören zu keiner Bereitschaft."
 
-#: accounts/forms.py:102 accounts/forms.py:274
+#: accounts/forms.py:102 accounts/forms.py:276
 msgid "Please select a unit."
 msgstr "Bitte eine Bereitschaft auswählen."
 
@@ -175,11 +179,7 @@ msgstr "Neue Dienste für die Bereitschaft"
 msgid "Billings and changed bank details"
 msgstr "Abrechnungen und geänderte Bankverbindungen"
 
-#: accounts/middleware.py:103
-msgid "In demo mode, only an admin can do this."
-msgstr "Im Demo-Modus kann das nur ein Admin."
-
-#: accounts/middleware.py:130
+#: accounts/middleware.py:133
 msgid ""
 "Your account must be protected with two-factor authentication. Please set it "
 "up now."
@@ -200,7 +200,7 @@ msgstr "Bereitschaftsleitung"
 msgid "Unit member"
 msgstr "Mitglied einer Bereitschaft"
 
-#: accounts/models.py:44 duties/models.py:24 duties/models.py:408
+#: accounts/models.py:44 duties/models.py:24 duties/models.py:414
 msgid "name"
 msgstr "Name"
 
@@ -210,7 +210,7 @@ msgid "created at"
 msgstr "erstellt am"
 
 #: accounts/models.py:48 accounts/models.py:69 accounts/models.py:181
-#: billing/models.py:18 billing/models.py:65 duties/models.py:378
+#: billing/models.py:18 billing/models.py:65 duties/models.py:384
 msgid "unit"
 msgstr "Bereitschaft"
 
@@ -246,11 +246,11 @@ msgstr "Leer lassen, um der Browsereinstellung zu folgen."
 msgid "new duties"
 msgstr "neue Dienste"
 
-#: accounts/models.py:84 duties/models.py:454
+#: accounts/models.py:84 duties/models.py:460
 msgid "reports"
 msgstr "Meldungen"
 
-#: accounts/models.py:85 billing/models.py:93
+#: accounts/models.py:85 billing/models.py:96
 msgid "billings"
 msgstr "Abrechnungen"
 
@@ -382,8 +382,8 @@ msgstr "Diese Einladung kann nicht mehr widerrufen werden."
 msgid "Unit “%(name)s” created."
 msgstr "Bereitschaft „%(name)s“ angelegt."
 
-#: accounts/views.py:224 accounts/views.py:292 accounts/views.py:338
-#: duties/views.py:232 duties/views.py:343 duties/views.py:730
+#: accounts/views.py:224 accounts/views.py:292 accounts/views.py:337
+#: duties/views.py:232 duties/views.py:343 duties/views.py:735
 msgid "Saved."
 msgstr "Gespeichert."
 
@@ -396,17 +396,17 @@ msgstr "Bitte eine Rolle auswählen."
 msgid "%(account)s is now: %(role)s."
 msgstr "%(account)s ist jetzt: %(role)s."
 
-#: accounts/views.py:307
+#: accounts/views.py:306
 #, python-format
 msgid "Account for %(email)s added."
 msgstr "Konto für %(email)s angelegt."
 
-#: accounts/views.py:321
+#: accounts/views.py:320
 #, python-format
 msgid "Access for %(account)s unblocked."
 msgstr "Zugang für %(account)s freigegeben."
 
-#: accounts/views.py:323
+#: accounts/views.py:322
 #, python-format
 msgid "Access for %(account)s blocked."
 msgstr "Zugang für %(account)s gesperrt."
@@ -415,83 +415,87 @@ msgstr "Zugang für %(account)s gesperrt."
 msgid "Duty pay and billing"
 msgstr "Dienstgelder und Abrechnung"
 
-#: billing/forms.py:18
+#: billing/forms.py:19
 msgid "Optional for accounts within the SEPA area."
 msgstr "Für Konten im SEPA-Raum optional."
 
-#: billing/forms.py:35 billing/pdf.py:194
+#: billing/forms.py:36 billing/pdf.py:194
 #: templates/billing/billing_detail.html:66
 #: templates/duties/duty_detail.html:163
 msgid "Note"
 msgstr "Bemerkung"
 
-#: billing/forms.py:38 billing/models.py:72
+#: billing/forms.py:39 billing/models.py:72
 msgid "Printed on the statement."
 msgstr "Wird auf die Abrechnung gedruckt."
 
-#: billing/forms.py:56 billing/forms.py:154 billing/pdf.py:127
-#: billing/pdf.py:143 templates/billing/billing_create.html:40
+#: billing/forms.py:59 billing/forms.py:163 billing/pdf.py:127
+#: billing/pdf.py:143 templates/billing/billing_create.html:41
 #: templates/billing/billing_detail.html:39
 #: templates/billing/billing_list.html:47 templates/billing/unit_pay.html:62
 msgid "Date"
 msgstr "Datum"
 
-#: billing/forms.py:62 billing/pdf.py:143
-#: templates/billing/billing_create.html:41
+#: billing/forms.py:65 billing/pdf.py:143
+#: templates/billing/billing_create.html:42
 #: templates/billing/billing_detail.html:40 templates/billing/unit_pay.html:63
 #: templates/duties/_duty_table.html:7
 #: templates/mailings/mailing_detail.html:16
 msgid "Duty"
 msgstr "Dienst"
 
-#: billing/forms.py:69 billing/pdf.py:143
-#: templates/billing/billing_create.html:42
+#: billing/forms.py:72 billing/pdf.py:143
+#: templates/billing/billing_create.html:43
 #: templates/billing/billing_detail.html:41 templates/billing/unit_pay.html:64
 msgid "Helper"
 msgstr "Helfer"
 
-#: billing/forms.py:76 duties/forms.py:296
-#: templates/billing/billing_create.html:43
+#: billing/forms.py:79 duties/forms.py:297
+#: templates/billing/billing_create.html:44
 #: templates/duties/_position_row.html:10 templates/duties/duty_detail.html:161
 #: templates/duties/duty_form.html:78
 msgid "Qualification"
 msgstr "Qualifikation"
 
-#: billing/forms.py:83 templates/billing/billing_create.html:44
+#: billing/forms.py:86 templates/billing/billing_create.html:45
 msgid "Rate in euros"
 msgstr "Satz in Euro"
 
-#: billing/forms.py:93 billing/pdf.py:142
-#: templates/billing/billing_create.html:45
+#: billing/forms.py:97 billing/pdf.py:142
+#: templates/billing/billing_create.html:46
 #: templates/billing/billing_detail.html:42 templates/billing/unit_pay.html:65
 msgid "Hours"
 msgstr "Stunden"
 
-#: billing/forms.py:136
+#: billing/forms.py:124
+msgid "Please reload the page and enter the statement again."
+msgstr "Bitte lade die Seite neu und gib die Abrechnung noch einmal ein."
+
+#: billing/forms.py:145
 msgid "This field is required."
 msgstr "Dieses Feld ist zwingend erforderlich."
 
-#: billing/forms.py:143
+#: billing/forms.py:152
 msgid "Please enter the hours."
 msgstr "Bitte gib die Stunden an."
 
-#: billing/forms.py:156
+#: billing/forms.py:165
 msgid "Description"
 msgstr "Bezeichnung"
 
-#: billing/forms.py:158
+#: billing/forms.py:167
 msgid "Quantity"
 msgstr "Menge"
 
-#: billing/forms.py:164
+#: billing/forms.py:173
 msgid "Optional, e.g. kilometres."
 msgstr "Optional, z. B. Kilometer."
 
-#: billing/forms.py:167
+#: billing/forms.py:176
 msgid "Price in euros"
 msgstr "Preis in Euro"
 
-#: billing/forms.py:171
+#: billing/forms.py:180
 msgid "Per unit with a quantity; negative for a deduction."
 msgstr "Mit Menge pro Einheit; negativ für einen Abzug."
 
@@ -550,7 +554,7 @@ msgstr "Jahr"
 msgid "sequence number"
 msgstr "laufende Nummer"
 
-#: billing/models.py:72 duties/models.py:412
+#: billing/models.py:72 duties/models.py:418
 msgid "note"
 msgstr "Bemerkung"
 
@@ -570,65 +574,65 @@ msgstr "bezahlt am"
 msgid "cancelled at"
 msgstr "abgesagt am"
 
-#: billing/models.py:92 billing/models.py:136
+#: billing/models.py:95 billing/models.py:139
 msgid "billing"
 msgstr "Abrechnung"
 
-#: billing/models.py:131 duties/models.py:114
+#: billing/models.py:134 duties/models.py:114
 msgid "Per helper hour"
 msgstr "Pro Helferstunde"
 
-#: billing/models.py:132 duties/models.py:115
+#: billing/models.py:135 duties/models.py:115
 msgid "Flat rate per helper"
 msgstr "Pauschal pro Helfer"
 
-#: billing/models.py:133
+#: billing/models.py:136
 msgid "Other item"
 msgstr "Sonstige Position"
 
-#: billing/models.py:141 duties/models.py:453
+#: billing/models.py:144 duties/models.py:459
 msgid "report"
 msgstr "Meldung"
 
-#: billing/models.py:147 billing/models.py:149 duties/models.py:177
-#: duties/models.py:310 duties/models.py:375 mailings/models.py:33
+#: billing/models.py:150 billing/models.py:152 duties/models.py:177
+#: duties/models.py:316 duties/models.py:381 mailings/models.py:33
 msgid "duty"
 msgstr "Dienst"
 
-#: billing/models.py:150
+#: billing/models.py:153
 msgid "date"
 msgstr "Datum"
 
-#: billing/models.py:151
+#: billing/models.py:154
 msgid "helper"
 msgstr "Helfer"
 
-#: billing/models.py:153 duties/models.py:47 duties/models.py:314
-#: duties/models.py:411
+#: billing/models.py:156 duties/models.py:47 duties/models.py:320
+#: duties/models.py:417
 msgid "qualification"
 msgstr "Qualifikation"
 
-#: billing/models.py:154 duties/models.py:140
+#: billing/models.py:157 duties/models.py:140
 msgid "duty pay"
 msgstr "Dienstgeld"
 
-#: billing/models.py:155 duties/models.py:143
+#: billing/models.py:158 duties/models.py:143
 msgid "rate in euros"
 msgstr "Satz in Euro"
 
-#: billing/models.py:157
+#: billing/models.py:160
 msgid "hours"
 msgstr "Stunden"
 
-#: billing/models.py:158
+#: billing/models.py:161
 msgid "amount"
 msgstr "Betrag"
 
-#: billing/models.py:161
+#: billing/models.py:164
 msgid "billing item"
 msgstr "Abrechnungsposten"
 
-#: billing/models.py:162
+#: billing/models.py:165
 msgid "billing items"
 msgstr "Abrechnungsposten"
 
@@ -647,7 +651,7 @@ msgstr "%(amount)s pauschal"
 msgid "Statement of duty pay %(number)s"
 msgstr "Abrechnung Dienstgelder %(number)s"
 
-#: billing/pdf.py:125 duties/forms.py:285 templates/accounts/profile.html:15
+#: billing/pdf.py:125 duties/forms.py:286 templates/accounts/profile.html:15
 #: templates/billing/billing_list.html:13
 #: templates/billing/billing_list.html:48 templates/duties/duty_detail.html:159
 #: templates/mailings/mailing_detail.html:34
@@ -668,6 +672,7 @@ msgid "Paid on"
 msgstr "Bezahlt am"
 
 #: billing/pdf.py:142 templates/billing/billing_detail.html:42
+#: templates/billing/unit_pay.html:65
 msgid "Hours/qty."
 msgstr "Std./Menge"
 
@@ -715,6 +720,14 @@ msgstr "%(site)s · Abrechnung %(number)s · erstellt von %(name)s"
 msgid "Page %(page)d"
 msgstr "Seite %(page)d"
 
+#: billing/services.py:246
+msgid "An amount or the total is too large."
+msgstr "Ein Betrag oder die Summe ist zu groß."
+
+#: billing/services.py:248
+msgid "The total of a statement must be more than zero."
+msgstr "Die Summe einer Abrechnung muss größer als null sein."
+
 #: billing/validators.py:20
 msgid "This is not a valid IBAN."
 msgstr "Das ist keine gültige IBAN."
@@ -728,47 +741,52 @@ msgstr ""
 msgid "This is not a valid BIC."
 msgstr "Das ist keine gültige BIC."
 
-#: billing/views.py:80
+#: billing/views.py:82
 msgid "Bank details saved."
 msgstr "Bankverbindung gespeichert."
 
-#: billing/views.py:126
+#: billing/views.py:134
 msgid "Please select at least one helper or add a line."
 msgstr "Bitte wähle mindestens einen Helfer aus oder füge eine Zeile hinzu."
 
-#: billing/views.py:138
+#: billing/views.py:155
 msgid "Some of these helpers have been billed in the meantime."
 msgstr "Einige dieser Helfer wurden inzwischen abgerechnet."
 
-#: billing/views.py:143
+#: billing/views.py:160
 #, python-format
 msgid "Statement %(number)s created."
 msgstr "Abrechnung %(number)s erstellt."
 
-#: billing/views.py:196
+#: billing/views.py:180
+#, python-format
+msgid "Statement %(number)s has already been created with this form."
+msgstr "Abrechnung %(number)s wurde mit diesem Formular schon erstellt."
+
+#: billing/views.py:222
 #, python-format
 msgid "Statement %(number)s marked as paid."
 msgstr "Abrechnung %(number)s als bezahlt markiert."
 
-#: billing/views.py:199
+#: billing/views.py:225
 msgid "Only open statements can be marked as paid."
 msgstr "Nur offene Abrechnungen können als bezahlt markiert werden."
 
-#: billing/views.py:213
+#: billing/views.py:239
 #, python-format
 msgid "Statement %(number)s cancelled. Its helpers can be billed again."
 msgstr ""
 "Abrechnung %(number)s storniert. Die Helfer können erneut abgerechnet werden."
 
-#: billing/views.py:218
+#: billing/views.py:244
 msgid "Only open statements can be cancelled."
 msgstr "Nur offene Abrechnungen können storniert werden."
 
-#: config/settings.py:296
+#: config/settings.py:299
 msgid "German"
 msgstr "Deutsch"
 
-#: config/settings.py:297
+#: config/settings.py:300
 msgid "English"
 msgstr "Englisch"
 
@@ -856,12 +874,12 @@ msgstr "Anhänge"
 msgid "Duties and reports"
 msgstr "Dienste und Meldungen"
 
-#: duties/calendar.py:71
+#: duties/calendar.py:72
 #, python-format
 msgid "Cancelled: %(title)s"
 msgstr "Abgesagt: %(title)s"
 
-#: duties/calendar.py:73
+#: duties/calendar.py:74
 #, python-format
 msgid "Draft: %(title)s"
 msgstr "Entwurf: %(title)s"
@@ -906,65 +924,65 @@ msgstr ""
 msgid "– choose –"
 msgstr "– auswählen –"
 
-#: duties/forms.py:155
+#: duties/forms.py:156
 #, python-format
 msgid ""
 "Helpers have been reported for these positions; keep them: %(positions)s"
 msgstr ""
 "Für diese Positionen wurden Helfer gemeldet; behalte sie: %(positions)s"
 
-#: duties/forms.py:166
+#: duties/forms.py:167
 msgid "Helpers have been reported for this position; its qualification stays."
 msgstr "Für diese Position wurden Helfer gemeldet; ihre Qualifikation bleibt."
 
-#: duties/forms.py:170
+#: duties/forms.py:171
 msgid "This qualification is listed twice."
 msgstr "Diese Qualifikation steht doppelt in der Liste."
 
-#: duties/forms.py:174
+#: duties/forms.py:175
 #, python-format
 msgid "A duty can have at most %(max)d helpers in total."
 msgstr "Ein Dienst kann insgesamt höchstens %(max)d Helfer haben."
 
-#: duties/forms.py:268
+#: duties/forms.py:269
 #, python-format
 msgid "These qualifications count as each other: %(qualifications)s"
 msgstr ""
 "„Zählt auch als“ dreht sich bei diesen Qualifikationen im Kreis: "
 "%(qualifications)s"
 
-#: duties/forms.py:296
+#: duties/forms.py:297
 msgid "Name of the helper"
 msgstr "Name des Helfers"
 
-#: duties/forms.py:352
+#: duties/forms.py:357
 #, python-format
 msgid "%(qualification)s – counts as %(positions)s"
 msgstr "%(qualification)s – zählt als %(positions)s"
 
-#: duties/forms.py:362
+#: duties/forms.py:367
 #, python-format
 msgid "%(position)s – %(count)d open"
 msgstr "%(position)s – noch %(count)d offen"
 
-#: duties/forms.py:366
+#: duties/forms.py:371
 #, python-format
 msgid "%(position)s – all taken"
 msgstr "%(position)s – alle vergeben"
 
-#: duties/forms.py:398
+#: duties/forms.py:403
 msgid "This person has already been reported for this duty."
 msgstr "Diese Person wurde für diesen Dienst bereits gemeldet."
 
-#: duties/forms.py:400
+#: duties/forms.py:405
 msgid "This person is listed twice."
 msgstr "Diese Person steht doppelt in der Liste."
 
-#: duties/forms.py:423
+#: duties/forms.py:428
 msgid "Reason (optional)"
 msgstr "Grund (optional)"
 
-#: duties/forms.py:426
+#: duties/forms.py:431
 #, python-format
 msgid "For the %(DISPATCH_NAME)s, e.g. who could step in instead."
 msgstr "Für die %(DISPATCH_NAME)s, z. B. wer stattdessen einspringen könnte."
@@ -1090,87 +1108,87 @@ msgstr "freigegeben am"
 msgid "duties"
 msgstr "Dienste"
 
-#: duties/models.py:318
+#: duties/models.py:324
 msgid "number"
 msgstr "Anzahl"
 
-#: duties/models.py:320
+#: duties/models.py:326
 msgid "own rate in euros"
 msgstr "eigener Satz in Euro"
 
-#: duties/models.py:326
+#: duties/models.py:332
 msgid "Empty: the rate of the duty."
 msgstr "Leer: der Satz des Dienstes."
 
-#: duties/models.py:330 duties/models.py:393
+#: duties/models.py:336 duties/models.py:399
 msgid "position"
 msgstr "Position"
 
-#: duties/models.py:331
+#: duties/models.py:337
 msgid "positions"
 msgstr "Positionen"
 
-#: duties/models.py:366
+#: duties/models.py:372
 msgid "Reported"
 msgstr "Gemeldet"
 
-#: duties/models.py:367
+#: duties/models.py:373
 msgid "Confirmed"
 msgstr "Bestätigt"
 
-#: duties/models.py:368
+#: duties/models.py:374
 msgid "Declined"
 msgstr "Abgelehnt"
 
-#: duties/models.py:369
+#: duties/models.py:375
 msgid "Withdrawn"
 msgstr "Zurückgezogen"
 
-#: duties/models.py:384
+#: duties/models.py:390
 msgid "qualification of the helper"
 msgstr "Qualifikation des Helfers"
 
-#: duties/models.py:402
+#: duties/models.py:408
 msgid "assigned to"
 msgstr "besetzt als"
 
-#: duties/models.py:418
+#: duties/models.py:424
 msgid "reported by"
 msgstr "gemeldet von"
 
-#: duties/models.py:424
+#: duties/models.py:430
 msgid "reported at"
 msgstr "gemeldet am"
 
-#: duties/models.py:427
+#: duties/models.py:433
 msgid "decided by"
 msgstr "entschieden von"
 
-#: duties/models.py:433
+#: duties/models.py:439
 msgid "decided at"
 msgstr "entschieden am"
 
-#: duties/models.py:434
+#: duties/models.py:440
 msgid "withdrawn at"
 msgstr "zurückgezogen am"
 
-#: duties/models.py:438
+#: duties/models.py:444
 msgid "withdrawal requested at"
 msgstr "Rücknahme angefragt am"
 
-#: duties/models.py:442
+#: duties/models.py:448
 msgid "withdrawal requested by"
 msgstr "Rücknahme angefragt von"
 
-#: duties/models.py:448
+#: duties/models.py:454
 msgid "reason for the withdrawal"
 msgstr "Grund für die Rücknahme"
 
-#: duties/models.py:450
+#: duties/models.py:456
 msgid "anonymised at"
 msgstr "anonymisiert am"
 
-#: duties/models.py:469 templates/duties/duty_detail.html:174
+#: duties/models.py:475 templates/duties/duty_detail.html:174
 msgid "(anonymised)"
 msgstr "(anonymisiert)"
 
@@ -1282,16 +1300,16 @@ msgid_plural "%(count)d helpers added and confirmed."
 msgstr[0] "%(count)d Helfer hinzugefügt und bestätigt."
 msgstr[1] "%(count)d Helfer hinzugefügt und bestätigt."
 
-#: duties/views.py:435
+#: duties/views.py:436
 msgid "One of these people has already been reported."
 msgstr "Eine dieser Personen wurde bereits gemeldet."
 
-#: duties/views.py:465 duties/views.py:545
+#: duties/views.py:466 duties/views.py:546
 #, python-format
 msgid "Report for %(name)s withdrawn."
 msgstr "Meldung für %(name)s zurückgezogen."
 
-#: duties/views.py:474
+#: duties/views.py:475
 #, python-format
 msgid ""
 "This report has been confirmed meanwhile; ask the %(DISPATCH_NAME)s to "
@@ -1300,61 +1318,61 @@ msgstr ""
 "Diese Meldung wurde inzwischen bestätigt; bitte die %(DISPATCH_NAME)s, sie "
 "zurückzunehmen."
 
-#: duties/views.py:515
+#: duties/views.py:516
 #, python-format
 msgid ""
 "The %(DISPATCH_NAME)s has been asked to withdraw the report for %(name)s."
 msgstr ""
 "Die %(DISPATCH_NAME)s wurde gebeten, die Meldung für %(name)s zurückzunehmen."
 
-#: duties/views.py:530 duties/views.py:621 duties/views.py:629
+#: duties/views.py:531 duties/views.py:626 duties/views.py:634
 msgid "This report can no longer be changed."
 msgstr "Diese Meldung kann nicht mehr geändert werden."
 
-#: duties/views.py:566
+#: duties/views.py:567
 #, python-format
 msgid "%(name)s stays on the duty; the unit has been told."
 msgstr "%(name)s bleibt eingeplant; die Bereitschaft wurde informiert."
 
-#: duties/views.py:631
+#: duties/views.py:636
 #, python-format
 msgid "%(name)s confirmed."
 msgstr "%(name)s bestätigt."
 
-#: duties/views.py:633
+#: duties/views.py:638
 #, python-format
 msgid "%(name)s declined."
 msgstr "%(name)s abgelehnt."
 
-#: duties/views.py:649
+#: duties/views.py:654
 #, python-format
 msgid "%(count)d report confirmed."
 msgid_plural "%(count)d reports confirmed."
 msgstr[0] "%(count)d Meldung bestätigt."
 msgstr[1] "%(count)d Meldungen bestätigt."
 
-#: duties/views.py:667
+#: duties/views.py:672
 msgid "This helper cannot fill that position."
 msgstr "Dieser Helfer kann diese Position nicht besetzen."
 
-#: duties/views.py:669
+#: duties/views.py:674
 msgid "This helper has already been billed."
 msgstr "Dieser Helfer wurde bereits abgerechnet."
 
-#: duties/views.py:683
+#: duties/views.py:688
 #, python-format
 msgid "%(name)s now fills: %(position)s."
 msgstr "%(name)s besetzt jetzt: %(position)s."
 
-#: duties/views.py:714
+#: duties/views.py:719
 msgid "Your calendar address is ready."
 msgstr "Deine Kalender-Adresse ist fertig."
 
-#: duties/views.py:719
+#: duties/views.py:724
 msgid "New calendar address created; the old one no longer works."
 msgstr "Neue Kalender-Adresse erstellt; die alte funktioniert nicht mehr."
 
-#: duties/views.py:724
+#: duties/views.py:729
 msgid "Calendar subscription ended; the address no longer works."
 msgstr "Kalender-Abo beendet; die Adresse funktioniert nicht mehr."
 
@@ -1825,7 +1843,7 @@ msgstr "Konto anlegen"
 #: templates/accounts/account_create.html:3
 #: templates/accounts/account_create.html:7
 #: templates/accounts/account_create.html:31
-#: templates/accounts/unit_detail.html:20 templates/accounts/unit_list.html:32
+#: templates/accounts/unit_detail.html:20 templates/accounts/unit_list.html:34
 #: templates/core/home.html:85
 msgid "Add account"
 msgstr "Konto anlegen"
@@ -1848,7 +1866,7 @@ msgstr "Benachrichtigungen per E-Mail"
 #: templates/accounts/invitation_form.html:22
 #: templates/accounts/unit_form.html:12
 #: templates/billing/bank_account_form.html:18
-#: templates/billing/billing_create.html:94 templates/duties/duty_form.html:100
+#: templates/billing/billing_create.html:95 templates/duties/duty_form.html:100
 #: templates/duties/report_add.html:25 templates/duties/report_form.html:22
 #: templates/duties/withdrawal_request_form.html:22
 #: templates/mailings/mailing_form.html:41
@@ -2105,26 +2123,26 @@ msgid "Edit unit"
 msgstr "Bereitschaft bearbeiten"
 
 #: templates/accounts/unit_form.html:3 templates/accounts/unit_form.html:7
-#: templates/accounts/unit_list.html:7
+#: templates/accounts/unit_list.html:8
 msgid "Add unit"
 msgstr "Bereitschaft anlegen"
 
-#: templates/accounts/unit_list.html:16
+#: templates/accounts/unit_list.html:18
 #, python-format
 msgid "%(counter)s account"
 msgid_plural "%(counter)s accounts"
 msgstr[0] "%(counter)s Konto"
 msgstr[1] "%(counter)s Konten"
 
-#: templates/accounts/unit_list.html:26
+#: templates/accounts/unit_list.html:28
 msgid "No units yet."
 msgstr "Noch keine Bereitschaften angelegt."
 
-#: templates/accounts/unit_list.html:30
+#: templates/accounts/unit_list.html:32
 msgid "Internal accounts"
 msgstr "Interne Konten"
 
-#: templates/accounts/unit_list.html:35
+#: templates/accounts/unit_list.html:37
 #, python-format
 msgid "%(DISPATCH_NAME)s and admins; they belong to no unit."
 msgstr "%(DISPATCH_NAME)s und Admins; sie gehören zu keiner Bereitschaft."
@@ -2153,7 +2171,7 @@ msgstr ""
 
 #: templates/billing/billing_create.html:3
 #: templates/billing/billing_create.html:5
-#: templates/billing/billing_create.html:93
+#: templates/billing/billing_create.html:94
 #: templates/billing/billing_list.html:25 templates/billing/unit_pay.html:9
 msgid "Create statement"
 msgstr "Abrechnung erstellen"
@@ -2180,12 +2198,12 @@ msgstr ""
 msgid "Enter bank details"
 msgstr "Bankverbindung eintragen"
 
-#: templates/billing/billing_create.html:26
+#: templates/billing/billing_create.html:27
 #: templates/billing/billing_list.html:14 templates/duties/_duty_table.html:8
 msgid "Helpers"
 msgstr "Helfer"
 
-#: templates/billing/billing_create.html:29
+#: templates/billing/billing_create.html:30
 msgid ""
 "Confirmed helpers of finished duties with duty pay that have not been billed "
 "yet. Untick helpers who did not come. Every value can be changed for this "
@@ -2196,27 +2214,27 @@ msgstr ""
 "Werte lassen sich für diese Abrechnung ändern, z. B. die Stunden oder der "
 "Satz."
 
-#: templates/billing/billing_create.html:39
+#: templates/billing/billing_create.html:40
 msgid "Bill"
 msgstr "Abrechnen"
 
-#: templates/billing/billing_create.html:62
+#: templates/billing/billing_create.html:63
 msgid "per hour"
 msgstr "pro Stunde"
 
-#: templates/billing/billing_create.html:62
+#: templates/billing/billing_create.html:63
 msgid "flat"
 msgstr "pauschal"
 
-#: templates/billing/billing_create.html:78
+#: templates/billing/billing_create.html:79
 msgid "There are no helpers to bill for this unit."
 msgstr "Für diese Bereitschaft gibt es keine Helfer abzurechnen."
 
-#: templates/billing/billing_create.html:81
+#: templates/billing/billing_create.html:82
 msgid "Other items"
 msgstr "Weitere Positionen"
 
-#: templates/billing/billing_create.html:83
+#: templates/billing/billing_create.html:84
 msgid ""
 "E.g. a vehicle flat rate: description and price, optionally a quantity (the "
 "amount is then quantity × price). A negative price deducts."
@@ -2224,11 +2242,11 @@ msgstr ""
 "Z. B. eine Fahrzeugpauschale: Bezeichnung und Preis, optional eine Menge (der"
 " Betrag ist dann Menge × Preis). Ein negativer Preis wird abgezogen."
 
-#: templates/billing/billing_create.html:88
+#: templates/billing/billing_create.html:89
 msgid "Add a line"
 msgstr "Zeile hinzufügen"
 
-#: templates/billing/billing_create.html:92
+#: templates/billing/billing_create.html:93
 msgid "Create the statement now? The unit leads receive it by email."
 msgstr ""
 "Abrechnung jetzt erstellen? Die Bereitschaftsleitungen erhalten sie per E-"

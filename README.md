@@ -58,7 +58,8 @@ The rules live in `accounts/permissions.py`, `duties/permissions.py` and
   rates are only shown with duty pay). Dispatchers maintain the qualifications under
   *Duties → Qualifications* (name, abbreviation, order; new ones come last);
   qualifications in use cannot be deleted, only deactivated, and a position with
-  reported helpers can neither be removed nor get another qualification.
+  reported helpers (declined ones included: they can still be confirmed) can neither be
+  removed nor get another qualification.
 - **Also counts as:** a qualification can count as another one, e.g. emergency
   paramedic → paramedic → first aider. Helpers then also fill the places of the lower
   qualifications down the chain, never the other way round: with 2 × first aider and
@@ -176,7 +177,9 @@ the mail server is unreachable, the change is saved anyway and a warning is show
   for hourly pay, the hours. **Other items** (e.g. a vehicle flat rate or kilometres)
   are added with "Add a line": date, description, price and optionally a quantity (the
   amount is then quantity × price; a negative price deducts). A statement can also
-  consist of other items only – "Create statement" on the unit's duty pay overview.
+  consist of other items only – "Create statement" on the unit's duty pay overview. Its
+  total must be more than zero. Sending the form a second time (reload, back button,
+  double click) does not create a second statement but opens the first one.
   Statements are numbered per year (`2026-001`, …) and keep copies of the items, rates
   and bank details, so later changes do not alter them. A statement is
   *open* until it is marked as *paid*; open statements can be *cancelled*, which makes
@@ -277,10 +280,10 @@ with prepared accounts. A strip under the navigation says so.
   stores the emails, daily summaries included). After `RETENTION_OUTBOX_DAYS` (30) they
   are deleted.
 - **Only admins (superusers) change email addresses and passwords** – their own, and
-  those of others under *Edit* on the account. For everyone else *My account* has no
-  email address, password, HiOrg link and two-factor settings, and resetting the password
-  is switched off (its email would only reach the inbox; admins use
-  `manage.py changepassword`).
+  those of others: the email address under *Edit* on the account, the password in the
+  Django admin (or with `manage.py changepassword`). For everyone else *My account* has
+  no email address, password, HiOrg link and two-factor settings, and resetting the
+  password is switched off (its email would only reach the inbox).
 - **Two-factor authentication is off** for everyone but admins: dispatchers are not
   forced to set it up, and authenticators set up before are not asked for. Admins keep
   it (mandatory as dispatchers, see `MFA_REQUIRED_ROLES`).
