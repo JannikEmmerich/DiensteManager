@@ -1,6 +1,6 @@
 [project]
 name = "dienstemanager"
-version = "0.7.2"
+version = "0.7.3"
 description = "Staff planning with external units, based on duties from HiOrg-Server"
 requires-python = ">=3.12"
 dependencies = [

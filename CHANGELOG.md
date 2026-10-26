@@ -7,6 +7,11 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.7.3] – 2026-10-26
+
+When updating from 0.7.2 nothing needs to be done; the database is migrated when the
+container starts (positions listed twice at a duty are merged).
+
 ### Fixed
 
 - Statements: the hours of a duty whose length is not a whole quarter of an hour (or

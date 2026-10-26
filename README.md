@@ -346,11 +346,6 @@ install. After changing `pyproject.toml`, run `uv lock` and commit both files (C
 otherwise); `uv lock --upgrade` updates everything within the allowed versions.
 Dependabot proposes such updates weekly.
 
-**PyCharm:** the project was renamed; the configured interpreter still points to
-`~/PycharmProjects/PythonProject/.venv`. Select
-`~/PycharmProjects/DiensteManager/.venv/bin/python` under *Settings → Python
-Interpreter → Add Interpreter → Existing*.
-
 ### Tests and code style
 
 ```bash
