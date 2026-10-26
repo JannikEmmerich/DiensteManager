@@ -21,6 +21,7 @@ from .conftest import (
     create_invitation,
     create_report,
     positions_data,
+    post_billing,
 )
 
 IBAN = "DE89370400440532013000"
@@ -169,7 +170,7 @@ def test_history_of_billings_and_bank_details(client, dispatcher, unit, unit_lea
         starts_in=timedelta(days=-2), pay_type=Duty.PayType.FLAT, pay_rate=Decimal("40")
     )
     report = create_report(duty, unit, status=Report.Status.CONFIRMED)
-    client.post(reverse("billing_create", args=[unit.pk]), {f"include_{report.pk}": "on"})
+    post_billing(client, unit, {f"include_{report.pk}": "on"})
     billing = Billing.objects.get()
     client.post(reverse("billing_mark_paid", args=[billing.pk]))
     assert [e.action for e in _entries(history.scope_for_billing(billing.pk))] == [

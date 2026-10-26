@@ -85,6 +85,9 @@ class Billing(models.Model):
     created_at = models.DateTimeField(_("created at"), default=timezone.now, editable=False)
     paid_at = models.DateTimeField(_("paid at"), null=True, blank=True)
     cancelled_at = models.DateTimeField(_("cancelled at"), null=True, blank=True)
+    # Sent along with the form that created the billing: submitting the same form again
+    # (reload, back button, double click) does not create a second billing.
+    form_token = models.UUIDField(null=True, unique=True, editable=False)
 
     objects = BillingQuerySet.as_manager()
 

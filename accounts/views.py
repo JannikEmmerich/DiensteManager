@@ -299,7 +299,7 @@ def account_create(request):
     if not permissions.can_add_accounts(request.user):
         raise PermissionDenied
     unit_id = request.GET.get("unit", "")
-    unit = Unit.objects.filter(pk=unit_id).first() if unit_id.isdigit() else None
+    unit = Unit.objects.filter(pk=unit_id).first() if unit_id.isdecimal() else None
     form = AccountCreateForm(request.POST or None, initial={"unit": unit, "role": Role.MEMBER})
     if request.method == "POST" and form.is_valid():
         account = form.save()

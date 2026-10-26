@@ -1,3 +1,4 @@
+import uuid
 from decimal import Decimal
 
 from django import forms
@@ -37,6 +38,8 @@ class BillingForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 3}),
         help_text=_("Printed on the statement."),
     )
+    # Submitting the same form twice creates only one billing (services.create_billing).
+    form_token = forms.UUIDField(widget=forms.HiddenInput, initial=uuid.uuid4)
 
     # The editable values of each line besides the hours; empty means "as prefilled" only
     # for forms that do not send the field at all.
@@ -89,14 +92,15 @@ class BillingForm(forms.Form):
                 widget=forms.NumberInput(attrs={**small, "step": "0.01"}),
             )
             if duty.pay_type == Duty.PayType.HOURLY:
+                # Any length of a duty (to two decimals) fits as the prefilled hours.
                 self.fields[f"hours_{report.pk}"] = forms.DecimalField(
                     label=_("Hours"),
                     required=False,
                     initial=duty.duration_hours,
-                    min_value=Decimal("0.25"),
-                    max_value=Decimal("99.75"),
+                    min_value=Decimal("0.01"),
+                    max_digits=7,
                     decimal_places=2,
-                    widget=forms.NumberInput(attrs={**small, "step": "0.25"}),
+                    widget=forms.NumberInput(attrs={**small, "step": "any"}),
                 )
 
     def lines(self):
@@ -116,9 +120,14 @@ class BillingForm(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        if "form_token" in self.errors:
+            self.add_error(None, _("Please reload the page and enter the statement again."))
         selected = []
         for report in self.reports:
             if not cleaned_data.get(f"include_{report.pk}"):
+                # The values of helpers left out do not matter.
+                for name in [*self.VALUES, "hours"]:
+                    self.errors.pop(f"{name}_{report.pk}", None)
                 continue
             line = services.ReportLine(report)
             for name, attribute in [

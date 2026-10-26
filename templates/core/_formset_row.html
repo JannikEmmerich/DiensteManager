@@ -9,9 +9,9 @@
         </td>
     {% endfor %}
     <td>
-        {# Saved rows stay; the first row is needed (outside the loop: the empty row). #}
-        {% if not form.instance.pk and not forloop.first %}
+        {# Saved rows stay, and so do the rows the formset requires (outside the loop: the empty row). #}
+        {% if not form.instance.pk %}{% if not forloop or forloop.counter > formset.min_num %}
             <button class="btn-close mt-2" type="button" data-formset-remove aria-label="{% translate 'Remove row' %}" title="{% translate 'Remove row' %}"></button>
-        {% endif %}
+        {% endif %}{% endif %}
     </td>
 </tr>

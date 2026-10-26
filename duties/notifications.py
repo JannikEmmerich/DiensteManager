@@ -92,7 +92,7 @@ def _unit_contacts(unit_id, reports):
 def _active_reports_by_unit(duty):
     by_unit = defaultdict(list)
     for report in duty.reports.filter(status__in=Report.ACTIVE).select_related(
-        "unit", "position__qualification"
+        "unit", "helper_qualification"
     ):
         by_unit[report.unit_id].append(report)
     return by_unit
