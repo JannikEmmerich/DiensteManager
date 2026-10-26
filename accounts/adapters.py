@@ -69,7 +69,12 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def pre_social_login(self, request, sociallogin):
         super().pre_social_login(request, sociallogin)
-        if sociallogin.is_existing or sociallogin.state.get("process") != AuthProcess.LOGIN:
+        process = sociallogin.state.get("process")
+        if process == AuthProcess.CONNECT and permissions.demo_restricted(request.user):
+            # Whatever the way into linking: in demo mode, only admins link HiOrg.
+            messages.error(request, _("In demo mode, only an admin can do this."))
+            raise ImmediateHttpResponse(redirect("profile"))
+        if sociallogin.is_existing or process != AuthProcess.LOGIN:
             return
         invitation = invitations.pending_invitation_from_session(request)
         if invitation is not None:

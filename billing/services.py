@@ -5,9 +5,11 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Max
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from accounts.models import Unit
 from duties.models import Duty, Report
@@ -17,8 +19,20 @@ from .models import BankAccount, Billing, BillingItem
 ACTIVE_BILLING = (Billing.Status.ISSUED, Billing.Status.PAID)
 
 
+# The largest amount an item or a billing holds (amount and total: ten digits, two decimals).
+MAX_AMOUNT = Decimal("99999999.99")
+
+
 class AlreadyBilled(Exception):
     """One of the reports has been billed in the meantime."""
+
+
+class AlreadyCreated(Exception):
+    """The same form has created a billing before."""
+
+    def __init__(self, billing):
+        super().__init__(billing)
+        self.billing = billing
 
 
 def unbilled_reports():
@@ -167,6 +181,12 @@ class ReportLine:
     helper_name: str | None = None
     qualification: str | None = None
 
+    @property
+    def amount(self):
+        duty = self.report.duty
+        hours = self.hours if duty.pay_type == Duty.PayType.HOURLY else None
+        return duty.pay_for(hours, self.report.pay_rate if self.rate is None else self.rate)
+
     def item(self, billing):
         report, duty = self.report, self.report.duty
         hourly = duty.pay_type == Duty.PayType.HOURLY
@@ -187,7 +207,7 @@ class ReportLine:
             pay_type=duty.pay_type,
             rate=rate,
             hours=self.hours if hourly else None,
-            amount=duty.pay_for(self.hours if hourly else None, rate),
+            amount=self.amount,
         )
 
 
@@ -200,8 +220,12 @@ class ExtraLine:
     date: date
     quantity: Decimal | None = None
 
-    def item(self, billing):
+    @property
+    def amount(self):
         amount = self.rate if self.quantity is None else self.quantity * self.rate
+        return amount.quantize(Decimal("0.01"), ROUND_HALF_UP)
+
+    def item(self, billing):
         return BillingItem(
             billing=billing,
             duty_title=self.description,
@@ -209,21 +233,34 @@ class ExtraLine:
             pay_type=BillingItem.PayType.OTHER,
             rate=self.rate,
             hours=self.quantity,
-            amount=amount.quantize(Decimal("0.01"), ROUND_HALF_UP),
+            amount=self.amount,
         )
 
 
-def create_billing(unit, lines, note, user, extra_lines=()):
+def check_amounts(lines):
+    """Raises ``ValidationError`` unless the total of the lines (``ReportLine``s and
+    ``ExtraLine``s) is more than zero and every amount fits into a billing."""
+    amounts = [line.amount for line in lines]
+    total = sum(amounts, Decimal(0))
+    if total > MAX_AMOUNT or any(abs(amount) > MAX_AMOUNT for amount in amounts):
+        raise ValidationError(_("An amount or the total is too large."))
+    if total <= 0:
+        raise ValidationError(_("The total of a statement must be more than zero."))
+
+
+def create_billing(unit, lines, note, user, extra_lines=(), form_token=None):
     """Creates a billing from ``lines`` (``ReportLine``s or pairs of a billable report and
     its hours, which only count for hourly pay) and ``extra_lines`` (``ExtraLine``s).
 
-    Raises ``AlreadyBilled`` if one of the reports has been billed in the meantime.
+    Raises ``AlreadyCreated`` if ``form_token`` has created a billing before, and
+    ``AlreadyBilled`` if one of the reports has been billed in the meantime.
     """
     lines = [line if isinstance(line, ReportLine) else ReportLine(*line) for line in lines]
     with transaction.atomic():
         report_ids = [line.report.pk for line in lines]
         # Locks the reports so that nobody bills them at the same time.
         list(Report.objects.select_for_update().filter(pk__in=report_ids))
+        _check_form_token(form_token)
         if BillingItem.objects.filter(
             report_id__in=report_ids, billing__status__in=ACTIVE_BILLING
         ).exists():
@@ -234,6 +271,7 @@ def create_billing(unit, lines, note, user, extra_lines=()):
             year=timezone.localdate().year,
             note=note,
             created_by=user,
+            form_token=form_token,
             account_holder=bank_account.account_holder if bank_account else "",
             iban=bank_account.iban if bank_account else "",
             bic=bank_account.bic if bank_account else "",
@@ -247,6 +285,8 @@ def create_billing(unit, lines, note, user, extra_lines=()):
                     billing.save()
                 break
             except IntegrityError:
+                # Also when a second request with the same form got there first.
+                _check_form_token(form_token)
                 if attempt == 2:
                     raise
         items = [line.item(billing) for line in [*lines, *extra_lines]]
@@ -254,6 +294,14 @@ def create_billing(unit, lines, note, user, extra_lines=()):
         billing.total = sum((item.amount for item in items), Decimal(0))
         billing.save(update_fields=["total"])
     return billing
+
+
+def _check_form_token(form_token):
+    if form_token is None:
+        return
+    billing = Billing.objects.filter(form_token=form_token).first()
+    if billing is not None:
+        raise AlreadyCreated(billing)
 
 
 def change_status(billing, new_status, timestamp_field):

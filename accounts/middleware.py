@@ -69,8 +69,11 @@ MFA_SETUP_VIEWS = {
 
 
 # What only admins may open in demo mode: changing the email address or the password,
-# resetting the password (its email only reaches the inbox) and linking HiOrg.
+# resetting the password (its email only reaches the inbox) and linking HiOrg (also
+# refused when it starts from the HiOrg sign-in, see SocialAccountAdapter).
 DEMO_ADMIN_ONLY_VIEWS = {
+    "admin:password_change",
+    "admin:password_change_done",
     "account_email",
     "account_change_password",
     "account_set_password",
@@ -94,7 +97,7 @@ class DemoModeMiddleware:
         return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        name = request.resolver_match.url_name or ""
+        name = request.resolver_match.view_name or ""
         admin_only = name in DEMO_ADMIN_ONLY_VIEWS or (
             name.startswith("mfa_") and name not in MFA_SIGN_IN_VIEWS
         )

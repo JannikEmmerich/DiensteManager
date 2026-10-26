@@ -425,6 +425,7 @@ def _save_new_reports(request, formset, duty, unit, action, **values):
             setattr(report, name, value)
     try:
         with transaction.atomic():
+            duty.lock_staffing()
             for report in reports:
                 if report.status == Report.Status.CONFIRMED:
                     report.assigned_position = duty.assign_position(report)
@@ -587,29 +588,33 @@ def _decide(request, reports, status):
         # A request to withdraw a declined report is settled.
         values.update(withdrawal_requested_at=None, withdrawal_requested_by=None)
     changed = []
-    for report in reports:
-        assigned = {}
+    with transaction.atomic():
         if status == Report.Status.CONFIRMED:
-            # Confirmed helpers fill a position, which also sets their pay.
-            assigned["assigned_position"] = report.duty.assign_position(report)
-        updated = Report.objects.filter(pk=report.pk, status__in=DECIDABLE[status]).update(
-            **values, **assigned
-        )
-        if updated:
-            report.status = status
-            report.decided_at = now
-            report.decided_by = request.user
-            for name, value in assigned.items():
-                setattr(report, name, value)
-            changed.append(report)
-            history.record(
-                report,
-                history.Action.CONFIRMED
-                if status == Report.Status.CONFIRMED
-                else history.Action.DECLINED,
-                request.user,
-                history.scope_for_duty(report.duty_id),
+            for duty in sorted({report.duty for report in reports}, key=lambda duty: duty.pk):
+                duty.lock_staffing()
+        for report in reports:
+            assigned = {}
+            if status == Report.Status.CONFIRMED:
+                # Confirmed helpers fill a position, which also sets their pay.
+                assigned["assigned_position"] = report.duty.assign_position(report)
+            updated = Report.objects.filter(pk=report.pk, status__in=DECIDABLE[status]).update(
+                **values, **assigned
             )
+            if updated:
+                report.status = status
+                report.decided_at = now
+                report.decided_by = request.user
+                for name, value in assigned.items():
+                    setattr(report, name, value)
+                changed.append(report)
+                history.record(
+                    report,
+                    history.Action.CONFIRMED
+                    if status == Report.Status.CONFIRMED
+                    else history.Action.DECLINED,
+                    request.user,
+                    history.scope_for_duty(report.duty_id),
+                )
     return changed
 
 

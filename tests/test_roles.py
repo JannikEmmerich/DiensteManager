@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from accounts.models import Role, User
 
-from .conftest import PASSWORD, create_account
+from .conftest import PASSWORD, create_account, create_invitation
 
 
 def _change_role(client, account, role):
@@ -137,6 +137,21 @@ def test_email_addresses_stay_unique(client, admin, member, unit_lead):
         _account_data(member, email=unit_lead.email.upper()),
     )
     assert "An account with this email address already exists." in response.text
+
+
+def test_pending_invitation_for_the_unchanged_address(client, admin, member, unit):
+    """E.g. the person changed their own address to one with an open invitation."""
+    create_invitation(member.email, Role.MEMBER, unit, admin)
+    client.force_login(admin)
+    url = reverse("account_edit", args=[member.pk])
+    response = client.post(url, _account_data(member, first_name="Mia"))
+    assert response.status_code == 302
+    member.refresh_from_db()
+    assert member.first_name == "Mia"
+    # Changing to an address with an open invitation is still refused.
+    create_invitation("invited@example.org", Role.MEMBER, unit, admin)
+    response = client.post(url, _account_data(member, email="invited@example.org"))
+    assert "There is already a pending invitation for this email address." in response.text
 
 
 def test_admin_makes_a_dispatcher_and_back(client, admin, member, unit):

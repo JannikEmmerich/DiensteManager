@@ -1,4 +1,5 @@
 import json
+import uuid
 from datetime import timedelta
 from urllib.parse import parse_qs, urlparse
 
@@ -118,6 +119,13 @@ def create_report(duty, unit, name="Hanna Helper", reported_by=None, **fields):
         # Unless given, the helper has the qualification of their position.
         fields.setdefault("helper_qualification", position.qualification)
     return Report.objects.create(duty=duty, unit=unit, name=name, reported_by=reported_by, **fields)
+
+
+def post_billing(client, unit, data):
+    """Sends the statement form for ``unit`` like a browser, with a new form token."""
+    return client.post(
+        reverse("billing_create", args=[unit.pk]), {"form_token": str(uuid.uuid4()), **data}
+    )
 
 
 @pytest.fixture

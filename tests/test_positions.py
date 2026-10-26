@@ -6,8 +6,9 @@ from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
-from django.db import connection
+from django.db import connection, transaction
 from django.db.migrations.executor import MigrationExecutor
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -231,6 +232,24 @@ def test_a_duty_needs_a_position(client, dispatcher):
     assert not Duty.objects.exists()
 
 
+def test_positions_with_declined_reports_stay(client, dispatcher, unit, paramedic, first_aider):
+    """Declined helpers can still be confirmed, for the position they were reported for."""
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    create_report(duty, unit, position=rs, status=Report.Status.DECLINED)
+    client.force_login(dispatcher)
+    data = _duty_data(**positions_data(duty=duty))
+    data["positions-0-qualification"] = first_aider.pk
+    data["positions-1-qualification"] = paramedic.pk
+    response = client.post(reverse("duty_update", args=[duty.pk]), data)
+    assert "its qualification stays" in response.text
+    data = _duty_data(**positions_data(duty=duty))
+    data["positions-0-DELETE"] = "on"
+    response = client.post(reverse("duty_update", args=[duty.pk]), data)
+    assert "keep them: Paramedic (RS)" in response.text
+    assert list(duty.positions.order_by("pk")) == [rs, sanh]
+    assert duty.positions.get(pk=rs.pk).qualification == paramedic
+
+
 def test_positions_with_reports_cannot_be_removed(client, dispatcher, unit, paramedic, first_aider):
     duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
     create_report(duty, unit, position=rs)
@@ -362,6 +381,24 @@ def test_units_report_helpers_for_positions(client, member, paramedic, first_aid
         ("Rita", paramedic, rs),
         ("Sam", first_aider, sanh),
     }
+
+
+def test_empty_rows_stay_empty_when_places_fill_up(client, member, paramedic, first_aider):
+    """The page preselected RS; meanwhile RS is taken, so SanH would be preselected now."""
+    duty, rs, sanh = _duty_with_positions(paramedic, first_aider)
+    client.force_login(member)
+    create_report(duty, member.unit, name="A", position=rs)
+    create_report(duty, member.unit, name="B", position=rs)
+    response = client.post(
+        reverse("report_create", args=[duty.pk]),
+        _report_data(
+            {"helper_qualification": paramedic.pk, "name": "Rita"},
+            {"helper_qualification": paramedic.pk},  # added in the browser, left empty
+        ),
+    )
+    assert response.status_code == 302
+    assert Report.objects.get(name="Rita").position == rs
+    assert Report.objects.count() == 3
 
 
 def test_choices_show_the_open_places(client, member, unit, other_unit, paramedic, first_aider):
@@ -808,3 +845,69 @@ def test_positions_table_in_german(client, dispatcher):
     client.force_login(dispatcher)
     page = client.get(reverse("duty_create")).text
     assert '<th class="col-width-7">Anzahl</th>' in page
+
+
+def test_confirmations_wait_for_each_other(client, monkeypatch, dispatcher, unit, paramedic):
+    """Two confirmations at the same time never take the same free place."""
+    duty, rs, _sanh = _duty_with_positions(paramedic, Qualification.objects.create(name="X"))
+    first = create_report(duty, unit, name="A", position=rs)
+    second = create_report(duty, unit, name="B", position=rs)
+    calls = []
+    assign = Duty.assign_position
+    monkeypatch.setattr(Duty, "lock_staffing", lambda self: calls.append(("lock", self.pk)))
+    monkeypatch.setattr(
+        Duty,
+        "assign_position",
+        lambda self, report: calls.append(("assign", report.pk)) or assign(self, report),
+    )
+    client.force_login(dispatcher)
+    client.post(reverse("report_confirm_all", args=[duty.pk]))
+    assert calls == [("lock", duty.pk), ("assign", first.pk), ("assign", second.pk)]
+    calls.clear()
+    third = create_report(duty, unit, name="C", position=rs)
+    client.post(reverse("report_confirm", args=[third.pk]))
+    assert calls == [("lock", duty.pk), ("assign", third.pk)]
+
+
+def test_lock_staffing_locks_the_duty(db):
+    duty = create_duty()
+    with transaction.atomic(), CaptureQueriesContext(connection) as queries:
+        duty.lock_staffing()
+    (query,) = queries
+    assert "duties_duty" in query["sql"]
+    if connection.features.has_select_for_update:
+        assert "FOR UPDATE" in query["sql"]
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_merges_positions_listed_twice():
+    """0007 gave positions for any qualification "Helfer", also next to a Helfer position."""
+    before = [("duties", "0006_qualification_includes")]
+    executor = MigrationExecutor(connection)
+    executor.migrate(before)
+    old = executor.loader.project_state(before).apps
+    helper = old.get_model("duties", "Qualification").objects.create(name="Helfer", sort_order=10)
+    unit = old.get_model("accounts", "Unit").objects.create(name="Old unit")
+    duty = old.get_model("duties", "Duty").objects.create(
+        title="Old",
+        starts_at=timezone.now(),
+        ends_at=timezone.now() + timedelta(hours=1),
+        helpers_needed=5,
+    )
+    positions = old.get_model("duties", "DutyPosition").objects
+    helpers = positions.create(duty=duty, qualification=helper, count=2)
+    anyone = positions.create(duty=duty, count=3)
+    reports = old.get_model("duties", "Report").objects
+    confirmed = reports.create(
+        duty=duty, unit=unit, name="Confirmed", position=anyone, status="confirmed"
+    )
+    pending = reports.create(duty=duty, unit=unit, name="Pending", position=helpers)
+    executor = MigrationExecutor(connection)
+    executor.migrate([("duties", "0010_merge_duplicate_positions")])
+    (position,) = DutyPosition.objects.filter(duty_id=duty.pk)
+    assert (position.pk, position.qualification_id, position.count) == (helpers.pk, helper.pk, 5)
+    confirmed = Report.objects.get(pk=confirmed.pk)
+    assert (confirmed.position_id, confirmed.assigned_position_id) == (helpers.pk, helpers.pk)
+    assert Report.objects.get(pk=pending.pk).position_id == helpers.pk
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())

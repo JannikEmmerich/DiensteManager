@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 from decimal import Decimal
 
@@ -12,7 +13,7 @@ from billing.models import BankAccount, Billing
 from billing.validators import validate_bic, validate_iban
 from duties.models import Duty, Report
 
-from .conftest import create_account, create_duty, create_report
+from .conftest import create_account, create_duty, create_report, post_billing
 
 IBAN = "DE89370400440532013000"
 
@@ -32,8 +33,7 @@ def _confirmed(duty, unit, name="Hanna Helper", **fields):
     return create_report(duty, unit, name=name, status=Report.Status.CONFIRMED, **fields)
 
 
-def _bill(client, unit, data):
-    return client.post(reverse("billing_create", args=[unit.pk]), data)
+_bill = post_billing
 
 
 # --- IBAN and bank details ---------------------------------------------------------------------
@@ -518,3 +518,129 @@ def test_other_items_need_a_description_and_a_price(client, dispatcher, unit):
     response = _bill(client, unit, _extra({"date": "2026-05-01", "quantity": "3"}))
     assert response.text.count("This field is required.") == 2
     assert not Billing.objects.exists()
+
+
+def test_any_length_of_a_duty_fits_the_hours(client, dispatcher, unit):
+    """Duties of 2 h 20 min or of five days: the prefilled hours are valid in the browser."""
+    short = _paid_duty(title="Short")
+    short.ends_at = short.starts_at + timedelta(hours=2, minutes=20)
+    short.save()
+    long = _paid_duty(title="Camp", starts_in=timedelta(days=-10))
+    long.ends_at = long.starts_at + timedelta(days=5)
+    long.save()
+    hanna, paul = _confirmed(short, unit, "Hanna"), _confirmed(long, unit, "Paul")
+    client.force_login(dispatcher)
+    page = client.get(reverse("billing_create", args=[unit.pk])).text
+    for report, hours in [(hanna, "2.33"), (paul, "120.00")]:
+        (field,) = re.findall(rf'<input[^>]* name="hours_{report.pk}"[^>]*>', page)
+        assert f'value="{hours}"' in field and 'step="any" min="0.01"' in field
+        assert "max=" not in field
+    _bill(client, unit, {f"include_{paul.pk}": "on", f"hours_{paul.pk}": "120"})
+    (item,) = Billing.objects.get().items.all()
+    assert (item.hours, item.amount) == (Decimal("120.00"), Decimal("1500.00"))
+
+
+def test_values_of_helpers_left_out_do_not_matter(client, dispatcher, unit):
+    hanna, paul = _confirmed(_paid_duty(), unit, "Hanna"), _confirmed(_paid_duty(), unit, "Paul")
+    client.force_login(dispatcher)
+    _bill(
+        client,
+        unit,
+        {
+            f"include_{hanna.pk}": "on",
+            f"hours_{hanna.pk}": "4",
+            f"hours_{paul.pk}": "-3",
+            f"rate_{paul.pk}": "nonsense",
+        },
+    )
+    (item,) = Billing.objects.get().items.all()
+    assert item.report == hanna
+
+
+def test_the_same_form_creates_one_statement(client, dispatcher, unit):
+    """Reload, back button or double click: sending the form again shows the statement."""
+    client.force_login(dispatcher)
+    data = {
+        "form_token": "0b5ad9a4-8a3c-4d7e-9a52-0f0e8a7e2f61",
+        **_extra({"date": "2026-05-01", "description": "Vehicle", "rate": "80"}),
+    }
+    first = client.post(reverse("billing_create", args=[unit.pk]), data)
+    billing = Billing.objects.get()
+    response = client.post(reverse("billing_create", args=[unit.pk]), data, follow=True)
+    assert response.redirect_chain == [(first["Location"], 302)]
+    assert f"Statement {billing.number} has already been created with this form." in response.text
+    assert Billing.objects.count() == 1
+    # The same for a statement with helpers.
+    report = _confirmed(_paid_duty(), unit)
+    data = {
+        "form_token": "5f1c2b8e-3d4a-4b6c-8e9f-1a2b3c4d5e6f",
+        f"include_{report.pk}": "on",
+        f"hours_{report.pk}": "4",
+    }
+    client.post(reverse("billing_create", args=[unit.pk]), data)
+    response = client.post(reverse("billing_create", args=[unit.pk]), data)
+    assert response["Location"] == Billing.objects.get(items__report=report).get_absolute_url()
+    assert Billing.objects.count() == 2
+
+
+def test_a_form_without_token_is_not_saved(client, dispatcher, unit):
+    report = _confirmed(_paid_duty(), unit)
+    client.force_login(dispatcher)
+    response = client.post(
+        reverse("billing_create", args=[unit.pk]), {f"include_{report.pk}": "on"}
+    )
+    assert "Please reload the page and enter the statement again." in response.text
+    assert not Billing.objects.exists()
+
+
+@pytest.mark.parametrize(
+    ("rows", "message"),
+    [
+        ([{"rate": "-50"}], "The total of a statement must be more than zero."),
+        ([{"rate": "10"}, {"rate": "-10"}], "The total of a statement must be more than zero."),
+        ([{"quantity": "1000", "rate": "100000"}], "An amount or the total is too large."),
+        (
+            [{"quantity": "99999.99", "rate": "-999999.99"}, {"rate": "100"}],
+            "An amount or the total is too large.",
+        ),
+        ([{"rate": "999999.99"}] * 101, "An amount or the total is too large."),
+    ],
+)
+def test_total_must_be_positive_and_fit(client, dispatcher, unit, rows, message):
+    client.force_login(dispatcher)
+    rows = [{"date": "2026-05-01", "description": "Item", **row} for row in rows]
+    response = _bill(client, unit, _extra(*rows))
+    assert message in response.text
+    assert not Billing.objects.exists()
+
+
+def test_unit_pay_names_quantities(client, dispatcher, unit_lead, unit):
+    services.create_billing(
+        unit,
+        [],
+        "",
+        dispatcher,
+        extra_lines=[
+            services.ExtraLine("Kilometres", Decimal("0.30"), timezone.localdate(), Decimal(120))
+        ],
+    )
+    client.force_login(unit_lead)
+    assert "Hours/qty." in client.get(reverse("unit_pay", args=[unit.pk])).text
+
+
+def test_extra_lines_can_be_removed_after_an_error(client, dispatcher, unit):
+    client.force_login(dispatcher)
+    response = _bill(client, unit, _extra({"date": "2026-05-01", "description": "Vehicle"}))
+    assert "This field is required." in response.text
+    rows = response.text.split("data-formset-rows")[1].split("</tbody>")[0]
+    assert "data-formset-remove" in rows
+
+
+def test_a_form_token_creates_one_billing(dispatcher, unit):
+    token = "9d7c1f0e-2b3a-4c5d-8e6f-7a8b9c0d1e2f"
+    line = services.ExtraLine("Vehicle", Decimal(80), timezone.localdate())
+    billing = services.create_billing(unit, [], "", dispatcher, [line], form_token=token)
+    with pytest.raises(services.AlreadyCreated) as error:
+        services.create_billing(unit, [], "", dispatcher, [line], form_token=token)
+    assert error.value.billing == billing
+    assert Billing.objects.count() == 1

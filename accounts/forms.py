@@ -257,6 +257,8 @@ class AccountForm(forms.ModelForm):
 
     def clean_email(self):
         email = User.objects.normalize_email(self.cleaned_data["email"])
+        if self.instance.pk and email == self.instance.email:
+            return email  # unchanged: e.g. an invitation sent to it meanwhile does not matter
         if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
             raise forms.ValidationError(_("An account with this email address already exists."))
         if Invitation.objects.pending().filter(email__iexact=email).exists():

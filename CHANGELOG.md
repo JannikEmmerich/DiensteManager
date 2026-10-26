@@ -7,6 +7,32 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Statements: the hours of a duty whose length is not a whole quarter of an hour (or
+  that is longer than 99.75 hours) no longer block the form, not even for helpers left
+  out; values of helpers left out do not matter.
+- Statements: sending the form twice (reload, back button, double click) no longer
+  creates a second statement, also with other items only; the first one opens.
+- Statements: the total must be more than zero, and amounts too large for a statement
+  are refused instead of causing an error.
+- The duty pay overview says "Hours/qty." when it lists other items.
+- Rows of other items can be removed again after the form came back with an error.
+- Two confirmations at the same time no longer take the same free place.
+- A position whose helpers were all declined can no longer be removed or get another
+  qualification (declined helpers can still be confirmed).
+- An empty row in the report form no longer counts as filled when places filled up
+  between opening and sending the form.
+- Positions listed twice at a duty (from the migration of "any qualification" to
+  "Helfer" in 0.4.0) are merged into one.
+- Calendar subscriptions: a carriage return in a title or location no longer breaks
+  the feed.
+- Admins can save an account whose unchanged email address has a pending invitation.
+- Demo mode: non-admins can no longer link HiOrg by starting the HiOrg sign-in, nor
+  change their password in the Django admin; `?unit=` with other digits than 0–9 no
+  longer causes an error when adding an account.
+- README: in demo mode, admins change other people's passwords in the Django admin.
+
 ## [0.7.2] – 2026-10-25
 
 When updating from 0.7.1 nothing needs to be done.

@@ -127,9 +127,10 @@ class DutyPositionForm(forms.ModelForm):
 
 
 def _has_helpers(position):
-    """Active reports for the position, or confirmed helpers who fill it."""
+    """Reports for the position (also declined ones, which can still be confirmed), or
+    confirmed helpers who fill it."""
     return (
-        position.reports.filter(status__in=Report.ACTIVE).exists()
+        position.reports.exclude(status=Report.Status.WITHDRAWN).exists()
         or position.assigned_reports.filter(status=Report.Status.CONFIRMED).exists()
     )
 
@@ -314,9 +315,13 @@ class ReportForm(forms.ModelForm):
         field.label_from_instance = lambda qualification: labels[qualification.pk]
         field.required = True
         field.empty_label = None
-        # The qualification of the first position with open places is preselected, so
-        # that empty rows count as unchanged.
+        # The qualification of the first position with open places is preselected.
         field.initial = next((p for p in positions if p.open_count), positions[0]).qualification_id
+
+    def has_changed(self):
+        # The qualification alone does not make a helper: an empty row stays empty even if
+        # the preselection followed new reports between showing and sending the form.
+        return any(self[name].value() not in (None, "") for name in ("name", "note"))
 
     def clean(self):
         cleaned_data = super().clean()
