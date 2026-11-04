@@ -1,9 +1,11 @@
 """Two-factor authentication (TOTP) works with the customised templates, and is
 mandatory for the roles in MFA_REQUIRED_ROLES."""
 
+import re
 import time
 
 import pytest
+from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
 from allauth.mfa.totp.forms import DeactivateTOTPForm
 from allauth.mfa.totp.internal.auth import (
@@ -110,6 +112,18 @@ def test_other_roles_only_if_configured(client, settings, unit_lead, member):
     assert client.get(reverse("home")).status_code == 200
 
 
+def test_by_default_only_admins_must_use_it(client, settings, admin, dispatcher, unit_lead):
+    settings.MFA_REQUIRED_ROLES = ["admin"]
+    for user in [dispatcher, unit_lead]:
+        client.force_login(user)
+        assert client.get(reverse("home")).status_code == 200
+    client.force_login(admin)
+    assert client.get(reverse("home"))["Location"] == reverse("mfa_activate_totp")
+    # Dispatchers can switch it off again, admins cannot.
+    assert DeactivateTOTPForm(data={}, authenticator=_enable_totp(dispatcher)).is_valid()
+    assert not DeactivateTOTPForm(data={}, authenticator=_enable_totp(admin)).is_valid()
+
+
 def test_nobody_is_forced_without_roles(client, settings, dispatcher):
     settings.MFA_REQUIRED_ROLES = []
     client.force_login(dispatcher)
@@ -121,3 +135,29 @@ def test_mandatory_totp_cannot_be_switched_off(mfa_for_dispatchers, dispatcher, 
     assert not form.is_valid()
     assert form.non_field_errors() == ["You cannot deactivate two-factor authentication."]
     assert DeactivateTOTPForm(data={}, authenticator=_enable_totp(member)).is_valid()
+
+
+# --- Changing the email address ----------------------------------------------------------------
+
+
+def test_change_email_with_two_factor_authentication(client, member, mailoutbox):
+    """With a code instead of a link, allauth lets accounts with 2FA change their address."""
+    secret = generate_totp_secret()
+    TOTP.activate(member, secret)
+    client.post(reverse("account_login"), {"login": member.email, "password": PASSWORD})
+    client.post(reverse("mfa_authenticate"), {"code": _code(secret)})
+    client.post(reverse("account_reauthenticate"), {"password": PASSWORD})
+    response = client.post(reverse("account_email"), {"action_add": "", "email": "New@Example.org"})
+    assert response["Location"] == reverse("account_email_verification_sent")
+    (message,) = mailoutbox
+    assert message.to == ["new@example.org"]
+    (code,) = re.findall(r"^([A-Z0-9]{4}-[A-Z0-9]{4})$", message.body, re.MULTILINE)
+    page = client.get(reverse("account_email_verification_sent"))
+    assert 'name="code"' in page.text
+    response = client.post(reverse("account_email_verification_sent"), {"code": code})
+    assert response.status_code == 302
+    member.refresh_from_db()
+    assert member.email == "new@example.org"
+    assert list(EmailAddress.objects.filter(user=member).values_list("email", flat=True)) == [
+        "new@example.org"
+    ]

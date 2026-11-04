@@ -110,8 +110,8 @@ class DemoModeMiddleware:
 class MfaRequiredMiddleware:
     """Sends accounts that must use two-factor authentication to its setup first.
 
-    Applies to the roles in ``MFA_REQUIRED_ROLES``, e.g. dispatchers, who see the bank
-    details of all units and create the billings.
+    Applies to the roles in ``MFA_REQUIRED_ROLES``, by default the admins, who can do
+    everything.
     """
 
     def __init__(self, get_response):
