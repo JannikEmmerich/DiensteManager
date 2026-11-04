@@ -7,6 +7,15 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.8.0] – 2026-11-04
+
+When updating from 0.7.3 nothing needs to be done, but note:
+
+- Dispatchers no longer have to use two-factor authentication, only admins. To keep it
+  mandatory for dispatchers, set `MFA_REQUIRED_ROLES=admin,dispatcher` in `.env`.
+- Confirmation links for new email addresses sent before the update no longer work; add
+  the address again to get a code.
+
 ### Changed
 
 - Two-factor authentication is mandatory only for admins by default, no longer for
