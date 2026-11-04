@@ -1,9 +1,12 @@
+from contextlib import suppress
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.providers.base import AuthProcess
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.shortcuts import redirect
@@ -35,6 +38,31 @@ def _minimise(extra_data):
     return keep_allowed(extra_data)
 
 
+# Where Cloudflare locates the visitor's IP address: city, region and country code.
+LOCATION_HEADERS = ("CF-IPCity", "CF-Region", "CF-IPCountry")
+# Country codes that are no country: unknown, Tor.
+NO_COUNTRY = {"XX", "T1"}
+
+
+def client_location(request):
+    """E.g. "Karlsruhe, Baden-Wurttemberg, DE"; empty unless the app trusts Cloudflare's
+    headers (``ALLAUTH_TRUSTED_CLIENT_IP_HEADER`` = CF-Connecting-IP), since anyone could
+    send them otherwise."""
+    header = settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER or ""
+    if request is None or header.lower() != "cf-connecting-ip":
+        return ""
+    parts = []
+    for name in LOCATION_HEADERS:
+        value = request.headers.get(name, "")
+        with suppress(UnicodeError):
+            # Header values arrive decoded as Latin-1; Cloudflare sends UTF-8.
+            value = value.encode("latin-1").decode()
+        value = value.strip()
+        if value and value not in NO_COUNTRY and value not in parts:
+            parts.append(value)
+    return ", ".join(parts)
+
+
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         # No public sign-up form: accounts are only created through invitations.
@@ -50,6 +78,12 @@ class AccountAdapter(DefaultAccountAdapter):
             with translation.override(user.language):
                 return super().send_mail(template_prefix, email, context)
         return super().send_mail(template_prefix, email, context)
+
+    def send_notification_mail(self, template_prefix, user, context=None, email=None):
+        # Security emails (e.g. password changed) say where the change came from: the IP
+        # address and, behind Cloudflare, its location (not the browser, see the template).
+        context = {"location": client_location(self.request), **(context or {})}
+        return super().send_notification_mail(template_prefix, user, context, email)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):

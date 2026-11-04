@@ -3,6 +3,7 @@ from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailAddress
 from django.urls import reverse
 
+from accounts.adapters import client_location
 from accounts.models import Role, User
 
 from .conftest import PASSWORD, create_invitation
@@ -44,7 +45,6 @@ def test_public_sign_up_is_closed(client, db):
     [
         reverse("account_login"),
         reverse("account_reset_password"),
-        reverse("account_confirm_email", args=["invalid-key"]),
         reverse("account_reset_password_from_key", args=["x", "y"]),
         reverse("openid_connect_callback", kwargs={"provider_id": "hiorg"})
         + "?code=x&state=unknown",
@@ -152,3 +152,82 @@ def test_access_log_shows_the_visitor(client, db, settings, trusted, headers, ad
     response = client.get(reverse("account_login"), **headers)
     assert response.status_code == 200
     assert response.wsgi_request.environ["REMOTE_ADDR"] == address
+
+
+# --- Security emails ---------------------------------------------------------------------------
+
+CLOUDFLARE = {
+    "HTTP_CF_CONNECTING_IP": "2a02:8071:7110:9980:34b9:dd89:9897:6f0f",
+    "HTTP_CF_IPCITY": "Karlsruhe",
+    "HTTP_CF_REGION": "Baden-Wurttemberg",
+    "HTTP_CF_IPCOUNTRY": "DE",
+    "HTTP_USER_AGENT": "Mozilla/5.0 (Windows NT 10.0) Firefox/158.0",
+}
+
+
+def test_security_email_names_the_location(client, settings, member, mailoutbox):
+    """Behind Cloudflare: IP address with city, region and country, but not the browser."""
+    settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "CF-Connecting-IP"
+    client.defaults.update(CLOUDFLARE)
+    client.post(reverse("account_login"), {"login": member.email, "password": PASSWORD})
+    client.post(
+        reverse("account_change_password"),
+        {"oldpassword": PASSWORD, "password1": "a-new-long-pass", "password2": "a-new-long-pass"},
+        **CLOUDFLARE,
+    )
+    (message,) = mailoutbox
+    assert "Your password has been changed." in message.body
+    assert (
+        "- IP address: 2a02:8071:7110:9980:34b9:dd89:9897:6f0f "
+        "(Karlsruhe, Baden-Wurttemberg, DE)\n- Date: " in message.body
+    )
+    assert "Firefox" not in message.body and "Browser" not in message.body
+
+
+@pytest.mark.parametrize(
+    ("headers", "location"),
+    [
+        # Cloudflare sends UTF-8; the header arrives decoded as Latin-1.
+        ({"HTTP_CF_IPCITY": "München".encode().decode("latin-1")}, "München"),
+        # Unknown country, a city that is also the region.
+        (
+            {"HTTP_CF_IPCITY": "Berlin", "HTTP_CF_REGION": "Berlin", "HTTP_CF_IPCOUNTRY": "XX"},
+            "Berlin",
+        ),
+        ({}, ""),
+    ],
+)
+def test_location_from_cloudflare(rf, settings, headers, location):
+    settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "CF-Connecting-IP"
+    assert client_location(rf.get("/", **headers)) == location
+
+
+def test_no_location_without_cloudflare(client, settings, member, mailoutbox):
+    """Without the trusted Cloudflare header, anyone could send a location."""
+    settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER = None
+    client.post(reverse("account_login"), {"login": member.email, "password": PASSWORD})
+    client.post(
+        reverse("account_change_password"),
+        {"oldpassword": PASSWORD, "password1": "a-new-long-pass", "password2": "a-new-long-pass"},
+        **CLOUDFLARE,
+    )
+    (message,) = mailoutbox
+    assert "- IP address: 127.0.0.1\n- Date: " in message.body
+    assert "Karlsruhe" not in message.body
+
+
+def test_security_email_in_german(client, settings, member, mailoutbox):
+    settings.ALLAUTH_TRUSTED_CLIENT_IP_HEADER = "CF-Connecting-IP"
+    member.language = "de"
+    member.save()
+    client.defaults.update(CLOUDFLARE)
+    client.post(reverse("account_login"), {"login": member.email, "password": PASSWORD})
+    client.post(
+        reverse("account_change_password"),
+        {"oldpassword": PASSWORD, "password1": "a-new-long-pass", "password2": "a-new-long-pass"},
+        **CLOUDFLARE,
+    )
+    (message,) = mailoutbox
+    assert "Wenn du diese Änderung nicht erkennst" in message.body
+    assert "- IP-Adresse: 2a02:8071:7110:9980:34b9:dd89:9897:6f0f (Karlsruhe" in message.body
+    assert "- Datum: " in message.body

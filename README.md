@@ -262,10 +262,21 @@ buttons on a duty ("Email the units") and on a unit.
   stored.
 - **Two-factor authentication** (authenticator app, plus recovery codes) is available
   to everyone under *My account → Two-factor authentication*. It is **mandatory for
-  admins and dispatchers**, who see the bank details of all units: without it they are
-  sent to its setup after signing in and can open nothing else, and they cannot switch
-  it off. `MFA_REQUIRED_ROLES` sets the roles (`dispatcher`, `unit_lead`, `member`,
-  separated by commas; empty: nobody is forced).
+  admins**: without it they are sent to its setup after signing in and can open nothing
+  else, and they cannot switch it off. `MFA_REQUIRED_ROLES` sets the roles (`admin`,
+  `dispatcher`, `unit_lead`, `member`, separated by commas; admins also count as
+  dispatchers; empty: nobody is forced), e.g. `admin,dispatcher` for everyone who sees
+  the bank details of all units. Others can switch it on and off themselves.
+- **Security emails:** changes to the sign-in (password, email address, two-factor
+  authentication, HiOrg link) are confirmed by email to the account. They name the IP
+  address the change came from and, behind Cloudflare
+  (`ALLAUTH_TRUSTED_CLIENT_IP_HEADER=CF-Connecting-IP`), its location, e.g.
+  "Karlsruhe, Baden-Wurttemberg, DE" (from `CF-IPCity`, `CF-Region` and `CF-IPCountry`;
+  city and region need the Managed Transform *Add visitor location headers* in
+  Cloudflare). The browser is not mentioned.
+- **Changing the email address** (*My account → Email address*): the new address gets a
+  code, which is entered on the next page; then it replaces the old one. This also works
+  with two-factor authentication switched on.
 - The Django admin uses the same sign-in including two-factor authentication.
 
 ## Demo mode
@@ -286,7 +297,7 @@ with prepared accounts. A strip under the navigation says so.
   password is switched off (its email would only reach the inbox).
 - **Two-factor authentication is off** for everyone but admins: dispatchers are not
   forced to set it up, and authenticators set up before are not asked for. Admins keep
-  it (mandatory as dispatchers, see `MFA_REQUIRED_ROLES`).
+  it (mandatory for them, see `MFA_REQUIRED_ROLES`).
 - **Only admins create accounts, without invitations:** "Add account" (on a unit's page,
   under *Units* for internal accounts and on the overview) creates the account with name,
   email address, role, unit, language and a password; it can sign in right away. Nobody

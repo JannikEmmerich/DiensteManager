@@ -171,6 +171,10 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# A new address is confirmed with a code entered while signed in, not with a link: this
+# also works for accounts with two-factor authentication (allauth blocks adding an
+# address to those otherwise).
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
 ACCOUNT_CHANGE_EMAIL = True
 ACCOUNT_EMAIL_NOTIFICATIONS = True
 # Never send emails to addresses without an account (password reset).
@@ -218,14 +222,12 @@ if HIORG_CLIENT_ID:
 MFA_ADAPTER = "accounts.adapters.MFAAdapter"
 MFA_TOTP_ISSUER = SITE_NAME
 # Roles whose accounts must use two-factor authentication: they are sent to its setup
-# before anything else and cannot switch it off (accounts/middleware.py). Admins count
-# as dispatchers. Empty: nobody is forced.
-MFA_REQUIRED_ROLES = [
-    role.strip() for role in env.list("MFA_REQUIRED_ROLES", default=["dispatcher"])
-]
-if set(MFA_REQUIRED_ROLES) - {"dispatcher", "unit_lead", "member"}:
+# before anything else and cannot switch it off (accounts/middleware.py). "admin" are the
+# superusers; admins also count as dispatchers. Empty: nobody is forced.
+MFA_REQUIRED_ROLES = [role.strip() for role in env.list("MFA_REQUIRED_ROLES", default=["admin"])]
+if set(MFA_REQUIRED_ROLES) - {"admin", "dispatcher", "unit_lead", "member"}:
     raise ImproperlyConfigured(
-        "MFA_REQUIRED_ROLES may only contain dispatcher, unit_lead and member."
+        "MFA_REQUIRED_ROLES may only contain admin, dispatcher, unit_lead and member."
     )
 
 # Number of trusted reverse proxies in front of the app (Caddy: 1), so that the rate

@@ -9,8 +9,8 @@
 - Members: no management permissions.
 - Nobody changes or blocks their own account here.
 
-Accounts of the roles in MFA_REQUIRED_ROLES (default: dispatchers and admins) must use
-two-factor authentication.
+Accounts of the roles in MFA_REQUIRED_ROLES (default: admins) must use two-factor
+authentication.
 
 In demo mode (DEMO_MODE), only admins change email addresses and passwords, use
 two-factor authentication, block accounts, change roles and add units. Nobody invites;
@@ -33,9 +33,12 @@ def demo_restricted(user):
 
 
 def must_use_mfa(user):
-    """Two-factor authentication is mandatory for the roles in MFA_REQUIRED_ROLES."""
+    """Two-factor authentication is mandatory for the roles in MFA_REQUIRED_ROLES
+    ("admin": superusers, who also count as dispatchers)."""
     if not user.is_authenticated or demo_restricted(user):
         return False
+    if user.is_superuser and "admin" in settings.MFA_REQUIRED_ROLES:
+        return True
     role = Role.DISPATCHER if is_dispatcher(user) else user.role
     return role in settings.MFA_REQUIRED_ROLES
 

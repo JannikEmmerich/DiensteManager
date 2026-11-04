@@ -7,6 +7,20 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Two-factor authentication is mandatory only for admins by default, no longer for
+  dispatchers: `MFA_REQUIRED_ROLES` has the new value `admin` and defaults to it. To
+  keep it mandatory for dispatchers, set `MFA_REQUIRED_ROLES=admin,dispatcher`.
+- Security emails (e.g. password changed, two-factor authentication switched on) name
+  the location of the IP address behind Cloudflare (city, region, country) and no longer
+  the browser.
+
+### Fixed
+
+- Accounts with two-factor authentication can change their email address: the new
+  address is confirmed with a code instead of a link (allauth blocked it before).
+
 ## [0.7.3] – 2026-10-26
 
 When updating from 0.7.2 nothing needs to be done; the database is migrated when the
