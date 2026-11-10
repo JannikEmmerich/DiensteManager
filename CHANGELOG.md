@@ -7,6 +7,12 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.8.1] – 2026-11-10
+
+When updating from 0.8.0 nothing needs to be done; the database is migrated when the
+container starts (old email addresses left behind by changes in the Django admin are
+removed).
+
 ### Security
 
 - An email address changed in the Django admin left the old address in place: it still
