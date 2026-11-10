@@ -12,6 +12,7 @@ from django.utils.translation import get_language_info
 from django.utils.translation import gettext_lazy as _
 
 from core.names import dispatch_text
+from core.validators import validate_name
 
 from .managers import UserManager
 
@@ -62,6 +63,12 @@ class User(AbstractUser):
         DAILY = "daily", _("Once a day as a summary")
 
     username = None
+    first_name = models.CharField(
+        _("first name"), max_length=150, blank=True, validators=[validate_name]
+    )
+    last_name = models.CharField(
+        _("last name"), max_length=150, blank=True, validators=[validate_name]
+    )
     email = models.EmailField(_("email address"), unique=True)
     role = models.CharField(_("role"), max_length=20, choices=role_choices)
     unit = models.ForeignKey(
@@ -111,6 +118,18 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         self.email = self.__class__.objects.normalize_email(self.email)
         super().save(*args, **kwargs)
+
+    def sync_email_address(self):
+        """Makes ``email`` the only address allauth has for the account, as confirmed.
+
+        allauth signs in with the addresses in its own list (``EmailAddress``) and sends
+        the password reset to them. Whoever changes ``email`` outside allauth (admins,
+        who vouch for the address) calls this, so that the old address stops working.
+        """
+        from allauth.account.models import EmailAddress
+
+        EmailAddress.objects.filter(user=self).delete()
+        EmailAddress.objects.create(user=self, email=self.email, primary=True, verified=True)
 
 
 class CalendarFeed(models.Model):

@@ -7,6 +7,19 @@ All notable changes are listed here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- An email address changed in the Django admin left the old address in place: it still
+  signed in (with the password) and received the password reset. The Django admin now
+  replaces the address like *Edit* in the portal does, and the update removes old
+  addresses left behind that way. Accounts added in the Django admin can sign in
+  without confirming their address first.
+- Names of accounts and helpers, notes, the reason for a withdrawal, the account holder
+  and the bank no longer take line breaks, and names no links. With them, an account
+  could put its own paragraphs and a link into emails of the portal, e.g. through its
+  name at the top of an invitation sent to any address. The invitation names the
+  inviter on one line, whatever is stored.
+
 ## [0.8.0] – 2026-11-04
 
 When updating from 0.7.3 nothing needs to be done, but note:

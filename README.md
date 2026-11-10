@@ -34,7 +34,9 @@ also get *Edit* for every other account – on the unit's page, and for dispatch
 admins under *Units → Internal accounts* – to change name, email address (it counts as
 confirmed and is used for signing in from then on), role (making someone a dispatcher
 or back; internal accounts belong to no unit), unit, language and notifications.
-Passwords and the admin status itself stay in the Django admin.
+Passwords and the admin status itself stay in the Django admin. An email address changed
+there also replaces the old one: only the new address signs in and gets the password
+reset.
 
 **Name of the dispatchers:** the UI and the emails call them "Disposition", in German
 and English alike. `DISPATCH_NAME` in `.env` sets another name, e.g.
@@ -277,6 +279,10 @@ buttons on a duty ("Email the units") and on a unit.
 - **Changing the email address** (*My account → Email address*): the new address gets a
   code, which is entered on the next page; then it replaces the old one. This also works
   with two-factor authentication switched on.
+- **Names and other one-line texts** (names of accounts and helpers, notes, the reason
+  for a withdrawal, account holder and bank) take no line breaks, and names no links:
+  they appear in emails to others – the name of whoever invites opens the invitation –
+  and must not pass for a message of the portal.
 - The Django admin uses the same sign-in including two-factor authentication.
 
 ## Demo mode

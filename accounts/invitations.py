@@ -27,8 +27,11 @@ def send_invitation(request, invitation):
     """Creates a new link (older links stop working), saves and sends the invitation."""
     token = invitation.new_token()
     invitation.save()
+    inviter = invitation.invited_by
     context = {
         "invitation": invitation,
+        # On one line, also for names stored before they were checked (core.validators).
+        "inviter": " ".join(str(inviter).split()) if inviter else "",
         "link": request.build_absolute_uri(reverse("accept_invitation", args=[token])),
     }
     with translation.override(invitation.language or translation.get_language()):

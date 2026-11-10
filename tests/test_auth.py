@@ -1,6 +1,9 @@
 import pytest
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailAddress
+from django import forms
+from django.db import connection
+from django.db.migrations.executor import MigrationExecutor
 from django.urls import reverse
 
 from accounts.adapters import client_location
@@ -231,3 +234,122 @@ def test_security_email_in_german(client, settings, member, mailoutbox):
     assert "Wenn du diese Änderung nicht erkennst" in message.body
     assert "- IP-Adresse: 2a02:8071:7110:9980:34b9:dd89:9897:6f0f (Karlsruhe" in message.body
     assert "- Datum: " in message.body
+
+
+# --- Email addresses changed by admins -----------------------------------------------------------
+
+
+def _admin_form_data(client, url):
+    """The values of an admin form, as the browser sends them back unchanged."""
+    data = {}
+    for field in client.get(url).context["adminform"].form:
+        value = field.value()
+        if isinstance(field.field.widget, forms.MultiWidget):
+            for index, part in enumerate(field.field.widget.decompress(value)):
+                if part is not None:
+                    data[f"{field.html_name}_{index}"] = str(part)
+        elif value is True:
+            data[field.html_name] = "on"
+        elif value not in (None, False, ""):
+            data[field.html_name] = value
+    return data
+
+
+def test_email_changed_in_the_django_admin_replaces_the_old_address(
+    client, admin, member, mailoutbox
+):
+    """allauth signs in with its own list of addresses and sends the password reset to
+    them: the old address must leave that list."""
+    client.force_login(admin)
+    url = reverse("admin:accounts_user_change", args=[member.pk])
+    response = client.post(url, {**_admin_form_data(client, url), "email": "New@Example.org"})
+    assert response.status_code == 302
+    member.refresh_from_db()
+    assert member.email == "new@example.org"
+    (address,) = EmailAddress.objects.filter(user=member)
+    assert (address.email, address.primary, address.verified) == ("new@example.org", True, True)
+    client.logout()
+    # The old address neither signs in nor receives the password reset.
+    response = client.post(
+        reverse("account_login"), {"login": "member@example.org", "password": PASSWORD}
+    )
+    assert response.status_code == 200
+    assert "_auth_user_id" not in client.session
+    client.post(reverse("account_reset_password"), {"email": "member@example.org"})
+    assert mailoutbox == []
+    response = client.post(
+        reverse("account_login"), {"login": "new@example.org", "password": PASSWORD}
+    )
+    assert response["Location"] == reverse("home")
+
+
+def test_other_changes_in_the_django_admin_keep_the_address(client, admin, member):
+    client.force_login(admin)
+    address = EmailAddress.objects.get(user=member)
+    url = reverse("admin:accounts_user_change", args=[member.pk])
+    response = client.post(url, {**_admin_form_data(client, url), "first_name": "Mia"})
+    assert response.status_code == 302
+    assert EmailAddress.objects.get(user=member) == address
+
+
+def test_account_added_in_the_django_admin_signs_in(client, admin, unit):
+    client.force_login(admin)
+    response = client.post(
+        reverse("admin:accounts_user_add"),
+        {
+            "email": "Added@Example.org",
+            "role": Role.MEMBER,
+            "unit": unit.pk,
+            "usable_password": "true",
+            "password1": "a-long-admin-pass",
+            "password2": "a-long-admin-pass",
+        },
+    )
+    assert response.status_code == 302
+    user = User.objects.get(email="added@example.org")
+    assert EmailAddress.objects.filter(user=user, primary=True, verified=True).exists()
+    client.logout()
+    response = client.post(
+        reverse("account_login"), {"login": "added@example.org", "password": "a-long-admin-pass"}
+    )
+    assert response["Location"] == reverse("home")
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_removes_stale_email_addresses():
+    """Addresses left behind by email changes in the Django admin before it replaced them."""
+    before = [
+        ("accounts", "0006_alter_invitation_role_alter_user_role"),
+        ("account", "0009_emailaddress_unique_primary_email"),
+    ]
+    executor = MigrationExecutor(connection)
+    executor.migrate(before)
+    old = executor.loader.project_state(before).apps
+    users = old.get_model("accounts", "User").objects
+    addresses = old.get_model("account", "EmailAddress").objects
+    changed = users.create(email="changed@example.org", role="dispatcher")
+    addresses.create(user=changed, email="old@example.org", verified=True, primary=True)
+    # Tried to sign in with the new address already, which waits for its confirmation.
+    retried = users.create(email="retried@example.org", role="dispatcher")
+    addresses.create(user=retried, email="stale@example.org", verified=True, primary=True)
+    addresses.create(user=retried, email="retried@example.org")
+    # Untouched: the own address, one waiting to replace it, and an account without any.
+    kept = users.create(email="kept@example.org", role="dispatcher")
+    addresses.create(user=kept, email="kept@example.org", verified=True, primary=True)
+    addresses.create(user=kept, email="pending@example.org")
+    bare = users.create(email="bare@example.org", role="dispatcher")
+    executor = MigrationExecutor(connection)
+    executor.migrate([("accounts", "0007_remove_stale_email_addresses")])
+
+    def rows(user):
+        return sorted(
+            EmailAddress.objects.filter(user_id=user.pk).values_list("email", "verified", "primary")
+        )
+
+    assert rows(changed) == [("changed@example.org", True, True)]
+    assert rows(retried) == [("retried@example.org", True, True)]
+    assert rows(kept) == [("kept@example.org", True, True), ("pending@example.org", False, False)]
+    assert rows(bare) == []
+    # On to the latest state for the tests after this one.
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
