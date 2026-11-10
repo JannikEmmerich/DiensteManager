@@ -12,11 +12,9 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Not for Dependabot: the action refuses pull requests started by bots, and their
+    # workflows do not get the repository's secrets (no token). The tests check updates.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
 
     runs-on: ubuntu-latest
     permissions:

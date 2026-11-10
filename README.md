@@ -489,7 +489,9 @@ Writing `@claude` and a request in an issue or pull request (comment) starts Cla
 (`.github/workflows/claude.yml`, for accounts with write access). It works on a branch
 `claude/issue-…`, may run the tests, ruff and the translation and migration commands,
 and answers with a link to open the pull request. It follows `CLAUDE.md` (conventions
-and commands of this project). `claude-code-review.yml` reviews every pull request.
+and commands of this project). `claude-code-review.yml` reviews every pull request
+except Dependabot's (the review action refuses pull requests by bots, and Dependabot's
+workflows get no secrets); their check shows as skipped.
 
 ### Docker images
 
