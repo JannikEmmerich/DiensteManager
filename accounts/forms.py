@@ -7,6 +7,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from core.names import dispatch_text
+from core.validators import validate_name
 
 from . import permissions
 from .models import LANGUAGE_CHOICES, Invitation, Role, Unit, User
@@ -106,8 +107,8 @@ class InvitationForm(forms.ModelForm):
 class AcceptInvitationForm(SetPasswordMixin, forms.Form):
     """Creates the account of an invitation with a password."""
 
-    first_name = forms.CharField(label=_("First name"), max_length=150)
-    last_name = forms.CharField(label=_("Last name"), max_length=150)
+    first_name = forms.CharField(label=_("First name"), max_length=150, validators=[validate_name])
+    last_name = forms.CharField(label=_("Last name"), max_length=150, validators=[validate_name])
     password1, password2 = SetPasswordMixin.create_password_fields()
 
     def __init__(self, *args, invitation, **kwargs):
@@ -279,9 +280,7 @@ class AccountForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit)
         if commit and "email" in self.changed_data:
-            # The address allauth signs in with and sends to; the admin vouches for it.
-            EmailAddress.objects.filter(user=user).delete()
-            EmailAddress.objects.create(user=user, email=user.email, primary=True, verified=True)
+            user.sync_email_address()
         return user
 
     def personal_fields(self):

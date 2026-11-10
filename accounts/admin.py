@@ -48,6 +48,12 @@ class UserAdmin(DjangoUserAdmin):
         ),
     ]
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "email" in form.changed_data:
+            # Otherwise the old address would still sign in and get the password reset.
+            obj.sync_email_address()
+
 
 @admin.register(Unit)
 class UnitAdmin(admin.ModelAdmin):

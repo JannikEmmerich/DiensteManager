@@ -12,6 +12,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
+from core.validators import validate_name, validate_single_line
 
 from . import staffing
 
@@ -411,11 +412,14 @@ class Report(models.Model):
         blank=True,
         related_name="assigned_reports",
     )
-    name = models.CharField(_("name"), max_length=150)
+    # Names and notes of helpers go into emails to the dispatchers: one line each.
+    name = models.CharField(_("name"), max_length=150, validators=[validate_name])
     # What units entered as free text before they reported helpers with a qualification
     # from the catalogue; no longer asked for.
     qualification = models.CharField(_("qualification"), max_length=100, blank=True)
-    note = models.CharField(_("note"), max_length=500, blank=True)
+    note = models.CharField(
+        _("note"), max_length=500, blank=True, validators=[validate_single_line]
+    )
     status = models.CharField(
         _("status"), max_length=20, choices=Status.choices, default=Status.REPORTED
     )
@@ -451,7 +455,12 @@ class Report(models.Model):
         blank=True,
         related_name="+",
     )
-    withdrawal_note = models.CharField(_("reason for the withdrawal"), max_length=300, blank=True)
+    withdrawal_note = models.CharField(
+        _("reason for the withdrawal"),
+        max_length=300,
+        blank=True,
+        validators=[validate_single_line],
+    )
     # Data lifecycle: name, qualification and notes are erased after the retention period.
     anonymized_at = models.DateTimeField(_("anonymised at"), null=True, blank=True)
 

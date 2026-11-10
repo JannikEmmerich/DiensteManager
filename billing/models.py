@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import Unit
+from core.validators import validate_single_line
 from duties.models import Duty, Report
 
 from .validators import format_iban, validate_bic, validate_iban
@@ -17,10 +18,15 @@ class BankAccount(models.Model):
     unit = models.OneToOneField(
         Unit, verbose_name=_("unit"), on_delete=models.CASCADE, related_name="bank_account"
     )
-    account_holder = models.CharField(_("account holder"), max_length=150)
+    # Changes are reported by email (protection against fraud): one line each.
+    account_holder = models.CharField(
+        _("account holder"), max_length=150, validators=[validate_single_line]
+    )
     iban = models.CharField(_("IBAN"), max_length=34, validators=[validate_iban])
     bic = models.CharField(_("BIC"), max_length=11, blank=True, validators=[validate_bic])
-    bank_name = models.CharField(_("bank"), max_length=150, blank=True)
+    bank_name = models.CharField(
+        _("bank"), max_length=150, blank=True, validators=[validate_single_line]
+    )
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
